@@ -630,15 +630,36 @@ async function sbFetch(method, table, opts){
 
 /* Upload file to Supabase Storage */
 async function sbUpload(bucket, path, file){
-  var url = SB_URL + "/storage/v1/object/" + bucket + "/" + path;
-  var res = await fetch(url, {
-    method: "POST",
-    headers: { "apikey": SB_KEY, "Authorization": "Bearer " + SB_KEY },
-    body: file
-  });
-  if(!res.ok) return null;
-  var data = await res.json();
-  return SB_URL + "/storage/v1/object/public/" + bucket + "/" + path;
+  // Try both the given bucket name and lowercase/uppercase variants
+  var attempts = [bucket, bucket.toLowerCase(), bucket.charAt(0).toUpperCase()+bucket.slice(1).toLowerCase()];
+  var lastErr = null;
+  for(var i=0; i<attempts.length; i++){
+    var b = attempts[i];
+    var url = SB_URL + "/storage/v1/object/" + b + "/" + path;
+    try {
+      var res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "apikey": SB_KEY,
+          "Authorization": "Bearer " + SB_KEY,
+          "Content-Type": file.type || "image/jpeg",
+          "x-upsert": "true"
+        },
+        body: file
+      });
+      if(res.ok){
+        console.log("Upload OK with bucket:", b);
+        return SB_URL + "/storage/v1/object/public/" + b + "/" + path;
+      }
+      var errText = await res.text();
+      console.warn("Upload attempt failed ("+b+"):", res.status, errText);
+      lastErr = new Error(res.status + ": " + errText);
+    } catch(e){
+      console.warn("Upload exception ("+b+"):", e.message);
+      lastErr = e;
+    }
+  }
+  throw lastErr || new Error("Upload fallito su tutti i bucket");
 }
 
 /* Check if Supabase is configured */
@@ -1805,8 +1826,8 @@ async function publishPost(){
     // Upload image to Supabase Storage
     var ext = _postImageFile.name.split(".").pop()||"jpg";
     var path = "posts/"+(A.user.id)+"-"+Date.now()+"."+ext;
-    var imageUrl = await sbUpload("posts", path, _postImageFile);
-    if(!imageUrl) throw new Error("Upload fallito");
+    var imageUrl = await sbUpload("Posts", path, _postImageFile);
+    if(!imageUrl) throw new Error("Upload fallito - verifica che il bucket 'posts' esista su Supabase Storage");
 
     var caption = document.getElementById("post-caption").value.trim();
     var tags = document.getElementById("post-tags").value.trim();
@@ -1831,8 +1852,11 @@ async function publishPost(){
     showToast("Post pubblicato!","🎨");
     navTo("feed");
   } catch(e){
-    console.error("Publish error:",e);
-    showToast("Errore: "+e.message,"");
+    console.error("Publish error:", e);
+    var msg = e.message || "Errore sconosciuto";
+    if(msg.includes("Bucket not found") || msg.includes("bucket")) msg = "Bucket 'posts' non trovato. Crealo su Supabase Storage.";
+    if(msg.includes("403") || msg.includes("Unauthorized")) msg = "Permessi negati. Controlla le policy del bucket.";
+    showToast("Errore: "+msg,"");
   }
   btn.textContent="Pubblica"; btn.disabled=false;
 }
