@@ -419,6 +419,11 @@ button{font-family:'Baloo 2',sans-serif;cursor:pointer}
     </div>
   </div>
 
+  <!-- Filter tabs -->
+  <div style="display:flex;gap:8px;padding:10px 16px;background:#0F0E1A;border-bottom:1px solid rgba(255,255,255,.05)">
+    <button id="feed-filter-all" onclick="setFeedFilter('all')" style="flex:1;padding:8px;background:#8B5CF6;border:none;border-radius:50px;color:#fff;font-weight:800;font-size:12px;cursor:pointer">Tutti</button>
+    <button id="feed-filter-following" onclick="setFeedFilter('following')" style="flex:1;padding:8px;background:rgba(255,255,255,.06);border:none;border-radius:50px;color:#9896B8;font-weight:800;font-size:12px;cursor:pointer">Seguiti</button>
+  </div>
   <!-- Feed posts -->
   <div id="feed-posts" style="max-width:640px;margin:0 auto;padding:10px 0">
     <div id="feed-loading" style="text-align:center;padding:40px;color:#9896B8">
@@ -479,6 +484,16 @@ button{font-family:'Baloo 2',sans-serif;cursor:pointer}
     </div>
     <div id="post-detail-content"></div>
   </div>
+</div>
+
+
+<!-- PUBLIC PROFILE -->
+<div class="screen" id="scr-pubprofile" style="background:#0F0E1A;min-height:100vh;padding-bottom:70px">
+  <div style="background:#161525;border-bottom:1px solid rgba(255,255,255,.08);padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10">
+    <button onclick="closePubProfile()" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;color:#fff;font-size:16px;cursor:pointer">←</button>
+    <span id="pubprof-username" style="font-weight:800;font-size:16px;color:#fff;flex:1"></span>
+  </div>
+  <div id="pubprof-content" style="max-width:640px;margin:0 auto"></div>
 </div>
 
 <!-- DRAWPASS SHOP -->
@@ -1511,8 +1526,18 @@ function renderProfile(){
   document.getElementById("profile-name").textContent=A.user.name;
   document.getElementById("profile-email").textContent=A.user.email;
   document.getElementById("prof-stat-lessons").textContent=done;
-  document.getElementById("prof-stat-cats").textContent=catsDone;
-  document.getElementById("prof-stat-pct").textContent=Math.round(done/18*100)+"%";
+  // Load social stats async
+  if(sbReady()&&A.user){
+    sbFetch("GET","dl_users",{filters:"id=eq."+A.user.id,select:"followers_count,following_count"}).then(function(r){
+      if(r&&r[0]){
+        var fc=document.getElementById("prof-stat-followers"); if(fc) fc.textContent=r[0].followers_count||0;
+        var fg=document.getElementById("prof-stat-following"); if(fg) fg.textContent=r[0].following_count||0;
+      }
+    });
+    sbFetch("GET","dl_posts",{filters:"user_id=eq."+A.user.id,select:"id"}).then(function(r){
+      var pp=document.getElementById("prof-stat-posts"); if(pp) pp.textContent=(r&&r.length)||0;
+    });
+  }
   // Avatar display
   var selAv=UNLOCKS.avatars.find(function(x){return x.id===prf.avatar;})||UNLOCKS.avatars[0];
   var selBr=UNLOCKS.borders.find(function(x){return x.id===prf.border;})||UNLOCKS.borders[0];
@@ -1625,7 +1650,18 @@ async function renderFeed(){
   if(!sbReady()){ container.innerHTML='<div style="text-align:center;padding:40px;color:#9896B8">Configura Supabase per vedere i post</div>'; return; }
 
   try {
-    var posts = await sbFetch("GET","dl_posts",{order:"created_at.desc",limit:20});
+    var posts;
+    if(_feedFilter === "following" && A.user){
+      var fol = await sbFetch("GET","dl_follows",{filters:"follower_id=eq."+A.user.id,select:"following_id"});
+      if(!fol||!fol.length){
+        container.innerHTML='<div style="text-align:center;padding:60px 20px"><div style="font-size:48px;margin-bottom:12px">👥</div><div style="font-weight:800;color:#fff;margin-bottom:8px">Non segui nessuno ancora</div><div style="color:#9896B8;font-size:13px">Scopri gli artisti nel feed generale</div><button onclick="setFeedFilter(\'all\')" style="margin-top:16px;background:#8B5CF6;border:none;border-radius:50px;padding:10px 24px;color:#fff;font-weight:800;cursor:pointer">Vedi tutti i post</button></div>';
+        return;
+      }
+      var ids = fol.map(function(f){return f.following_id;}).join(",");
+      posts = await sbFetch("GET","dl_posts",{filters:"user_id=in.("+ids+")",order:"created_at.desc",limit:20});
+    } else {
+      posts = await sbFetch("GET","dl_posts",{order:"created_at.desc",limit:20});
+    }
     if(!posts){ container.innerHTML='<div style="text-align:center;padding:40px;color:#9896B8">Errore nel caricamento</div>'; return; }
     if(posts.length===0){
       container.innerHTML='<div style="text-align:center;padding:60px 20px"><div style="font-size:64px;margin-bottom:16px">🎨</div><div style="font-weight:800;font-size:18px;color:#fff;margin-bottom:8px">Nessun post ancora</div><div style="color:#9896B8;font-size:13px;margin-bottom:20px">Sii il primo a condividere il tuo disegno!</div><button onclick="showNewPost()" style="background:linear-gradient(135deg,#8B5CF6,#6d28d9);border:none;border-radius:50px;padding:12px 28px;color:#fff;font-weight:800;font-size:14px;cursor:pointer">➕ Pubblica ora</button></div>';
@@ -1654,9 +1690,9 @@ function buildPostCard(post, liked){
   div.innerHTML =
     // Header
     '<div style="display:flex;align-items:center;gap:10px;padding:12px 16px 8px">'+
-      '<div style="width:38px;height:38px;border-radius:50%;background:#2d2a4a;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">'+post.user_avatar+'</div>'+
+      '<div onclick="openPubProfile(\"'+post.user_id+'\",\"'+post.user_name+'\")" style="width:38px;height:38px;border-radius:50%;background:#2d2a4a;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;cursor:pointer">'+post.user_avatar+'</div>'+
       '<div style="flex:1">'+
-        '<div style="font-weight:800;font-size:13px;color:#fff">'+post.user_name+'</div>'+
+        '<div onclick="openPubProfile(\"'+post.user_id+'\",\"'+post.user_name+'\")" style="font-weight:800;font-size:13px;color:#fff;cursor:pointer">'+post.user_name+'</div>'+
         '<div style="font-size:10px;color:#9896B8">'+timeAgo+(post.location?' · 📍'+post.location:'')+(post.lesson_id?' · 🎨 lezione':'')+'</div>'+
       '</div>'+
       (A.user&&post.user_id===A.user.id?'<button onclick="deletePost(\"'+post.id+'\")" style="background:none;border:none;color:#9896B8;font-size:18px;cursor:pointer">⋯</button>':'' )+
@@ -1882,6 +1918,129 @@ async function deletePost(postId){
     showToast("Post eliminato","");
     renderFeed();
   } catch(e){ showToast("Errore eliminazione",""); }
+}
+
+
+/* ═══════════════ PROFILI PUBBLICI + FOLLOW ═══════════════ */
+var _pubProfileUser = null;
+var _feedFilter = "all"; // "all" | "following"
+
+async function openPubProfile(userId, userName){
+  if(A.user && userId === A.user.id){ navTo("profile"); return; }
+  _pubProfileUser = userId;
+  document.getElementById("pubprof-username").textContent = userName || "Profilo";
+  document.getElementById("pubprof-content").innerHTML =
+    '<div style="text-align:center;padding:40px;color:#9896B8"><div style="width:28px;height:28px;border:3px solid rgba(255,255,255,.1);border-top:3px solid #8B5CF6;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px"></div>Caricamento...</div>';
+  showScreen("pubprofile");
+  hideBottomNav();
+  await loadPubProfile(userId);
+}
+
+function closePubProfile(){
+  showBottomNav();
+  navTo("feed");
+}
+
+async function loadPubProfile(userId){
+  var content = document.getElementById("pubprof-content");
+  try {
+    // Load user data
+    var users = await sbFetch("GET","dl_users",{filters:"id=eq."+userId});
+    if(!users||!users[0]){ content.innerHTML='<div style="padding:20px;color:#9896B8">Utente non trovato</div>'; return; }
+    var user = users[0];
+
+    // Load follow status
+    var amFollowing = false;
+    if(A.user){
+      var fol = await sbFetch("GET","dl_follows",{filters:"follower_id=eq."+A.user.id+"&following_id=eq."+userId});
+      amFollowing = fol && fol.length > 0;
+    }
+
+    // Load user posts
+    var posts = await sbFetch("GET","dl_posts",{filters:"user_id=eq."+userId,order:"created_at.desc"});
+    var postCount = posts ? posts.length : 0;
+
+    // Header
+    content.innerHTML =
+      '<div style="padding:20px 16px;border-bottom:1px solid rgba(255,255,255,.08)">'+
+        '<div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">'+
+          '<div style="width:72px;height:72px;border-radius:50%;background:#2d2a4a;display:flex;align-items:center;justify-content:center;font-size:34px;border:3px solid #8B5CF6;flex-shrink:0">'+
+            (user.avatar||"👤")+
+          '</div>'+
+          '<div style="flex:1">'+
+            '<div style="font-weight:800;font-size:18px;color:#fff;margin-bottom:2px">'+user.name+'</div>'+
+            (user.bio?'<div style="font-size:12px;color:#9896B8;margin-bottom:8px">'+user.bio+'</div>':'')+
+            '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">'+
+              '<div><div style="font-weight:800;font-size:16px;color:#fff">'+postCount+'</div><div style="font-size:10px;color:#9896B8">Post</div></div>'+
+              '<div><div style="font-weight:800;font-size:16px;color:#fff">'+( user.followers_count||0)+'</div><div style="font-size:10px;color:#9896B8">Follower</div></div>'+
+              '<div><div style="font-weight:800;font-size:16px;color:#fff">'+( user.following_count||0)+'</div><div style="font-size:10px;color:#9896B8">Seguiti</div></div>'+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+        (A.user && A.user.id !== userId ?
+          '<button id="follow-btn-'+userId+'" onclick="toggleFollow(\"'+userId+'\")" style="width:100%;padding:10px;border:none;border-radius:10px;font-weight:800;font-size:14px;cursor:pointer;background:'+(amFollowing?"rgba(255,255,255,.1)":"linear-gradient(135deg,#8B5CF6,#6d28d9)")+';color:#fff">'+
+            (amFollowing?"✓ Segui già":"+ Segui")+
+          '</button>' : ''
+        )+
+      '</div>'+
+      // Posts grid
+      '<div id="pubprof-posts" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;padding:2px">'+
+        (posts && posts.length > 0 ?
+          posts.map(function(p){
+            return '<div onclick="openPostDetail(\"'+p.id+'\")" style="aspect-ratio:1;overflow:hidden;cursor:pointer;position:relative">'+
+              '<img src="'+p.image_url+'" style="width:100%;height:100%;object-fit:cover"/>'+
+              '<div style="position:absolute;bottom:4px;right:4px;display:flex;gap:4px">'+
+                '<span style="background:rgba(0,0,0,.5);border-radius:4px;padding:2px 5px;font-size:9px;color:#fff">❤️'+p.likes_count+'</span>'+
+              '</div>'+
+            '</div>';
+          }).join("") :
+          '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#9896B8">Nessun post ancora</div>'
+        )+
+      '</div>';
+  } catch(e){
+    content.innerHTML='<div style="padding:20px;color:#9896B8">Errore: '+e.message+'</div>';
+  }
+}
+
+async function toggleFollow(userId){
+  if(!A.user){ showToast("Accedi per seguire",""); return; }
+  var btn = document.getElementById("follow-btn-"+userId);
+  var amFollowing = btn && btn.textContent.includes("già");
+
+  // Optimistic update
+  if(btn){
+    btn.textContent = amFollowing ? "+ Segui" : "✓ Segui già";
+    btn.style.background = amFollowing ? "linear-gradient(135deg,#8B5CF6,#6d28d9)" : "rgba(255,255,255,.1)";
+  }
+
+  try {
+    if(amFollowing){
+      await sbFetch("DELETE","dl_follows?follower_id=eq."+A.user.id+"&following_id=eq."+userId,{});
+      // Decrement counters
+      var u1 = await sbFetch("GET","dl_users",{filters:"id=eq."+A.user.id,select:"following_count"});
+      var u2 = await sbFetch("GET","dl_users",{filters:"id=eq."+userId,select:"followers_count"});
+      if(u1&&u1[0]) await sbFetch("PATCH","dl_users?id=eq."+A.user.id,{body:{following_count:Math.max(0,(u1[0].following_count||0)-1)}});
+      if(u2&&u2[0]) await sbFetch("PATCH","dl_users?id=eq."+userId,{body:{followers_count:Math.max(0,(u2[0].followers_count||0)-1)}});
+    } else {
+      await sbFetch("POST","dl_follows",{body:{follower_id:A.user.id,following_id:userId}});
+      // Increment counters
+      var u3 = await sbFetch("GET","dl_users",{filters:"id=eq."+A.user.id,select:"following_count"});
+      var u4 = await sbFetch("GET","dl_users",{filters:"id=eq."+userId,select:"followers_count"});
+      if(u3&&u3[0]) await sbFetch("PATCH","dl_users?id=eq."+A.user.id,{body:{following_count:(u3[0].following_count||0)+1}});
+      if(u4&&u4[0]) await sbFetch("PATCH","dl_users?id=eq."+userId,{body:{followers_count:(u4[0].followers_count||0)+1}});
+      showToast("Ora segui "+userId,"");
+    }
+  } catch(e){ console.error("Follow error:",e); }
+}
+
+/* ── Feed filter (All / Following) ── */
+function setFeedFilter(filter){
+  _feedFilter = filter;
+  var allBtn = document.getElementById("feed-filter-all");
+  var folBtn = document.getElementById("feed-filter-following");
+  if(allBtn){ allBtn.style.background=filter==="all"?"#8B5CF6":"rgba(255,255,255,.06)"; allBtn.style.color=filter==="all"?"#fff":"#9896B8"; }
+  if(folBtn){ folBtn.style.background=filter==="following"?"#8B5CF6":"rgba(255,255,255,.06)"; folBtn.style.color=filter==="following"?"#fff":"#9896B8"; }
+  renderFeed();
 }
 
 /* ═══════════════ HOME REWARDS PANEL ═══════════════ */
