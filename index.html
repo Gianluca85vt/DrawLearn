@@ -496,6 +496,41 @@ button{font-family:'Baloo 2',sans-serif;cursor:pointer}
   <div id="pubprof-content" style="max-width:640px;margin:0 auto"></div>
 </div>
 
+
+<!-- NOTIFICATIONS -->
+<div class="screen" id="scr-notif" style="background:#0F0E1A;min-height:100vh;padding-bottom:70px">
+  <div style="background:#161525;border-bottom:1px solid rgba(255,255,255,.08);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10">
+    <span style="font-weight:800;font-size:18px;color:#fff">🔔 Notifiche</span>
+    <button onclick="markAllRead()" style="background:none;border:none;color:#8B5CF6;font-size:12px;font-weight:700;cursor:pointer">Segna tutte lette</button>
+  </div>
+  <div id="notif-list" style="max-width:640px;margin:0 auto"></div>
+</div>
+
+<!-- SEARCH -->
+<div class="screen" id="scr-search" style="background:#0F0E1A;min-height:100vh;padding-bottom:70px">
+  <div style="background:#161525;border-bottom:1px solid rgba(255,255,255,.08);padding:12px 16px;position:sticky;top:0;z-index:10">
+    <div style="display:flex;align-items:center;gap:10px;max-width:640px;margin:0 auto">
+      <button onclick="navTo('feed')" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;color:#fff;font-size:16px;cursor:pointer;flex-shrink:0">←</button>
+      <div style="flex:1;position:relative">
+        <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px">🔍</span>
+        <input id="search-input" type="text" placeholder="Cerca utenti, hashtag, tutorial..."
+          oninput="onSearchInput(this.value)"
+          style="width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:50px;padding:10px 14px 10px 38px;color:#fff;font-family:'Baloo 2',sans-serif;font-size:14px;outline:none"/>
+      </div>
+    </div>
+  </div>
+  <div id="search-results" style="max-width:640px;margin:0 auto;padding:16px">
+    <!-- Trending hashtags -->
+    <div id="search-trending">
+      <div style="font-size:11px;font-weight:800;color:#9896B8;letter-spacing:1px;margin-bottom:12px">TRENDING</div>
+      <div id="trending-tags" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+      <div style="font-size:11px;font-weight:800;color:#9896B8;letter-spacing:1px;margin:16px 0 12px">ARTISTI</div>
+      <div id="suggested-users"></div>
+    </div>
+    <div id="search-output" style="display:none"></div>
+  </div>
+</div>
+
 <!-- DRAWPASS SHOP -->
 <div class="screen" id="scr-drawpass" style="background:#F7F5FF;padding-bottom:40px">
   <div style="background:linear-gradient(135deg,#1C1B2E,#2d2a4a);padding:20px 20px 30px">
@@ -1136,12 +1171,15 @@ async function onLogin(){
   A.tokens = parseInt(localGet("dl:tokens"))||0;
   await loadTutorialsFromDB();
   showBottomNav();
-  // Update nav avatar
   var ni=document.getElementById("nav-avatar-icon");
   if(ni) ni.textContent=getAvatarIcon();
-  renderFeed();
-  showScreen("feed");
-  navTo("feed");
+  // Load unread notification count
+  if(sbReady()){
+    sbFetch("GET","dl_notifications",{filters:"user_id=eq."+A.user.id+"&read=eq.false",select:"id"}).then(function(n){
+      _unreadCount=n?n.length:0; updateNotifBadge();
+    }).catch(function(){});
+  }
+  renderFeed(); showScreen("feed"); navTo("feed");
   showToast("Benvenuto, "+A.user.name.split(" ")[0]+"!","");
 }
 async function doLogout(){
@@ -1638,25 +1676,27 @@ var _currentPostId = null;
 
 /* Navigation */
 function navTo(screen){
-  var screens = ["feed","home","category","lesson","profile","drawpass"];
-  screens.forEach(function(s){ document.getElementById("scr-"+s)&&(document.getElementById("scr-"+s).style.display="none"); });
+  var allScreens = ["feed","home","category","lesson","profile","drawpass","notif","search","pubprofile"];
+  allScreens.forEach(function(s){ var el=document.getElementById("scr-"+s); if(el) el.style.display="none"; });
   // Special renders
   if(screen==="feed"){ renderFeed(); showScreen("feed"); }
   else if(screen==="home"){ renderHome(); showScreen("home"); }
   else if(screen==="profile"){ renderProfile(); showScreen("profile"); }
   else if(screen==="drawpass"){ renderDrawPass(); showScreen("drawpass"); }
+  else if(screen==="notif"){ loadNotifications(); showScreen("notif"); }
+  else if(screen==="search"){ showScreen("search"); loadTrending(); setTimeout(function(){var si=document.getElementById("search-input");if(si)si.focus();},100); }
   else showScreen(screen);
   // Update nav tabs
-  ["feed","home","profile","drawpass"].forEach(function(s){
-    var el=document.getElementById("nav-"+s);
+  ["feed","home","profile","notif"].forEach(function(s){
+    var el=document.getElementById("nav-"+s)||(s==="feed"?document.getElementById("nav-feed"):null);
     if(el) el.classList.toggle("active", s===screen);
   });
-  // Update token label
-  var tl=document.getElementById("nav-token-label");
-  if(tl) tl.textContent=(A.tokens||0)+" Token";
+  var searchBtn = document.getElementById("nav-search-btn");
+  if(searchBtn) searchBtn.classList.toggle("active", screen==="search");
   // Update avatar icon in nav
   var ni=document.getElementById("nav-avatar-icon");
   if(ni) ni.textContent=getAvatarIcon();
+  showBottomNav();
 }
 
 function showBottomNav(){ document.getElementById("bottom-nav").style.display="block"; }
@@ -1765,9 +1805,11 @@ async function toggleLike(postId){
       await sbFetch("PATCH","dl_posts?id=eq."+postId,{body:{likes_count:-1}});
     } else {
       await sbFetch("POST","dl_likes",{body:{user_id:A.user.id,post_id:postId}});
-      // Increment using RPC or just update
-      var post = await sbFetch("GET","dl_posts",{filters:"id=eq."+postId,select:"likes_count"});
-      if(post&&post[0]) await sbFetch("PATCH","dl_posts?id=eq."+postId,{body:{likes_count:(post[0].likes_count||0)+1}});
+      var post = await sbFetch("GET","dl_posts",{filters:"id=eq."+postId,select:"likes_count,user_id,image_url"});
+      if(post&&post[0]){
+        await sbFetch("PATCH","dl_posts?id=eq."+postId,{body:{likes_count:(post[0].likes_count||0)+1}});
+        sendNotification(post[0].user_id,"like","ha messo ❤️ al tuo post",postId,post[0].image_url);
+      }
     }
   } catch(e){ console.error("Like error:",e); }
 }
@@ -1928,8 +1970,11 @@ async function submitComment(postId){
   input.value=""; input.disabled=true;
   try {
     await sbFetch("POST","dl_comments",{body:{post_id:postId,user_id:A.user.id,user_name:A.user.name,user_avatar:A.user.avatar||"👤",text:text}});
-    var post = await sbFetch("GET","dl_posts",{filters:"id=eq."+postId,select:"comments_count"});
-    if(post&&post[0]) await sbFetch("PATCH","dl_posts?id=eq."+postId,{body:{comments_count:(post[0].comments_count||0)+1}});
+    var post = await sbFetch("GET","dl_posts",{filters:"id=eq."+postId,select:"comments_count,user_id,image_url"});
+    if(post&&post[0]){
+      await sbFetch("PATCH","dl_posts?id=eq."+postId,{body:{comments_count:(post[0].comments_count||0)+1}});
+      sendNotification(post[0].user_id,"comment","ha commentato: "+text.substring(0,40),postId,post[0].image_url);
+    }
     openPostDetail(postId);
   } catch(e){ showToast("Errore invio commento",""); }
   input.disabled=false;
@@ -1944,6 +1989,184 @@ async function deletePost(postId){
   } catch(e){ showToast("Errore eliminazione",""); }
 }
 
+
+
+/* ═══════════════ NOTIFICHE ═══════════════ */
+var _unreadCount = 0;
+
+async function loadNotifications(){
+  if(!A.user||!sbReady()) return;
+  var list = document.getElementById("notif-list");
+  if(!list) return;
+  list.innerHTML = '<div style="text-align:center;padding:30px;color:#9896B8">Caricamento...</div>';
+  try {
+    var notifs = await sbFetch("GET","dl_notifications",{
+      filters:"user_id=eq."+A.user.id,
+      order:"created_at.desc",
+      limit:50
+    });
+    _unreadCount = notifs ? notifs.filter(function(n){return !n.read;}).length : 0;
+    updateNotifBadge();
+    if(!notifs||!notifs.length){
+      list.innerHTML='<div style="text-align:center;padding:60px 20px"><div style="font-size:48px;margin-bottom:12px">🔔</div><div style="font-weight:800;color:#fff;margin-bottom:8px">Nessuna notifica</div><div style="color:#9896B8;font-size:13px">Le notifiche appariranno qui</div></div>';
+      return;
+    }
+    list.innerHTML="";
+    notifs.forEach(function(n){
+      var icons = {like:"❤️",comment:"💬",follow:"👤"};
+      var d = document.createElement("div");
+      d.style.cssText="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;background:"+(n.read?"transparent":"rgba(139,92,246,.06)");
+      d.innerHTML=
+        '<div style="width:44px;height:44px;border-radius:50%;background:#2d2a4a;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">'+n.from_avatar+'</div>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-size:13px;color:#fff;line-height:1.4"><span style="font-weight:800">'+n.from_name+'</span> '+n.message+'</div>'+
+          '<div style="font-size:10px;color:#9896B8;margin-top:3px">'+getTimeAgo(new Date(n.created_at))+' fa</div>'+
+        '</div>'+
+        (n.post_image?'<img src="'+n.post_image+'" style="width:44px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0"/>':
+          '<div style="font-size:22px">'+( icons[n.type]||"🔔")+'</div>'
+        );
+      if(n.post_id){ (function(pid){d.onclick=function(){openPostDetail(pid);markRead(n.id);};})(n.post_id); }
+      list.appendChild(d);
+    });
+  } catch(e){ list.innerHTML='<div style="padding:20px;color:#9896B8">Errore: '+e.message+'</div>'; }
+}
+
+function updateNotifBadge(){
+  var badge = document.getElementById("notif-badge");
+  if(!badge) return;
+  if(_unreadCount > 0){
+    badge.style.display="flex";
+    badge.textContent = _unreadCount > 9 ? "9+" : _unreadCount;
+  } else {
+    badge.style.display="none";
+  }
+}
+
+async function markRead(notifId){
+  await sbFetch("PATCH","dl_notifications?id=eq."+notifId,{body:{read:true}});
+}
+
+async function markAllRead(){
+  if(!A.user) return;
+  await sbFetch("PATCH","dl_notifications?user_id=eq."+A.user.id,{body:{read:true}});
+  _unreadCount = 0;
+  updateNotifBadge();
+  loadNotifications();
+}
+
+async function sendNotification(toUserId, type, message, postId, postImage){
+  if(!A.user || !sbReady() || toUserId === A.user.id) return;
+  try {
+    await sbFetch("POST","dl_notifications",{body:{
+      user_id: toUserId,
+      from_id: A.user.id,
+      from_name: A.user.name,
+      from_avatar: A.user.avatar||"👤",
+      type: type,
+      post_id: postId||null,
+      post_image: postImage||null,
+      message: message,
+      read: false,
+      created_at: new Date().toISOString()
+    }});
+  } catch(e){ console.error("Notification error:",e); }
+}
+
+// Poll notifications every 30s
+setInterval(async function(){
+  if(A.user && sbReady()){
+    try {
+      var n = await sbFetch("GET","dl_notifications",{
+        filters:"user_id=eq."+A.user.id+"&read=eq.false",
+        select:"id",limit:1
+      });
+      _unreadCount = n ? n.length : 0;
+      updateNotifBadge();
+    } catch(e){}
+  }
+}, 30000);
+
+/* ═══════════════ RICERCA ═══════════════ */
+var _searchTimer = null;
+
+async function onSearchInput(q){
+  clearTimeout(_searchTimer);
+  var trending = document.getElementById("search-trending");
+  var output = document.getElementById("search-output");
+  if(!q||!q.trim()){ if(trending) trending.style.display="block"; if(output) output.style.display="none"; return; }
+  if(trending) trending.style.display="none";
+  if(output){ output.style.display="block"; output.innerHTML='<div style="text-align:center;padding:20px;color:#9896B8">Ricerca...</div>'; }
+  _searchTimer = setTimeout(async function(){
+    await doSearch(q.trim());
+  }, 400);
+}
+
+async function doSearch(q){
+  var output = document.getElementById("search-output");
+  if(!output) return;
+  try {
+    var isTag = q.startsWith("#");
+    var results = "";
+    if(isTag){
+      // Search posts by tag
+      var posts = await sbFetch("GET","dl_posts",{filters:"tags=ilike.*"+encodeURIComponent(q)+"*",order:"created_at.desc",limit:20});
+      if(posts&&posts.length){
+        results += '<div style="font-size:11px;font-weight:800;color:#9896B8;letter-spacing:1px;margin-bottom:10px">POST CON '+q.toUpperCase()+'</div>';
+        results += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px">';
+        posts.forEach(function(p){
+          results += '<div onclick="openPostDetail(\"'+p.id+'\")" style="aspect-ratio:1;overflow:hidden;cursor:pointer"><img src="'+p.image_url+'" style="width:100%;height:100%;object-fit:cover" loading="lazy"/></div>';
+        });
+        results += '</div>';
+      } else { results = '<div style="text-align:center;padding:30px;color:#9896B8">Nessun post trovato per '+q+'</div>'; }
+    } else {
+      // Search users by name
+      var users = await sbFetch("GET","dl_users",{filters:"name=ilike.*"+encodeURIComponent(q)+"*",limit:20});
+      if(users&&users.length){
+        results += '<div style="font-size:11px;font-weight:800;color:#9896B8;letter-spacing:1px;margin-bottom:10px">UTENTI</div>';
+        users.forEach(function(u){
+          results += '<div onclick="openPubProfile(\"'+u.id+'\",\"'+u.name+'\")" style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer">'+
+            '<div style="width:44px;height:44px;border-radius:50%;background:#2d2a4a;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">'+( u.avatar||"👤")+'</div>'+
+            '<div><div style="font-weight:800;font-size:14px;color:#fff">'+u.name+'</div>'+
+            '<div style="font-size:11px;color:#9896B8">'+( u.followers_count||0)+' follower</div></div></div>';
+        });
+      } else { results = '<div style="text-align:center;padding:30px;color:#9896B8">Nessun utente trovato</div>'; }
+    }
+    output.innerHTML = results || '<div style="text-align:center;padding:30px;color:#9896B8">Nessun risultato</div>';
+  } catch(e){ output.innerHTML='<div style="padding:20px;color:#9896B8">Errore ricerca</div>'; }
+}
+
+async function loadTrending(){
+  var tagsEl = document.getElementById("trending-tags");
+  var usersEl = document.getElementById("suggested-users");
+  if(!tagsEl||!sbReady()) return;
+  try {
+    // Load recent posts to extract trending tags
+    var posts = await sbFetch("GET","dl_posts",{order:"created_at.desc",limit:30,select:"tags,likes_count"});
+    var tagCount = {};
+    if(posts) posts.forEach(function(p){
+      if(!p.tags) return;
+      p.tags.split(" ").forEach(function(t){
+        if(t.startsWith("#")) tagCount[t]=(tagCount[t]||0)+1;
+      });
+    });
+    var sorted = Object.keys(tagCount).sort(function(a,b){return tagCount[b]-tagCount[a];}).slice(0,10);
+    tagsEl.innerHTML = sorted.length ?
+      sorted.map(function(t){ return '<button onclick="document.getElementById(\'search-input\').value=\"'+t+'\";onSearchInput(\"'+t+'\")" style="background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.3);border-radius:50px;padding:6px 14px;color:#8B5CF6;font-weight:700;font-size:12px;cursor:pointer">'+t+'</button>'; }).join("") :
+      '<span style="color:#9896B8;font-size:12px">Nessun post ancora</span>';
+    // Suggested users
+    var users = await sbFetch("GET","dl_users",{order:"followers_count.desc",limit:5,select:"id,name,avatar,followers_count"});
+    if(users&&users.length&&usersEl){
+      usersEl.innerHTML = users.map(function(u){
+        return '<div onclick="openPubProfile(\"'+u.id+'\",\"'+u.name+'\")" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer">'+
+          '<div style="width:40px;height:40px;border-radius:50%;background:#2d2a4a;display:flex;align-items:center;justify-content:center;font-size:20px">'+( u.avatar||"👤")+'</div>'+
+          '<div style="flex:1"><div style="font-weight:700;font-size:13px;color:#fff">'+u.name+'</div>'+
+          '<div style="font-size:10px;color:#9896B8">'+( u.followers_count||0)+' follower</div></div>'+
+          '<button onclick="event.stopPropagation();toggleFollow(\"'+u.id+'\")" style="background:rgba(139,92,246,.2);border:1px solid #8B5CF6;border-radius:50px;padding:5px 12px;color:#8B5CF6;font-weight:700;font-size:11px;cursor:pointer">Segui</button>'+
+        '</div>';
+      }).join("");
+    }
+  } catch(e){ console.error("Trending error:",e); }
+}
 
 /* ═══════════════ PROFILI PUBBLICI + FOLLOW ═══════════════ */
 var _pubProfileUser = null;
@@ -2052,7 +2275,8 @@ async function toggleFollow(userId){
       var u4 = await sbFetch("GET","dl_users",{filters:"id=eq."+userId,select:"followers_count"});
       if(u3&&u3[0]) await sbFetch("PATCH","dl_users?id=eq."+A.user.id,{body:{following_count:(u3[0].following_count||0)+1}});
       if(u4&&u4[0]) await sbFetch("PATCH","dl_users?id=eq."+userId,{body:{followers_count:(u4[0].followers_count||0)+1}});
-      showToast("Ora segui "+userId,"");
+      sendNotification(userId,"follow","ha iniziato a seguirti",null,null);
+      showToast("Ora segui questo utente","");
     }
   } catch(e){ console.error("Follow error:",e); }
 }
@@ -2908,24 +3132,25 @@ init();
 <div id="bottom-nav" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#161525;border-top:1px solid rgba(255,255,255,.08);z-index:100;padding:0 8px;padding-bottom:env(safe-area-inset-bottom,0)">
   <div style="max-width:640px;margin:0 auto;display:flex;align-items:stretch">
     <button class="nav-tab" id="nav-feed" onclick="navTo('feed')">
-      <span class="nav-icon">🖼️</span>
-      <span class="nav-label">Galleria</span>
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Home</span>
     </button>
-    <button class="nav-tab" id="nav-home" onclick="navTo('home')">
-      <span class="nav-icon">🎨</span>
-      <span class="nav-label">Impara</span>
+    <button class="nav-tab" id="nav-search-btn" onclick="navTo('search')">
+      <span class="nav-icon">🔍</span>
+      <span class="nav-label">Cerca</span>
     </button>
     <button class="nav-tab" id="nav-new" onclick="showNewPost()" style="position:relative">
       <div style="width:44px;height:44px;background:linear-gradient(135deg,#8B5CF6,#3DBE7A);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;margin-top:-14px;box-shadow:0 4px 16px rgba(139,92,246,.4)">➕</div>
       <span class="nav-label" style="margin-top:2px">Pubblica</span>
     </button>
+    <button class="nav-tab" id="nav-notif" onclick="navTo('notif')" style="position:relative">
+      <span class="nav-icon">🔔</span>
+      <div id="notif-badge" style="display:none;position:absolute;top:4px;right:calc(50% - 18px);background:#e74c3c;border-radius:50px;min-width:16px;height:16px;font-size:9px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 4px"></div>
+      <span class="nav-label">Notifiche</span>
+    </button>
     <button class="nav-tab" id="nav-profile" onclick="navTo('profile')">
       <span class="nav-icon" id="nav-avatar-icon">👤</span>
       <span class="nav-label">Profilo</span>
-    </button>
-    <button class="nav-tab" id="nav-drawpass" onclick="navTo('drawpass')">
-      <span class="nav-icon">🪙</span>
-      <span class="nav-label" id="nav-token-label">Token</span>
     </button>
   </div>
 </div>
