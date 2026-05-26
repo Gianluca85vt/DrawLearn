@@ -212,47 +212,158 @@ button{font-family:'Baloo 2',sans-serif;cursor:pointer}
 </div>
 
 <!-- HOME -->
-<div class="screen" id="scr-home">
-  <div style="background:#1C1B2E;padding:16px 20px 12px">
-    <div style="max-width:700px;margin:0 auto;display:flex;align-items:center;justify-content:space-between">
-      <div>
-        <div style="display:flex;align-items:center;gap:7px"><span style="font-size:20px">✏️</span><span style="font-weight:800;font-size:18px;color:#fff">DrawBound</span></div>
-        <div id="home-greeting" style="color:#9896B8;font-size:11px;margin-top:1px">Ciao!</div>
+<div class="screen" id="scr-home" style="background:#0F0E1A;min-height:100vh;padding-bottom:80px">
+
+  <!-- TOP BAR -->
+  <div style="background:#1C1B2E;padding:12px 16px;position:sticky;top:0;z-index:20;border-bottom:1px solid rgba(255,255,255,.06)">
+    <div style="max-width:720px;margin:0 auto;display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:8px">
+        <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGl2ZWxsb18xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCA1OTUuMjggODQxLjg5Ij4KICA8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMzAuNC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogMi4xLjQgQnVpbGQgMjI2KSAgLS0+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5zdDAgewogICAgICAgIGZpbGw6ICMxYzFiMjk7CiAgICAgIH0KCiAgICAgIC5zdDEgewogICAgICAgIGZpbGw6IHVybCgjU2Z1bWF0dXJhX3NlbnphX25vbWVfMzIyKTsKICAgICAgfQoKICAgICAgLnN0MiB7CiAgICAgICAgZmlsdGVyOiB1cmwoI2dsb3cpOwogICAgICAgIGlzb2xhdGlvbjogaXNvbGF0ZTsKICAgICAgICBvcGFjaXR5OiAuMzsKICAgICAgfQoKICAgICAgLnN0MyB7CiAgICAgICAgc3Ryb2tlOiAjMWMxYjI5OwogICAgICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgICAgICBzdHJva2UtbWl0ZXJsaW1pdDogNC42NTsKICAgICAgICBzdHJva2Utd2lkdGg6IDE2LjI4cHg7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgICA8ZmlsdGVyIGlkPSJnbG93IiB4PSItMjAlIiB5PSItMjAlIiB3aWR0aD0iMTQwJSIgaGVpZ2h0PSIxNDAlIj4KICAgICAgPGZlR2F1c3NpYW5CbHVyIHJlc3VsdD0iYmx1ciIgc3RkRGV2aWF0aW9uPSIxNSIvPgogICAgICA8ZmVDb21wb3NpdGUgaW49IlNvdXJjZUdyYXBoaWMiIGluMj0iYmx1ciIvPgogICAgPC9maWx0ZXI+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9IlNmdW1hdHVyYV9zZW56YV9ub21lXzMyMiIgZGF0YS1uYW1lPSJTZnVtYXR1cmEgc2VuemEgbm9tZSAzMjIiIHgxPSItLjEzIiB5MT0iODQxLjk3IiB4Mj0iMS4wNiIgeTI9Ijg0MC43OCIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSgxOTguMDA2NyAyNTQ3NjcuOTYyMykgc2NhbGUoMTk5LjI2MDEgLTMwMi4yODg0KSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgogICAgICA8c3RvcCBvZmZzZXQ9Ii4zNyIgc3RvcC1jb2xvcj0iIzgxNDM5MyIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNmYmJhMDAiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IGNsYXNzPSJzdDAiIHg9IjM3LjIiIHk9IjE2MC41MSIgd2lkdGg9IjUyMC44NyIgaGVpZ2h0PSI1MjAuODciIHJ4PSIxMjcuODkiIHJ5PSIxMjcuODkiLz4KICA8ZyBjbGFzcz0ic3QyIj4KICAgIDxwb2x5Z29uIHBvaW50cz0iMjk3LjY0IDI2Mi44MiA0MDYuOTMgNDYwLjQ3IDI5Ny42NCA1ODguMzcgMTg4LjM1IDQ2MC40NyAyOTcuNjQgMjYyLjgyIi8+CiAgPC9nPgogIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0yOTcuNjQsMjQwLjkzbDExNi4zMiwyMDcuNzFjNC4yNSw2LjM1LDIuNTUsMTQuOTYtMy44LDE5LjIxLS45Ny42NS0yLjAyLDEuMTctMy4xMiwxLjU2bC0xMDkuNCwxMzEuNTUtMTA5LjQtMTMxLjU1Yy03LjIyLTIuNTMtMTEuMDItMTAuNDMtOC40OC0xNy42NS4zOS0xLjEuOTEtMi4xNSwxLjU2LTMuMTJsMTE2LjMyLTIwNy43MVoiLz4KICA8cGF0aCBjbGFzcz0ic3QzIiBkPSJNMjk3LjY0LDM2NS41NXYyMzUuNDEiLz4KICA8Y2lyY2xlIGNsYXNzPSJzdDAiIGN4PSIyOTcuNjQiIGN5PSIzNjUuNTUiIHI9IjIyLjE2Ii8+Cjwvc3ZnPg==" style="width:28px;height:28px;object-fit:contain;flex-shrink:0"/>
+        <div>
+          <div style="font-weight:800;font-size:16px;color:#fff;line-height:1">DrawBound</div>
+          <div id="home-greeting" style="color:#9896B8;font-size:10px">Ciao!</div>
+        </div>
       </div>
       <div style="display:flex;align-items:center;gap:6px">
         <div id="pro-badge"></div>
-        <button onclick="showDrawPass()" title="DrawPass" style="background:rgba(255,255,255,.1);border:none;border-radius:50px;padding:4px 10px;font-weight:700;font-size:10px;color:#FFD60A;cursor:pointer;display:flex;align-items:center;gap:4px"><span>🪙</span><span id="home-token-balance">0</span></button><button onclick="showProfile()" id="home-avatar-btn" style="background:rgba(255,255,255,.1);border:none;border-radius:50%;width:30px;height:30px;font-size:16px;cursor:pointer">👤</button><button onclick="showCfg()" style="background:rgba(255,255,255,.1);border:none;border-radius:50%;width:30px;height:30px;font-size:14px">⚙️</button>
-        <button onclick="doLogout()" style="background:rgba(255,255,255,.1);border:none;border-radius:50px;padding:4px 10px;font-weight:600;font-size:10px;color:#9896B8">Esci</button>
+        <button onclick="showDrawPass()" style="background:rgba(255,214,10,.15);border:1px solid rgba(255,214,10,.3);border-radius:50px;padding:4px 10px;font-weight:800;font-size:11px;color:#FFD60A;cursor:pointer;display:flex;align-items:center;gap:4px">
+          <span>🪙</span><span id="home-token-balance">0</span>
+        </button>
+        <button onclick="navTo('notif')" style="position:relative;background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;font-size:17px;cursor:pointer">
+          🔔<div id="notif-badge" style="display:none;position:absolute;top:-2px;right:-2px;background:#e74c3c;border-radius:50%;width:14px;height:14px;font-size:8px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center"></div>
+        </button>
+        <button id="admin-btn" onclick="showCfg()" style="display:none;background:rgba(255,255,255,.06);border:none;border-radius:50%;width:32px;height:32px;font-size:13px;cursor:pointer">⚙️</button>
       </div>
     </div>
   </div>
-  <div style="max-width:700px;margin:0 auto;padding:0 20px">
-    <div style="background:linear-gradient(135deg,#2d2a4a,#3d3a5a);border-radius:16px;padding:16px;margin:12px 0">
-      <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
-        <div style="font-size:38px">🏆</div>
-        <div style="flex:1">
-          <div style="color:#fff;font-weight:800;font-size:14px;margin-bottom:4px">Il tuo percorso</div>
-          <div style="background:rgba(255,255,255,.1);border-radius:50px;height:7px;overflow:hidden">
-            <div id="progress-bar" style="width:0%;background:linear-gradient(90deg,#C8F5E0,#3DBE7A);height:100%;border-radius:50px;transition:width .6s"></div>
-          </div>
-          <div id="progress-text" style="color:#9896B8;font-size:10px;margin-top:3px">0 di 18 completate</div>
-        </div>
-        <button onclick="toggleRewards()" id="rewards-toggle-btn" style="background:rgba(255,255,255,.1);border:none;border-radius:50px;padding:5px 10px;color:#FFD60A;font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap">🎁 Premi</button>
+
+  <div style="max-width:720px;margin:0 auto;padding:14px 14px 0">
+
+    <!-- STREAK BANNER (Duolingo style) -->
+    <div id="streak-banner" style="display:none;background:linear-gradient(135deg,#FF6B00,#FF9500);border-radius:16px;padding:14px 18px;margin-bottom:12px;display:flex;align-items:center;gap:14px;cursor:pointer" onclick="showStreakInfo()">
+      <div style="font-size:42px;line-height:1">🔥</div>
+      <div style="flex:1">
+        <div id="streak-count-big" style="font-weight:900;font-size:28px;color:#fff;line-height:1">0</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:2px">giorni di fila</div>
       </div>
-      <!-- Rewards panel (collapsed by default) -->
-      <div id="rewards-panel" style="display:none">
-        <div style="height:1px;background:rgba(255,255,255,.1);margin-bottom:12px"></div>
-        <!-- Free rewards row -->
-        <div style="font-size:11px;font-weight:800;color:#9896B8;margin-bottom:8px;letter-spacing:1px">PREMI GRATUITI</div>
-        <div id="home-rewards-free" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px"></div>
-        <!-- Premium rewards row -->
-        <div style="font-size:11px;font-weight:800;color:#9896B8;margin:12px 0 8px;letter-spacing:1px">PREMI PREMIUM</div>
-        <div id="home-rewards-premium" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px"></div>
-        <button onclick="showDrawPass()" style="width:100%;margin-top:10px;padding:8px;background:rgba(255,214,10,.15);border:1px solid rgba(255,214,10,.3);border-radius:10px;color:#FFD60A;font-weight:800;font-size:11px;cursor:pointer">🪙 Vai al DrawPass Shop</button>
+      <div style="text-align:right">
+        <div id="streak-mult-label" style="font-weight:800;font-size:16px;color:#fff">1x</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.7)">token multiplier</div>
+        <div id="streak-today" style="margin-top:4px;font-size:10px;font-weight:700;background:rgba(255,255,255,.2);border-radius:50px;padding:2px 8px;color:#fff">✅ Oggi OK</div>
       </div>
     </div>
-    <h2 style="font-weight:800;font-size:16px;color:#1C1B2E;margin:0 0 9px">Scegli una categoria</h2>
+
+    <!-- PROFILE HERO CARD -->
+    <div style="background:linear-gradient(135deg,#1e1b3a,#2d2a4a);border-radius:20px;padding:18px;margin-bottom:12px;position:relative;overflow:hidden">
+      <div style="position:absolute;right:-20px;top:-20px;width:100px;height:100px;background:radial-gradient(circle,rgba(139,92,246,.25),transparent);border-radius:50%"></div>
+
+      <!-- Avatar + Info -->
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+        <div style="position:relative;cursor:pointer;flex-shrink:0" onclick="navTo('profile')">
+          <div id="hero-avatar" style="width:64px;height:64px;border-radius:50%;background:#3d3a5a;display:flex;align-items:center;justify-content:center;font-size:30px;border:3px solid #8B5CF6"></div>
+          <div style="position:absolute;bottom:0;right:0;background:#8B5CF6;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;border:2px solid #1e1b3a">✏️</div>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div id="hero-name" style="font-weight:800;font-size:17px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div>
+          <div id="hero-email" style="font-size:10px;color:#9896B8;margin-top:1px"></div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:5px">
+            <div id="hero-level-badge" style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.1);border-radius:50px;padding:3px 10px">
+              <span id="hero-level-icon" style="font-size:12px">🌱</span>
+              <span id="hero-level-name" style="font-size:11px;font-weight:800;color:#fff">Principiante</span>
+            </div>
+            <div id="streak-badge" style="display:none"></div>
+          </div>
+        </div>
+        <button onclick="toggleRewards()" id="rewards-toggle-btn" style="background:linear-gradient(135deg,#FFD60A,#FF9500);border:none;border-radius:50px;padding:6px 12px;font-weight:800;font-size:11px;color:#fff;cursor:pointer;flex-shrink:0">🎁</button>
+      </div>
+
+      <!-- Stats row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+        <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:8px;text-align:center">
+          <div id="stat-lessons-done" style="font-weight:800;font-size:18px;color:#3DBE7A">0</div>
+          <div style="font-size:9px;color:#9896B8">Lezioni</div>
+        </div>
+        <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:8px;text-align:center">
+          <div id="stat-cats-num" style="font-weight:800;font-size:18px;color:#FFD60A">0</div>
+          <div style="font-size:9px;color:#9896B8">Categorie</div>
+        </div>
+        <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:8px;text-align:center;cursor:pointer" onclick="showDrawPass()">
+          <div id="stat-tokens-big" style="font-weight:800;font-size:18px;color:#FF9500">0</div>
+          <div style="font-size:9px;color:#9896B8">Token</div>
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      <div style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span id="progress-text" style="font-size:11px;color:#9896B8">0 di 18 lezioni</span>
+          <span id="hero-next-level" style="font-size:10px;color:#8B5CF6;font-weight:700"></span>
+        </div>
+        <div style="background:rgba(255,255,255,.08);border-radius:50px;height:7px;overflow:hidden">
+          <div id="progress-bar" style="width:0%;background:linear-gradient(90deg,#8B5CF6,#3DBE7A);height:100%;border-radius:50px;transition:width .8s cubic-bezier(.4,0,.2,1)"></div>
+        </div>
+      </div>
+
+      <!-- Continue card -->
+      <div id="continue-card" style="display:none;background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.3);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="continueLastLesson()">
+        <div id="continue-icon" style="font-size:22px">📝</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:9px;font-weight:800;color:#8B5CF6;letter-spacing:1px;margin-bottom:2px">CONTINUA DA DOVE ERI</div>
+          <div id="continue-title" style="font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div>
+          <div id="continue-step" style="font-size:10px;color:#9896B8">Passo 1</div>
+        </div>
+        <div style="background:#8B5CF6;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:800;color:#fff;flex-shrink:0">▶ Vai</div>
+      </div>
+
+      <!-- Rewards panel -->
+      <div id="rewards-panel" style="display:none;margin-top:12px;border-top:1px solid rgba(255,255,255,.08);padding-top:12px">
+        <div style="font-size:10px;font-weight:800;color:#9896B8;letter-spacing:1px;margin-bottom:8px">PREMI GRATUITI</div>
+        <div id="home-rewards-free" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px"></div>
+        <div style="font-size:10px;font-weight:800;color:#9896B8;letter-spacing:1px;margin:10px 0 8px">PREMI PREMIUM</div>
+        <div id="home-rewards-premium" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px"></div>
+        <button onclick="showDrawPass()" style="width:100%;margin-top:10px;padding:8px;background:rgba(255,214,10,.1);border:1px solid rgba(255,214,10,.25);border-radius:10px;color:#FFD60A;font-weight:800;font-size:11px;cursor:pointer">🪙 DrawPass Shop</button>
+      </div>
+    </div>
+
+    <!-- CATEGORIES / SKILL TREE TOGGLE -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <span style="font-weight:800;font-size:15px;color:#fff" id="section-title">Categorie</span>
+      <div style="display:flex;gap:6px">
+        <button id="view-list-btn" onclick="setHomeView('list')" style="background:#8B5CF6;border:none;border-radius:50px;padding:5px 12px;color:#fff;font-weight:700;font-size:11px;cursor:pointer">📋 Lista</button>
+        <button id="view-tree-btn" onclick="setHomeView('tree')" style="background:rgba(255,255,255,.08);border:none;border-radius:50px;padding:5px 12px;color:#9896B8;font-weight:700;font-size:11px;cursor:pointer">🌳 Skill Tree</button>
+      </div>
+    </div>
+
+    <!-- CATEGORY GRID -->
     <div id="cat-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
+
+    <!-- SKILL TREE VIEW -->
+    <div id="skill-tree-view" style="display:none"></div>
+
+    <!-- FEATURE CARDS -->
+    <div id="home-feature-cards" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+      <div style="background:linear-gradient(135deg,#1a1e2e,#1e2438);border-radius:16px;padding:14px;cursor:pointer" onclick="showNewPost()">
+        <div style="font-size:26px;margin-bottom:6px">📸</div>
+        <div style="font-weight:800;font-size:12px;color:#fff;margin-bottom:3px">Condividi</div>
+        <div style="font-size:10px;color:#9896B8">Pubblica il tuo disegno</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#1e1a10,#2e2614);border-radius:16px;padding:14px;cursor:pointer" onclick="showDrawPass()">
+        <div style="font-size:26px;margin-bottom:6px">🎟️</div>
+        <div style="font-weight:800;font-size:12px;color:#fff;margin-bottom:3px">DrawPass</div>
+        <div style="font-size:10px;color:#9896B8">Sblocca lezioni singole</div>
+      </div>
+    </div>
+
+    <!-- PRO CTA -->
+    <div id="pro-cta-card" style="display:none;background:linear-gradient(135deg,#1C1B2E,#2d2a4a);border-radius:16px;padding:16px;margin-top:10px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="showScreen('paywall')">
+      <div style="font-size:36px">👑</div>
+      <div style="flex:1">
+        <div style="font-weight:800;font-size:14px;color:#fff">Sblocca DrawBound PRO</div>
+        <div style="font-size:11px;color:#9896B8">Tutte le lezioni avanzate</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#FFD60A,#FF9500);border-radius:10px;padding:6px 12px;font-weight:800;font-size:11px;color:#fff;white-space:nowrap">Da €4,99</div>
+    </div>
+
   </div>
 </div>
 
@@ -673,6 +784,27 @@ button{font-family:'Baloo 2',sans-serif;cursor:pointer}
       <button onclick="sendDM()" style="background:#8B5CF6;border:none;border-radius:50%;width:40px;height:40px;color:#fff;font-size:18px;cursor:pointer;flex-shrink:0">↑</button>
     </div>
   </div>
+</div>
+
+
+<!-- SKILL TREE SCREEN -->
+<div class="screen" id="scr-skilltree" style="background:#0A0918;min-height:100vh;padding-bottom:80px">
+  <div style="background:rgba(10,9,24,.95);backdrop-filter:blur(10px);padding:12px 16px;position:sticky;top:0;z-index:10;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px">
+    <button onclick="navTo('home')" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;color:#fff;font-size:16px;cursor:pointer;flex-shrink:0">←</button>
+    <span style="font-weight:800;font-size:18px;color:#fff;flex:1">🌳 Skill Tree</span>
+    <div style="font-size:11px;color:#9896B8" id="st-stats"></div>
+  </div>
+
+  <!-- Legend -->
+  <div style="display:flex;gap:12px;padding:10px 16px;overflow-x:auto;border-bottom:1px solid rgba(255,255,255,.06)">
+    <div style="display:flex;align-items:center;gap:5px;flex-shrink:0"><div style="width:12px;height:12px;border-radius:50%;background:#3DBE7A"></div><span style="font-size:10px;color:#9896B8">Completato</span></div>
+    <div style="display:flex;align-items:center;gap:5px;flex-shrink:0"><div style="width:12px;height:12px;border-radius:50%;background:#8B5CF6"></div><span style="font-size:10px;color:#9896B8">In corso</span></div>
+    <div style="display:flex;align-items:center;gap:5px;flex-shrink:0"><div style="width:12px;height:12px;border-radius:50%;background:#2d2a4a;border:1px solid #555"></div><span style="font-size:10px;color:#9896B8">Disponibile</span></div>
+    <div style="display:flex;align-items:center;gap:5px;flex-shrink:0"><div style="width:12px;height:12px;border-radius:50%;background:#1a1a2e;border:1px dashed #333"></div><span style="font-size:10px;color:#9896B8">Bloccato</span></div>
+    <div style="display:flex;align-items:center;gap:5px;flex-shrink:0"><div style="width:12px;height:12px;border-radius:50%;background:linear-gradient(135deg,#FFD60A,#FF9500)"></div><span style="font-size:10px;color:#9896B8">PRO</span></div>
+  </div>
+
+  <div id="skill-tree-container" style="padding:20px 16px;max-width:700px;margin:0 auto"></div>
 </div>
 
 <!-- DRAWPASS SHOP -->
@@ -1338,125 +1470,81 @@ async function doLogout(){
 
 /* ═══════════════ HOME ═══════════════ */
 function renderHome(){
+  if(!A.user) return;
   // Greeting
-  document.getElementById("home-greeting").textContent="Ciao, "+A.user.avatar+" "+A.user.name.split(" ")[0]+"!";
-  
-  // Progress & Level
-  var tot=18;
-  var done=Object.values(A.progress).filter(function(v){return v.completed;}).length;
-  var pct=Math.round(done/tot*100);
-  var lv=getLevel(done);
-  var nextLv=done<18?LEVELS[LEVELS.indexOf(lv)+1]:null;
+  document.getElementById("home-greeting").textContent="Ciao, "+A.user.name.split(" ")[0]+"!";
 
-  document.getElementById("progress-bar").style.width=pct+"%";
-  document.getElementById("progress-text").textContent=done+" di "+tot+" lezioni completate";
-
-  // Hero card
-  var heroAvatar=document.getElementById("hero-avatar");
-  if(heroAvatar){
-    heroAvatar.textContent=getAvatarIcon();
-    // Apply border color from selected border
-    var prf=A.profile||{border:"none"};
-    var br=UNLOCKS.borders.find(function(b){return b.id===prf.border;});
-    heroAvatar.style.border=br&&br.color&&br.color!=="rainbow"?"3px solid "+br.color:"3px solid #8B5CF6";
-  }
-  var heroName=document.getElementById("hero-name");
-  if(heroName) heroName.textContent=A.user.name;
-  var heroEmail=document.getElementById("hero-email");
-  if(heroEmail) heroEmail.textContent=A.user.email||"";
-  var profileBio = document.getElementById("profile-bio");
-  if(profileBio) profileBio.textContent = A.user.bio||"Nessuna bio ancora — aggiungine una!";
-  var statLes=document.getElementById("stat-lessons-done");
-  if(statLes) statLes.textContent=done;
-  renderStreakBadge();
-  var heroIcon=document.getElementById("hero-level-icon");
-  if(heroIcon) heroIcon.textContent=lv.icon;
-  var heroLvName=document.getElementById("hero-level-name");
-  if(heroLvName){heroLvName.textContent=lv.name;heroLvName.style.color=lv.color;}
-  var heroNext=document.getElementById("hero-next-level");
-  if(heroNext) heroNext.textContent=nextLv?"Prossimo: "+nextLv.name+" ("+nextLv.min+" lezioni)":"MAX LEVEL 👑";
-
-  // Continue card
-  var last=localGet("dl:last");
-  if(last){try{last=JSON.parse(last);}catch(e){last=null;}}
-  var contCard=document.getElementById("continue-card");
-  if(contCard&&last&&last.catId){
-    contCard.style.display="flex";
-    var ci=document.getElementById("continue-icon");
-    if(ci) ci.textContent=last.icon||last.catIcon||"📝";
-    var ct=document.getElementById("continue-title");
-    if(ct) ct.textContent=last.title||"Lezione";
-    var cs=document.getElementById("continue-step");
-    if(cs) cs.textContent="Passo "+(last.step+1);
-  } else if(contCard){
-    contCard.style.display="none";
-  }
-
-  // Stats
-  var catsDone=CATS.filter(function(cat){return cat.levels.every(function(l){var k=pk(cat.id,l.id);return A.progress[k]&&A.progress[k].completed;});}).length;
-  var sc=document.getElementById("stat-cats-num"); if(sc) sc.textContent=catsDone;
-  var st=document.getElementById("stat-tokens-big"); if(st) st.textContent=A.tokens||0;
-
-  // Admin button visibility
+  // Admin button
   var adminBtn=document.getElementById("admin-btn");
   if(adminBtn) adminBtn.style.display=isAdmin()?"inline-flex":"none";
 
-  // PRO badge + CTA
+  // PRO badge
   var pb=document.getElementById("pro-badge");
   var proCard=document.getElementById("pro-cta-card");
   if(A.pro){
-    pb.innerHTML='<span style="background:linear-gradient(135deg,#FFD60A,#FF9500);border-radius:50px;padding:3px 10px;font-weight:800;font-size:10px;color:#fff">👑 PRO</span>';
+    if(pb) pb.innerHTML='<span style="background:linear-gradient(135deg,#FFD60A,#FF9500);border-radius:50px;padding:3px 10px;font-weight:800;font-size:10px;color:#fff">👑 PRO</span>';
     if(proCard) proCard.style.display="none";
   } else {
-    pb.innerHTML='<button onclick="showScreen(\'paywall\')" style="background:linear-gradient(135deg,#FFD60A,#FF9500);border:none;border-radius:50px;padding:4px 10px;font-weight:800;font-size:10px;color:#fff;cursor:pointer">👑 PRO</button>';
+    if(pb) pb.innerHTML='<button onclick="showScreen(\'paywall\')" style="background:linear-gradient(135deg,#FFD60A,#FF9500);border:none;border-radius:50px;padding:4px 10px;font-weight:800;font-size:10px;color:#fff;cursor:pointer">👑 PRO</button>';
     if(proCard) proCard.style.display="flex";
   }
 
-  // Category cards
-  var grid=document.getElementById("cat-grid");
-  grid.innerHTML="";
+  // Progress + Level
+  var tot=18, done=Object.values(A.progress).filter(function(v){return v.completed;}).length;
+  var lv=getLevel(done);
+  var nextLv=done<18?LEVELS[LEVELS.indexOf(lv)+1]:null;
+  var pct=Math.round(done/tot*100);
+
+  // Hero card
+  var ha=document.getElementById("hero-avatar");
+  if(ha){ ha.textContent=getAvatarIcon(); var prf=A.profile||{border:"none"}; var br=UNLOCKS.borders.find(function(b){return b.id===prf.border;}); if(br&&br.color&&br.color!=="rainbow") ha.style.border="3px solid "+br.color; }
+  var hn=document.getElementById("hero-name"); if(hn) hn.textContent=A.user.name;
+  var he=document.getElementById("hero-email"); if(he) he.textContent=A.user.email||"";
+  var hli=document.getElementById("hero-level-icon"); if(hli) hli.textContent=lv.icon;
+  var hln=document.getElementById("hero-level-name"); if(hln){ hln.textContent=lv.name; hln.style.color=lv.color; }
+  var hnl=document.getElementById("hero-next-level"); if(hnl) hnl.textContent=nextLv?"→ "+nextLv.name+" ("+nextLv.min+")":" 👑 MAX";
+
+  // Progress bar
+  var pb2=document.getElementById("progress-bar"); if(pb2) pb2.style.width=pct+"%";
+  var pt=document.getElementById("progress-text"); if(pt) pt.textContent=done+" di "+tot+" lezioni completate";
+
+  // Stats
+  var catsDone=CATS.filter(function(cat){return cat.levels.every(function(l){var k=pk(cat.id,l.id);return A.progress[k]&&A.progress[k].completed;});}).length;
+  var sl=document.getElementById("stat-lessons-done"); if(sl) sl.textContent=done;
+  var sc=document.getElementById("stat-cats-num"); if(sc) sc.textContent=catsDone;
+  var st=document.getElementById("stat-tokens-big"); if(st) st.textContent=A.tokens||0;
+
+  // Continue card
+  var last=localGet("dl:last"); if(last){ try{last=JSON.parse(last);}catch(e){last=null;} }
+  var cc=document.getElementById("continue-card");
+  if(cc&&last&&last.catId){ cc.style.display="flex"; var ci=document.getElementById("continue-icon"); if(ci) ci.textContent=last.icon||"📝"; var ct=document.getElementById("continue-title"); if(ct) ct.textContent=last.title||"Lezione"; var cs=document.getElementById("continue-step"); if(cs) cs.textContent="Passo "+(last.step+1); }
+  else if(cc) cc.style.display="none";
+
+  // Streak banner
+  renderStreakBanner();
+  updateTokenUI();
+
+  // Category grid
+  var grid=document.getElementById("cat-grid"); grid.innerHTML="";
   CATS.forEach(function(cat,idx){
     var bg=BG[cat.id]||"#f5f5f5", ac=AC[cat.id]||"#555";
     var d=cat.levels.filter(function(l){var k=pk(cat.id,l.id);return A.progress[k]&&A.progress[k].completed;}).length;
-    var isFirst=idx===0;
-    var div=document.createElement("div");
-    // First category gets full width
-    if(isFirst) div.style.gridColumn="1/-1";
-    div.style.cssText="background:linear-gradient(135deg,"+bg+"33,"+bg+"18);border-radius:16px;padding:16px;cursor:pointer;transition:transform .2s;position:relative;overflow:hidden";
-    div.style.border="1.5px solid "+bg+"66";
-    // Progress bar background
-    var pctCat=cat.levels.length>0?Math.round(d/cat.levels.length*100):0;
     var bars=cat.levels.map(function(l){var k=pk(cat.id,l.id);var done=A.progress[k]&&A.progress[k].completed;return'<div style="flex:1;height:3px;border-radius:3px;background:'+(done?ac:"rgba(0,0,0,.08)")+'"></div>';}).join("");
+    var div=document.createElement("div"); div.className="card"; div.style.border="1.5px solid "+bg+"66";
     div.innerHTML=
-      '<div style="position:absolute;right:-10px;top:-10px;width:70px;height:70px;background:'+ac+'18;border-radius:50%"></div>'+
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'+
-        '<div style="width:44px;height:44px;background:'+ac+'22;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px">'+cat.icon+'</div>'+
-        '<div style="flex:1">'+
-          '<div style="font-weight:800;font-size:'+(isFirst?'15':"13")+'px;color:#1C1B2E">'+cat.label+'</div>'+
-          '<div style="font-size:10px;color:#9896B8;margin-top:1px">'+cat.levels.length+' lezioni'+
-          (d>0?' &bull; <span style="color:'+ac+'">'+d+' completate</span>':"")+'</div>'+
-        '</div>'+
-        (d===cat.levels.length&&d>0?'<span style="font-size:18px">🏆</span>':'')+
-      '</div>'+
-      '<div style="display:flex;gap:3px">'+bars+'</div>';
-    div.onmouseenter=function(){this.style.transform="translateY(-2px)";};
-    div.onmouseleave=function(){this.style.transform="translateY(0)";};
-    div.onclick=function(){
-      A.cat=cat;
-      loadTutorialsFromDB().then(function(){
-        var fresh=CATS.find(function(c){return c.id===cat.id;});
-        if(fresh) A.cat=fresh;
-        renderCategory();
-        showScreen("category");
-      }).catch(function(){
-        renderCategory();
-        showScreen("category");
-      });
-    };
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'+
+        '<div style="width:42px;height:42px;background:'+bg+'33;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px">'+cat.icon+'</div>'+
+        '<div style="flex:1"><div style="font-weight:800;font-size:13px;color:#1C1B2E">'+cat.label+'</div>'+
+        '<div style="font-size:10px;color:#9896B8">'+cat.levels.length+' lezioni'+(d>0?' · <span style="color:'+ac+'">'+d+' completate</span>':'')+'</div></div>'+
+        (d===cat.levels.length&&d>0?'<span style="font-size:16px">🏆</span>':'' )+
+      '</div><div style="display:flex;gap:3px">'+bars+'</div>';
+    div.onmouseenter=function(){this.style.transform="translateY(-2px)";}; div.onmouseleave=function(){this.style.transform="translateY(0)";};
+    div.onclick=function(){A.cat=cat;loadTutorialsFromDB().then(function(){var f=CATS.find(function(c){return c.id===cat.id;});if(f)A.cat=f;renderCategory();showScreen("category");}).catch(function(){renderCategory();showScreen("category");});};
     grid.appendChild(div);
   });
 
-  updateTokenUI();
+  // Keep skill view
+  if(_skillView==="tree") setHomeView("tree");
 }
 
 /* ═══════════════ CATEGORY ═══════════════ */
@@ -1829,7 +1917,7 @@ var _currentPostId = null;
 
     /* Navigation */
 function navTo(screen){
-  var allScreens = ["feed","home","category","lesson","profile","drawpass","notif","search","pubprofile","explore","chat","dm"];
+  var allScreens = ["feed","home","category","lesson","profile","drawpass","notif","search","pubprofile","explore","chat","dm","skilltree"];
   allScreens.forEach(function(s){ var el=document.getElementById("scr-"+s); if(el) el.style.display="none"; });
   // Special renders
   if(screen==="feed"){ renderFeed(); showScreen("feed"); }
@@ -1839,6 +1927,7 @@ function navTo(screen){
   else if(screen==="notif"){ loadNotifications(); showScreen("notif"); }
   else if(screen==="chat"){ loadChatInbox(); showScreen("chat"); showBottomNav(); }
   else if(screen==="search"){ showScreen("search"); loadTrending(); setTimeout(function(){var si=document.getElementById("search-input");if(si)si.focus();},100); }
+  else if(screen==="skilltree"){ renderSkillTreeV2(); showScreen("skilltree"); }
   else if(screen==="explore"){ showScreen("explore"); loadExplore(); setTimeout(function(){var si=document.getElementById("explore-search");if(si)si.focus();},100); }
   else showScreen(screen);
   // Update nav tabs
@@ -2208,19 +2297,33 @@ function renderStreakBadge(){
   var m=getStreakMultiplier(s.count);
   var el=document.getElementById("streak-badge");
   if(!el) return;
-  if(s.count>0){
-    el.innerHTML=
-      '<div style="display:flex;align-items:center;gap:6px;background:'+(active?"rgba(255,107,0,.15)":"rgba(255,255,255,.05)")+';border:1px solid '+(active?"rgba(255,107,0,.3)":"rgba(255,255,255,.1)")+';border-radius:50px;padding:5px 12px;cursor:pointer" onclick="showStreakInfo()">'+
-        '<span style="font-size:16px">'+(active?"🔥":"💤")+'</span>'+
-        '<div>'+
-          '<div style="font-weight:800;font-size:13px;color:'+(active?"#FF6B00":"#9896B8")+'">'+s.count+' giorni</div>'+
-          '<div style="font-size:9px;color:#9896B8">multiplier '+m.label+'</div>'+
-        '</div>'+
-      '</div>';
-    el.style.display="block";
-  } else {
-    el.style.display="none";
-  }
+  // Always show streak (even if 0)
+  var streakColor = active ? "#FF6B00" : "#9896B8";
+  var streakBg    = active ? "rgba(255,107,0,.2)" : "rgba(255,255,255,.06)";
+  var streakBorder= active ? "rgba(255,107,0,.4)" : "rgba(255,255,255,.1)";
+  el.style.display="block";
+  el.innerHTML=
+    '<div onclick="showStreakInfo()" style="cursor:pointer;background:'+streakBg+';border:1.5px solid '+streakBorder+';border-radius:14px;padding:10px 14px;display:flex;align-items:center;gap:10px">'+
+      '<div style="font-size:32px;line-height:1">'+(s.count>0?(active?"🔥":"💤"):"🔥")+'</div>'+
+      '<div style="flex:1">'+
+        '<div style="font-weight:800;font-size:20px;color:'+streakColor+';line-height:1">'+s.count+'</div>'+
+        '<div style="font-size:10px;color:#9896B8;margin-top:1px">giorni di fila · '+m.label+' token</div>'+
+      '</div>'+
+      '<div style="text-align:right">'+
+        '<div style="font-size:10px;color:#9896B8">Record</div>'+
+        '<div style="font-weight:800;font-size:14px;color:#fff">'+s.max+'</div>'+
+      '</div>'+
+    '</div>'+
+    (active?
+      '<div style="margin-top:6px;display:flex;gap:4px">'+
+        [0,1,2,3,4,5,6].map(function(d){
+          var date=new Date(Date.now()-d*86400000).toISOString().slice(0,10);
+          var done=s.count>=(7-d);
+          return '<div style="flex:1;height:4px;border-radius:2px;background:'+(done?"#FF6B00":"rgba(255,255,255,.1)")+'"></div>';
+        }).reverse().join("")+
+      '</div>':
+      '<div style="margin-top:6px;font-size:10px;color:#e74c3c;text-align:center">⚠️ Disegna oggi per non perdere lo streak!</div>'
+    );
 }
 
 function showStreakInfo(){
@@ -2324,7 +2427,7 @@ async function voteChallengeEntry(entryId, btn){
 
 
 /* ═══════════════ SKILL TREE ═══════════════ */
-var _skillView="list"; // "list" | "tree"
+var _skillView="list";
 
 function toggleSkillView(){
   _skillView = _skillView==="list"?"tree":"list";
@@ -2567,6 +2670,225 @@ async function submitRedline(){
     }
     if(btn){ btn.textContent="Pubblica"; btn.disabled=false; }
   }, "image/jpeg", 0.92);
+}
+
+
+/* ═══════════════ SKILL TREE V2 ═══════════════ */
+
+var SKILL_TREE = [
+  {
+    id:"env", label:"🌄 Environment", color:"#2E9E6B", bg:"#0d2018",
+    desc:"Disegna mondi e ambienti credibili",
+    branches:[
+      {
+        id:"nature_branch", label:"🌿 Natura",
+        nodes:[
+          {catId:"nature", lesId:1, label:"Fiore 6 Petali",     icon:"🌸", req:[]},
+          {catId:"nature", lesId:2, label:"Albero",             icon:"🌳", req:["nature-1"]},
+          {catId:"nature", lesId:3, label:"Paesaggio",          icon:"🏔️", req:["nature-2"], pro:true},
+        ]
+      },
+      {
+        id:"arch_branch", label:"🏛️ Architettura",
+        nodes:[
+          {catId:"architecture", lesId:1, label:"1 Punto Fuga",  icon:"📐", req:[]},
+          {catId:"architecture", lesId:2, label:"2 Punti Fuga",  icon:"📏", req:["architecture-1"]},
+          {catId:"architecture", lesId:3, label:"3 Punti Fuga",  icon:"🏙️", req:["architecture-2"], pro:true},
+        ]
+      }
+    ]
+  },
+  {
+    id:"char", label:"🎭 Character Design", color:"#8B5CF6", bg:"#130d24",
+    desc:"Crea personaggi memorabili in ogni stile",
+    branches:[
+      {
+        id:"manga_branch", label:"⛩️ Manga / Stile",
+        nodes:[
+          {catId:"faces", lesId:1, label:"Manga Base",           icon:"⛩️", req:[]},
+          {catId:"faces", lesId:2, label:"Metodo Loomis",        icon:"📐", req:["faces-1"]},
+          {catId:"faces", lesId:3, label:"Ritratto Realistico",  icon:"🎭", req:["faces-2"], pro:true},
+        ]
+      },
+      {
+        id:"animal_branch", label:"🐾 Animali",
+        nodes:[
+          {catId:"animals", lesId:1, label:"Gatto Kawaii",       icon:"🐱", req:[]},
+          {catId:"animals", lesId:2, label:"Cagnolino",          icon:"🐶", req:["animals-1"]},
+          {catId:"animals", lesId:3, label:"Volpe Realistica",   icon:"🦊", req:["animals-2"], pro:true},
+        ]
+      }
+    ]
+  },
+  {
+    id:"vfx", label:"💡 Luce & Ombre", color:"#D4A200", bg:"#1a1400",
+    desc:"Padroneggia luce, volume e chiaroscuro",
+    branches:[
+      {
+        id:"shade_branch", label:"🌗 Chiaroscuro",
+        nodes:[
+          {catId:"chiaroscuro", lesId:1, label:"Sfumato",        icon:"☁️", req:[]},
+          {catId:"chiaroscuro", lesId:2, label:"Tratteggio",     icon:"✏️", req:["chiaroscuro-1"]},
+          {catId:"chiaroscuro", lesId:3, label:"Puntinismo",     icon:"·",  req:["chiaroscuro-2"], pro:true},
+        ]
+      }
+    ]
+  },
+  {
+    id:"still", label:"🍎 Still Life & Cibo", color:"#FF8C4B", bg:"#1a0d06",
+    desc:"Osservazione, forma e composizione",
+    branches:[
+      {
+        id:"food_branch", label:"🍕 Illustrazione",
+        nodes:[
+          {catId:"food", lesId:1, label:"Pizza Cartoon",         icon:"🍕", req:[]},
+          {catId:"food", lesId:2, label:"Torta Scenografica",    icon:"🎂", req:["food-1"]},
+          {catId:"food", lesId:3, label:"Still Life",            icon:"🍱", req:["food-2"], pro:true},
+        ]
+      }
+    ]
+  }
+];
+
+function showSkillTree(){
+  renderSkillTreeV2();
+  showScreen("skilltree");
+}
+
+function nodeStatus(catId, lesId){
+  var cat  = CATS.find(function(c){return c.id===catId;});
+  if(!cat) return "locked";
+  var les  = cat.levels.find(function(l){return l.id===lesId;});
+  if(!les) return "locked";
+  var k    = pk(catId, lesId);
+  var prog = A.progress[k]||{};
+  if(prog.completed) return "done";
+  if(prog.step>0)   return "progress";
+  var locked = !les.free && !A.pro && !isLessonUnlockedByToken(catId, lesId);
+  if(locked) return "pro";
+  return "available";
+}
+
+function nodeUnlocked(node){
+  // Check all prerequisites are completed
+  return node.req.every(function(r){
+    var parts = r.split("-");
+    var catId = parts[0];
+    var lesId = parseInt(parts[1]);
+    return A.progress[pk(catId,lesId)] && A.progress[pk(catId,lesId)].completed;
+  });
+}
+
+function renderSkillTreeV2(){
+  var container = document.getElementById("skill-tree-container");
+  if(!container) return;
+
+  // Stats
+  var done  = Object.values(A.progress).filter(function(v){return v.completed;}).length;
+  var total = 18;
+  var st    = document.getElementById("st-stats");
+  if(st) st.textContent = done+"/"+total+" completate";
+
+  container.innerHTML = "";
+
+  SKILL_TREE.forEach(function(section){
+    // Section header
+    var secDiv = document.createElement("div");
+    secDiv.style.cssText = "margin-bottom:28px";
+
+    var secHeader = document.createElement("div");
+    secHeader.style.cssText = "background:"+section.bg+";border:1px solid "+section.color+"44;border-radius:16px;padding:14px 16px;margin-bottom:16px";
+    secHeader.innerHTML =
+      '<div style="font-weight:800;font-size:17px;color:#fff;margin-bottom:3px">'+section.label+'</div>'+
+      '<div style="font-size:12px;color:#9896B8">'+section.desc+'</div>';
+    secDiv.appendChild(secHeader);
+
+    section.branches.forEach(function(branch){
+      // Branch container
+      var branchDiv = document.createElement("div");
+      branchDiv.style.cssText = "margin-left:16px;margin-bottom:16px;position:relative";
+
+      // Branch label
+      var brLabel = document.createElement("div");
+      brLabel.style.cssText = "font-size:12px;font-weight:700;color:"+section.color+";margin-bottom:10px;display:flex;align-items:center;gap:6px";
+      brLabel.innerHTML = '<div style="width:8px;height:8px;border-radius:50%;background:'+section.color+'"></div>'+branch.label;
+      branchDiv.appendChild(brLabel);
+
+      // Nodes
+      var nodesContainer = document.createElement("div");
+      nodesContainer.style.cssText = "display:flex;flex-direction:column;gap:0;padding-left:12px;border-left:2px solid '+section.color+'22";
+
+      branch.nodes.forEach(function(node, idx){
+        var status   = nodeStatus(node.catId, node.lesId);
+        var unlocked = nodeUnlocked(node);
+        var isPro    = node.pro && !A.pro && !isLessonUnlockedByToken(node.catId, node.lesId);
+        if(!unlocked) status = isPro?"pro":"locked";
+
+        var statusColors = {
+          done:      {bg:"#3DBE7A22", border:"#3DBE7A", icon:"#3DBE7A", text:"#3DBE7A",    label:"✅ Completato"},
+          progress:  {bg:"#8B5CF622", border:"#8B5CF6", icon:"#8B5CF6", text:"#fff",       label:"▶ In corso"},
+          available: {bg:"#2d2a4a44", border:"#555",    icon:"#9896B8", text:"#fff",       label:"⬜ Inizia"},
+          pro:       {bg:"rgba(255,214,10,.1)", border:"#FFD60A", icon:"#FFD60A", text:"#FFD60A", label:"👑 PRO"},
+          locked:    {bg:"#1a1a2e",   border:"#333",    icon:"#333",    text:"#555",       label:"🔒 Bloccato"},
+        };
+        var sc = statusColors[status]||statusColors.locked;
+
+        var pct = 0;
+        if(status==="progress"){
+          var prog = A.progress[pk(node.catId,node.lesId)]||{};
+          var cat2 = CATS.find(function(c){return c.id===node.catId;});
+          var les2 = cat2&&cat2.levels.find(function(l){return l.id===node.lesId;});
+          if(les2) pct = Math.round((prog.step||0)/les2.steps.length*100);
+        }
+
+        var nodeEl = document.createElement("div");
+        nodeEl.style.cssText = "display:flex;align-items:center;gap:12px;padding:10px 12px;background:"+sc.bg+";border:1.5px solid "+sc.border+";border-radius:12px;margin-bottom:8px;cursor:"+(status==="locked"?"default":"pointer")+";transition:transform .15s";
+
+        nodeEl.innerHTML =
+          '<div style="width:44px;height:44px;border-radius:12px;background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;border:1px solid '+sc.border+'44">'+
+            (status==="locked"?"🔒":(status==="pro"?"👑":node.icon))+
+          '</div>'+
+          '<div style="flex:1;min-width:0">'+
+            '<div style="font-weight:800;font-size:14px;color:'+sc.text+'">'+node.label+'</div>'+
+            '<div style="font-size:11px;color:'+sc.icon+';margin-top:2px">'+sc.label+'</div>'+
+            (status==="progress"?
+              '<div style="margin-top:5px;background:rgba(255,255,255,.1);border-radius:50px;height:4px;overflow:hidden"><div style="width:'+pct+'%;background:'+sc.border+';height:100%;border-radius:50px"></div></div>':
+            '')+
+          '</div>'+
+          (status==="done"?'<div style="font-size:22px">✅</div>':'' )+
+          (status==="pro"?'<div onclick="event.stopPropagation();showScreen(\'paywall\')" style="background:linear-gradient(135deg,#FFD60A,#FF9500);border:none;border-radius:8px;padding:5px 10px;font-size:10px;font-weight:800;color:#fff;cursor:pointer;flex-shrink:0">Sblocca</div>':'' );
+
+        if(status!=="locked"){
+          (function(n){
+            nodeEl.onclick=function(){
+              var cat3=CATS.find(function(c){return c.id===n.catId;});
+              if(cat3){
+                var les3=cat3.levels.find(function(l){return l.id===n.lesId;});
+                if(les3) startLesson(cat3,les3);
+              }
+            };
+            nodeEl.onmouseenter=function(){if(status!=="locked")this.style.transform="translateX(4px)";};
+            nodeEl.onmouseleave=function(){this.style.transform="translateX(0)";};
+          })(node);
+        }
+
+        // Connector line to next node
+        if(idx < branch.nodes.length-1){
+          var connector = document.createElement("div");
+          connector.style.cssText = "width:2px;height:8px;background:"+section.color+"33;margin:0 0 0 21px";
+          nodesContainer.appendChild(nodeEl);
+          nodesContainer.appendChild(connector);
+        } else {
+          nodesContainer.appendChild(nodeEl);
+        }
+      });
+
+      branchDiv.appendChild(nodesContainer);
+      secDiv.appendChild(branchDiv);
+    });
+
+    container.appendChild(secDiv);
+  });
 }
 
 /* ═══════════════ BIO EDITING ═══════════════ */
