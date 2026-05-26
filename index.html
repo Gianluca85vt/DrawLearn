@@ -467,10 +467,18 @@ button{font-family:'Baloo 2',sans-serif;cursor:pointer}
 
 <!-- FEED SOCIAL -->
 <div class="screen" id="scr-feed" style="background:#0F0E1A;min-height:100vh;padding-bottom:70px">
-  <!-- Feed top bar with search -->
-  <div style="background:#161525;border-bottom:1px solid rgba(255,255,255,.08);padding:10px 16px;display:flex;align-items:center;justify-content:space-between">
-    <span style="font-weight:800;font-size:18px;color:#fff">DrawLearn</span>
-    <button onclick="navTo('explore')" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer">🔍</button>
+  <!-- Feed top bar -->
+  <div style="background:#161525;border-bottom:1px solid rgba(255,255,255,.08);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10">
+    <span style="font-weight:800;font-size:20px;color:#fff">✏️ DrawLearn</span>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button onclick="navTo('explore')" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;font-size:17px;cursor:pointer">🔍</button>
+      <button onclick="navTo('chat')" style="position:relative;background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;font-size:17px;cursor:pointer">
+        💬<div id="feed-chat-badge" style="display:none;position:absolute;top:-2px;right:-2px;background:#e74c3c;border-radius:50%;width:14px;height:14px;font-size:8px;color:#fff;display:flex;align-items:center;justify-content:center"></div>
+      </button>
+      <button onclick="navTo('notif')" style="position:relative;background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;font-size:17px;cursor:pointer">
+        🔔<div id="feed-notif-badge" style="display:none;position:absolute;top:-2px;right:-2px;background:#e74c3c;border-radius:50%;width:14px;height:14px;font-size:8px;color:#fff;display:flex;align-items:center;justify-content:center"></div>
+      </button>
+    </div>
   </div>
   <!-- Stories bar -->
   <div style="background:#161525;border-bottom:1px solid rgba(255,255,255,.06);padding:10px 16px;overflow-x:auto;white-space:nowrap">
@@ -484,6 +492,9 @@ button{font-family:'Baloo 2',sans-serif;cursor:pointer}
       <div id="stories-row" style="display:inline-flex;gap:12px"></div>
     </div>
   </div>
+
+  <!-- Community Challenge Banner -->
+  <div id="challenge-banner" style="display:none"></div>
 
   <!-- Filter tabs -->
   <div style="display:flex;gap:8px;padding:10px 16px;background:#0F0E1A;border-bottom:1px solid rgba(255,255,255,.05)">
@@ -1313,8 +1324,11 @@ async function onLogin(){
       _unreadCount=n?n.length:0; updateNotifBadge();
     }).catch(function(){});
   }
+  var streak=checkAndUpdateStreak();
   renderFeed(); showScreen("feed"); navTo("feed");
-  showToast("Benvenuto, "+A.user.name.split(" ")[0]+"!","");
+  var greeting="Benvenuto, "+A.user.name.split(" ")[0]+"!";
+  if(streak>1) greeting+=" 🔥"+streak+" giorni!";
+  showToast(greeting,"");
 }
 async function doLogout(){
   localDel("dl:uid");
@@ -1354,6 +1368,7 @@ function renderHome(){
   if(profileBio) profileBio.textContent = A.user.bio||"Nessuna bio ancora — aggiungine una!";
   var statLes=document.getElementById("stat-lessons-done");
   if(statLes) statLes.textContent=done;
+  renderStreakBadge();
   var heroIcon=document.getElementById("hero-level-icon");
   if(heroIcon) heroIcon.textContent=lv.icon;
   var heroLvName=document.getElementById("hero-level-name");
@@ -1827,7 +1842,7 @@ function navTo(screen){
   else if(screen==="explore"){ showScreen("explore"); loadExplore(); setTimeout(function(){var si=document.getElementById("explore-search");if(si)si.focus();},100); }
   else showScreen(screen);
   // Update nav tabs
-  ["feed","home","profile","notif","chat"].forEach(function(s){
+  ["feed","home","profile"].forEach(function(s){
     var el=document.getElementById("nav-"+s);
     if(el) el.classList.toggle("active", s===screen);
   });
@@ -1844,6 +1859,7 @@ function hideBottomNav(){ document.getElementById("bottom-nav").style.display="n
 async function renderFeed(){
   var container = document.getElementById("feed-posts");
   if(!container) return;
+  loadChallengeBanner(); // Load challenge banner async
   container.innerHTML = '<div id="feed-loading" style="text-align:center;padding:40px;color:#9896B8"><div style="width:28px;height:28px;border:3px solid rgba(255,255,255,.1);border-top:3px solid #8B5CF6;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px"></div>Caricamento...</div>';
 
   if(!sbReady()){ container.innerHTML='<div style="text-align:center;padding:40px;color:#9896B8">Configura Supabase per vedere i post</div>'; return; }
@@ -2130,6 +2146,255 @@ async function deletePost(postId){
 
 
 
+
+
+/* ═══════════════ STREAK ═══════════════ */
+var STREAK_MULTIPLIERS = [
+  {days:1,  mult:1.0, label:"1x"},
+  {days:3,  mult:1.2, label:"1.2x"},
+  {days:7,  mult:1.5, label:"1.5x"},
+  {days:14, mult:1.8, label:"1.8x"},
+  {days:30, mult:2.0, label:"2x 🔥"},
+];
+
+function getStreakMultiplier(streak){
+  var m=STREAK_MULTIPLIERS[0];
+  for(var i=0;i<STREAK_MULTIPLIERS.length;i++){
+    if(streak>=STREAK_MULTIPLIERS[i].days) m=STREAK_MULTIPLIERS[i];
+  }
+  return m;
+}
+
+function checkAndUpdateStreak(){
+  var today = new Date().toISOString().slice(0,10);
+  var data = JSON.parse(localGet("dl:streak")||"{}");
+  var count = data.count||0;
+  var lastDate = data.last||"";
+  var maxStreak = data.max||0;
+  if(lastDate===today) return count; // Already done today
+  var yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+  if(lastDate===yesterday){
+    count++; // Consecutive day!
+  } else if(lastDate && lastDate!==today){
+    count=1; // Streak broken, restart
+  } else {
+    count=count||1;
+  }
+  maxStreak = Math.max(maxStreak, count);
+  localSet("dl:streak", JSON.stringify({count:count, last:today, max:maxStreak}));
+  // Save to Supabase
+  if(A.user&&sbReady()){
+    sbFetch("PATCH","dl_users?id=eq."+A.user.id,{body:{streak_count:count,streak_last:today,streak_max:maxStreak}}).catch(function(){});
+  }
+  return count;
+}
+
+function getStreakData(){
+  var data=JSON.parse(localGet("dl:streak")||"{}");
+  return {count:data.count||0, max:data.max||0, last:data.last||""};
+}
+
+function getStreakTokenBonus(baseTokens){
+  var s=getStreakData();
+  var m=getStreakMultiplier(s.count);
+  return Math.round(baseTokens*m.mult);
+}
+
+function renderStreakBadge(){
+  var s=getStreakData();
+  var today=new Date().toISOString().slice(0,10);
+  var active=s.last===today||s.last===new Date(Date.now()-86400000).toISOString().slice(0,10);
+  var m=getStreakMultiplier(s.count);
+  var el=document.getElementById("streak-badge");
+  if(!el) return;
+  if(s.count>0){
+    el.innerHTML=
+      '<div style="display:flex;align-items:center;gap:6px;background:'+(active?"rgba(255,107,0,.15)":"rgba(255,255,255,.05)")+';border:1px solid '+(active?"rgba(255,107,0,.3)":"rgba(255,255,255,.1)")+';border-radius:50px;padding:5px 12px;cursor:pointer" onclick="showStreakInfo()">'+
+        '<span style="font-size:16px">'+(active?"🔥":"💤")+'</span>'+
+        '<div>'+
+          '<div style="font-weight:800;font-size:13px;color:'+(active?"#FF6B00":"#9896B8")+'">'+s.count+' giorni</div>'+
+          '<div style="font-size:9px;color:#9896B8">multiplier '+m.label+'</div>'+
+        '</div>'+
+      '</div>';
+    el.style.display="block";
+  } else {
+    el.style.display="none";
+  }
+}
+
+function showStreakInfo(){
+  var s=getStreakData();
+  var m=getStreakMultiplier(s.count);
+  var today=new Date().toISOString().slice(0,10);
+  var doneToday=s.last===today;
+  var msg="🔥 Streak: "+s.count+" giorni consecutivi\n"+
+    "⭐ Record: "+s.max+" giorni\n"+
+    "🪙 Multiplier token: "+m.label+"\n\n"+
+    (doneToday?"✅ Hai già disegnato oggi! Torna domani.":"⚠️ Disegna almeno uno step oggi per non perdere lo streak!");
+  alert(msg);
+}
+
+
+/* ═══════════════ COMMUNITY CHALLENGE ═══════════════ */
+async function loadChallengeBanner(){
+  var container=document.getElementById("challenge-banner");
+  if(!container||!sbReady()) return;
+  try {
+    var challenges=await sbFetch("GET","dl_challenges",{filters:"active=eq.true",order:"created_at.desc",limit:1});
+    if(!challenges||!challenges.length){ container.style.display="none"; return; }
+    var c=challenges[0];
+    var daysLeft=Math.max(0,Math.ceil((new Date(c.end_date)-Date.now())/86400000));
+    // Count entries
+    var entries=await sbFetch("GET","dl_challenge_entries",{filters:"challenge_id=eq."+c.id,select:"id"});
+    var entryCount=entries?entries.length:0;
+    container.style.display="block";
+    container.innerHTML=
+      '<div style="background:linear-gradient(135deg,#1a1040,#2d1b69);border-radius:16px;margin:10px 16px;padding:14px 16px;border:1px solid rgba(139,92,246,.3)">'+
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'+
+          '<div style="display:flex;align-items:center;gap:8px">'+
+            '<div style="background:#8B5CF6;border-radius:6px;padding:3px 8px;font-size:9px;font-weight:800;color:#fff;letter-spacing:1px">SFIDA SETTIMANALE</div>'+
+            '<div style="font-size:10px;color:#9896B8">⏰ '+daysLeft+' giorni rimasti</div>'+
+          '</div>'+
+          '<div style="font-size:10px;color:#FFD60A;font-weight:700">🪙 +'+c.prize_tokens+' token</div>'+
+        '</div>'+
+        '<div style="font-weight:800;font-size:15px;color:#fff;margin-bottom:4px">'+c.title+'</div>'+
+        '<div style="font-size:12px;color:#9896B8;margin-bottom:10px">'+c.description+'</div>'+
+        '<div style="display:flex;align-items:center;gap:8px">'+
+          '<button onclick="joinChallenge(\"'+c.id+'\")" style="flex:1;padding:8px;background:linear-gradient(135deg,#8B5CF6,#6d28d9);border:none;border-radius:8px;color:#fff;font-weight:800;font-size:12px;cursor:pointer">✏️ Partecipa</button>'+
+          '<button onclick="viewChallengeEntries(\"'+c.id+'\",\"'+c.title+'\")" style="padding:8px 12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;font-size:12px;cursor:pointer">'+entryCount+' partecipanti</button>'+
+        '</div>'+
+      '</div>';
+  } catch(e){ container.style.display="none"; }
+}
+
+var _activeChallengeId=null;
+function joinChallenge(challengeId){
+  if(!A.user){ showToast("Accedi per partecipare",""); return; }
+  _activeChallengeId=challengeId;
+  // Reuse the new post flow but mark as challenge entry
+  showNewPost();
+  showToast("Scatta il tuo disegno e pubblicalo!","🎨");
+}
+
+async function viewChallengeEntries(challengeId, title){
+  var entries=await sbFetch("GET","dl_challenge_entries",{
+    filters:"challenge_id=eq."+challengeId,
+    order:"votes.desc",
+    limit:20
+  });
+  if(!entries||!entries.length){ showToast("Nessuna partecipazione ancora — sii il primo!",""); return; }
+  // Show in a modal
+  var modal=document.createElement("div");
+  modal.style.cssText="position:fixed;inset:0;background:#0F0E1A;z-index:990;overflow-y:auto;padding-bottom:30px";
+  modal.setAttribute('data-challenge-modal','1');
+  var header='<div style="background:#161525;padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5">'+
+    '<button onclick="closeChallengeModal()" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;color:#fff;font-size:16px;cursor:pointer">←</button>'+
+    '<span style="font-weight:800;font-size:15px;color:#fff">🏆 '+title+'</span></div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 12px 0">';
+  modal.innerHTML=header+entries.map(function(e,i){
+    return '<div style="background:#161525;border-radius:12px;overflow:hidden">'+
+      '<div style="position:relative"><img src="'+e.image_url+'" style="width:100%;aspect-ratio:1;object-fit:cover"/>'+
+      (i<3?'<div style="position:absolute;top:6px;left:6px;background:'+(i===0?"#FFD60A":i===1?"#C0C0C0":"#CD7F32")+';border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px">'+( i+1)+'</div>':'')+
+      '</div>'+
+      '<div style="padding:8px 10px;display:flex;align-items:center;justify-content:space-between">'+
+        '<div style="font-size:12px;color:#fff;font-weight:700">'+e.user_avatar+' '+e.user_name+'</div>'+
+        '<button onclick="voteChallengeEntry(\"'+e.id+'\",this)" style="background:rgba(255,100,100,.15);border:1px solid rgba(255,100,100,.3);border-radius:50px;padding:3px 10px;color:#ff6464;font-size:11px;font-weight:700;cursor:pointer">❤️ '+e.votes+'</button>'+
+      '</div></div>';
+  }).join("")+'</div>';
+  document.body.appendChild(modal);
+}
+
+function closeChallengeModal(){
+  var modals=document.querySelectorAll('[data-challenge-modal]');
+  modals.forEach(function(m){m.remove();});
+  var all=document.querySelectorAll('div[style*="z-index: 990"]');
+  all.forEach(function(m){if(m.querySelector('[onclick*="closeChallengeModal"]'))m.remove();});
+}
+async function voteChallengeEntry(entryId, btn){
+  if(!A.user){ showToast("Accedi per votare",""); return; }
+  try {
+    await sbFetch("POST","dl_challenge_votes",{body:{user_id:A.user.id,entry_id:entryId}});
+    var entry=await sbFetch("GET","dl_challenge_entries",{filters:"id=eq."+entryId,select:"votes"});
+    if(entry&&entry[0]) await sbFetch("PATCH","dl_challenge_entries?id=eq."+entryId,{body:{votes:(entry[0].votes||0)+1}});
+    if(btn){ btn.textContent="❤️ "+(parseInt(btn.textContent.replace("❤️ ","")||"0")+1); btn.style.background="rgba(255,100,100,.4)"; }
+    showToast("Voto registrato!","❤️");
+  } catch(e){ showToast("Hai già votato questo!",""); }
+}
+
+
+/* ═══════════════ SKILL TREE ═══════════════ */
+var _skillView="list"; // "list" | "tree"
+
+function toggleSkillView(){
+  _skillView = _skillView==="list"?"tree":"list";
+  var btn=document.getElementById("skill-view-btn");
+  if(btn) btn.textContent = _skillView==="list"?"🌳 Skill Tree":"📋 Lista";
+  renderHome();
+}
+
+function renderSkillTree(catGrid){
+  catGrid.style.display="none";
+  var treeEl=document.getElementById("skill-tree-view");
+  if(!treeEl){
+    treeEl=document.createElement("div");
+    treeEl.id="skill-tree-view";
+    catGrid.parentNode.insertBefore(treeEl,catGrid.nextSibling);
+  }
+  treeEl.style.display="block";
+  treeEl.innerHTML="";
+
+  CATS.forEach(function(cat){
+    var bg=BG[cat.id]||"#f5f5f5";
+    var ac=AC[cat.id]||"#555";
+    var section=document.createElement("div");
+    section.style.marginBottom="20px";
+    var title=document.createElement("div");
+    title.style.cssText="display:flex;align-items:center;gap:8px;padding:8px 4px;margin-bottom:10px";
+    title.innerHTML='<span style="font-size:20px">'+cat.icon+'</span><span style="font-weight:800;font-size:15px;color:#1C1B2E">'+cat.label+'</span>';
+    section.appendChild(title);
+
+    // Tree nodes in a horizontal flow
+    var row=document.createElement("div");
+    row.style.cssText="display:flex;align-items:center;gap:0;overflow-x:auto;padding:4px 0";
+
+    cat.levels.forEach(function(les,i){
+      var k=pk(cat.id,les.id);
+      var prog=A.progress[k]||{};
+      var completed=prog.completed;
+      var inProgress=prog.step>0&&!completed;
+      var locked=!les.free&&!A.pro&&!isLessonUnlockedByToken(cat.id,les.id);
+      var prevCompleted=i===0||(A.progress[pk(cat.id,cat.levels[i-1].id)]&&A.progress[pk(cat.id,cat.levels[i-1].id)].completed);
+      var accessible=les.free||A.pro||prevCompleted;
+
+      // Connector line (except first)
+      if(i>0){
+        var line=document.createElement("div");
+        line.style.cssText="width:24px;height:3px;flex-shrink:0;background:"+(prevCompleted?ac:"#e0ddf5")+";position:relative;top:0";
+        row.appendChild(line);
+      }
+
+      // Node
+      var node=document.createElement("div");
+      var nodeColor=completed?ac:(inProgress?ac+"88":(accessible?bg:"#f0f0f0"));
+      node.style.cssText="width:72px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:"+(accessible?"pointer":"default")+";opacity:"+(accessible?1:0.5);
+      node.innerHTML=
+        '<div style="width:56px;height:56px;border-radius:50%;background:'+nodeColor+';border:3px solid '+(completed?ac:(inProgress?ac:"#e0ddf5"))+';display:flex;align-items:center;justify-content:center;font-size:24px;position:relative;box-shadow:'+(completed?"0 4px 12px "+ac+"44":"none")+'">'+
+          (locked?"🔒":les.icon)+
+          (completed?'<div style="position:absolute;bottom:-2px;right:-2px;width:18px;height:18px;background:'+ac+';border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:900">✓</div>':'' )+
+        '</div>'+
+        '<div style="font-size:9px;font-weight:700;color:#4A4868;text-align:center;line-height:1.2;max-width:64px">'+les.title.split(" ").slice(0,2).join(" ")+'</div>'+
+        '<div style="font-size:8px;color:'+(completed?"#3DBE7A":(inProgress?ac:"#9896B8"))+'">'+
+          (completed?"✅ Fatto":(inProgress?Math.round((prog.step/les.steps.length)*100)+"%":"▶ Inizia"))+
+        '</div>';
+      if(accessible){
+        (function(c,l){ node.onclick=function(){startLesson(c,l);}; })(cat,les);
+      }
+      row.appendChild(node);
+    });
+    section.appendChild(row);
+    treeEl.appendChild(section);
+  });
+}
 
 /* ═══════════════ BIO EDITING ═══════════════ */
 function openBioEdit(){
@@ -2483,14 +2748,21 @@ async function loadNotifications(){
 }
 
 function updateNotifBadge(){
-  var badge = document.getElementById("notif-badge");
-  if(!badge) return;
-  if(_unreadCount > 0){
-    badge.style.display="flex";
-    badge.textContent = _unreadCount > 9 ? "9+" : _unreadCount;
-  } else {
-    badge.style.display="none";
-  }
+  var count = _unreadCount;
+  ["notif-badge","feed-notif-badge"].forEach(function(id){
+    var b=document.getElementById(id);
+    if(!b) return;
+    if(count>0){b.style.display="flex";b.textContent=count>9?"9+":count;}
+    else b.style.display="none";
+  });
+}
+function updateChatBadge(count){
+  ["chat-badge","feed-chat-badge"].forEach(function(id){
+    var b=document.getElementById(id);
+    if(!b) return;
+    if(count>0){b.style.display="flex";b.textContent=count>9?"9+":count;}
+    else b.style.display="none";
+  });
 }
 
 async function markRead(notifId){
@@ -2843,6 +3115,17 @@ function setTokens(n){
   localSet("dl:tokens", A.tokens);
   if(sbReady()) db.set("dl:tokens", A.tokens).catch(function(){});
   updateTokenUI();
+  // Apply skill tree view if active
+  if(_skillView==="tree"){
+    var cg=document.getElementById("cat-grid");
+    if(cg) renderSkillTree(cg);
+    // Remove tree if switching back to list
+  } else {
+    var treeEl=document.getElementById("skill-tree-view");
+    if(treeEl) treeEl.style.display="none";
+    var cg2=document.getElementById("cat-grid");
+    if(cg2) cg2.style.display="grid";
+  }
 }
 
 function updateTokenUI(){
@@ -3597,18 +3880,8 @@ init();
       <span class="nav-label">Impara</span>
     </button>
     <button class="nav-tab" id="nav-new" onclick="showNewPost()" style="position:relative">
-      <div style="width:44px;height:44px;background:linear-gradient(135deg,#8B5CF6,#3DBE7A);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;margin-top:-14px;box-shadow:0 4px 16px rgba(139,92,246,.4)">➕</div>
-      <span class="nav-label" style="margin-top:2px">Pubblica</span>
-    </button>
-    <button class="nav-tab" id="nav-notif" onclick="navTo('notif')" style="position:relative">
-      <span class="nav-icon">🔔</span>
-      <div id="notif-badge" style="display:none;position:absolute;top:4px;right:calc(50% - 18px);background:#e74c3c;border-radius:50px;min-width:16px;height:16px;font-size:9px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 4px"></div>
-      <span class="nav-label">Notifiche</span>
-    </button>
-    <button class="nav-tab" id="nav-chat" onclick="navTo('chat')" style="position:relative">
-      <span class="nav-icon">💬</span>
-      <div id="chat-badge" style="display:none;position:absolute;top:4px;right:calc(50% - 18px);background:#e74c3c;border-radius:50px;min-width:16px;height:16px;font-size:9px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 4px"></div>
-      <span class="nav-label">Chat</span>
+      <div style="width:48px;height:48px;background:linear-gradient(135deg,#8B5CF6,#3DBE7A);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin-top:-16px;box-shadow:0 4px 20px rgba(139,92,246,.5)">➕</div>
+      <span class="nav-label" style="margin-top:3px">Post</span>
     </button>
     <button class="nav-tab" id="nav-profile" onclick="navTo('profile')">
       <span class="nav-icon" id="nav-avatar-icon">👤</span>
