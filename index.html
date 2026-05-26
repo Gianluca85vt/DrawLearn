@@ -826,6 +826,22 @@ button{font-family:'Baloo 2',sans-serif;cursor:pointer}
   <div id="skill-tree-container" style="padding:20px 16px;max-width:700px;margin:0 auto"></div>
 </div>
 
+
+<!-- SFIDE SCREEN -->
+<div class="screen" id="scr-challenges" style="background:#0F0E1A;min-height:100vh;padding-bottom:80px">
+  <div style="background:#161525;border-bottom:1px solid rgba(255,255,255,.08);padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10">
+    <button onclick="navTo('feed')" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;color:#fff;font-size:16px;cursor:pointer">←</button>
+    <span style="font-weight:800;font-size:18px;color:#fff;flex:1">🏆 Sfide della Community</span>
+  </div>
+  <!-- Tabs -->
+  <div style="display:flex;gap:0;background:#161525;border-bottom:1px solid rgba(255,255,255,.08)">
+    <button id="cht-active" onclick="setChallengeTab('active')" style="flex:1;padding:10px;background:none;border:none;border-bottom:2px solid #8B5CF6;color:#fff;font-weight:700;font-size:13px;cursor:pointer">Attive</button>
+    <button id="cht-entries" onclick="setChallengeTab('entries')" style="flex:1;padding:10px;background:none;border:none;border-bottom:2px solid transparent;color:#9896B8;font-weight:700;font-size:13px;cursor:pointer">Partecipazioni</button>
+    <button id="cht-past" onclick="setChallengeTab('past')" style="flex:1;padding:10px;background:none;border:none;border-bottom:2px solid transparent;color:#9896B8;font-weight:700;font-size:13px;cursor:pointer">Passate</button>
+  </div>
+  <div id="challenges-content" style="max-width:640px;margin:0 auto;padding:16px"></div>
+</div>
+
 <!-- DRAWPASS SHOP -->
 <div class="screen" id="scr-drawpass" style="background:#F7F5FF;padding-bottom:40px">
   <div style="background:linear-gradient(135deg,#1C1B2E,#2d2a4a);padding:20px 20px 30px">
@@ -836,7 +852,7 @@ button{font-family:'Baloo 2',sans-serif;cursor:pointer}
         <h1 style="font-weight:800;font-size:24px;color:#fff;margin-bottom:4px">DrawPass</h1>
         <p style="color:#9896B8;font-size:12px">Token per sbloccare lezioni singole</p>
         <div style="background:rgba(255,214,10,.15);border:2px solid rgba(255,214,10,.3);border-radius:50px;padding:12px 28px;display:inline-flex;align-items:center;gap:10px;margin-top:12px">
-          <span style="font-size:24px">🪙</span>
+          <span style="font-size:24px"><svg width="22" height="22" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 1L23 10L12 23L1 10Z" fill="#FFD60A" stroke="#C8A000" stroke-width="1.5"/><path d="M12 8L18 13L12 23L6 13Z" fill="#C8A000"/><line x1="12" y1="15" x2="12" y2="23" stroke="#1C1B2E" stroke-width="2" stroke-linecap="round"/></svg></span>
           <div>
             <div id="dp-balance" style="font-weight:800;font-size:28px;color:#FFD60A;line-height:1">0</div>
             <div style="color:#9896B8;font-size:11px;text-align:center">DrawToken</div>
@@ -1953,6 +1969,7 @@ function navTo(screen){
   else if(screen==="search"){ showScreen("search"); loadTrending(); setTimeout(function(){var si=document.getElementById("search-input");if(si)si.focus();},100); }
   else if(screen==="skilltree"){ renderSkillTreeV2(); showScreen("skilltree"); }
   else if(screen==="explore"){ showScreen("explore"); loadExplore(); setTimeout(function(){var si=document.getElementById("explore-search");if(si)si.focus();},100); }
+  else if(screen==="challenges"){ showScreen("challenges"); loadChallengeContent(); showBottomNav(); }
   else showScreen(screen);
   // Update nav tabs
   ["feed","home","profile","chat"].forEach(function(s){
@@ -2035,39 +2052,122 @@ async function renderFeed(){
 
 function buildPostCard(post, liked){
   var timeAgo = getTimeAgo(new Date(post.created_at));
-  var div = document.createElement("div");
-  div.style.cssText = "background:#161525;margin-bottom:2px;border-bottom:1px solid rgba(255,255,255,.05)";
-  div.innerHTML =
-    // Header
-    '<div style="display:flex;align-items:center;gap:10px;padding:12px 16px 8px">'+
-      '<div onclick="openPubProfile(\"'+post.user_id+'\",\"'+post.user_name+'\")" style="width:38px;height:38px;border-radius:50%;background:#2d2a4a;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;cursor:pointer">'+post.user_avatar+'</div>'+
-      '<div style="flex:1">'+
-        '<div onclick="openPubProfile(\"'+post.user_id+'\",\"'+post.user_name+'\")" style="font-weight:800;font-size:13px;color:#fff;cursor:pointer">'+post.user_name+'</div>'+
-        '<div style="font-size:10px;color:#9896B8">'+timeAgo+(post.location?' · 📍'+post.location:'')+(post.lesson_id?' · 🎨 lezione':'')+'</div>'+
-      '</div>'+
-      (A.user&&post.user_id===A.user.id?'<button onclick="deletePost(\"'+post.id+'\")" style="background:none;border:none;color:#9896B8;font-size:18px;cursor:pointer">⋯</button>':'' )+
-    '</div>'+
-    // Image
-    '<div style="cursor:pointer" onclick="openPostDetail(\"'+post.id+'\")">'+
-      '<img src="'+post.image_url+'" style="width:100%;display:block;max-height:480px;object-fit:cover" loading="lazy"/>'+
-    '</div>'+
-    // Actions
-    '<div style="padding:10px 16px">'+
-      '<div style="display:flex;align-items:center;gap:16px;margin-bottom:8px">'+
-        '<button id="like-btn-'+post.id+'" onclick="toggleLike(\"'+post.id+'\")" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;color:'+( liked?'#e74c3c':'#9896B8')+';font-weight:700;font-size:13px">'+
-          '<span style="font-size:20px">'+( liked?'❤️':'🤍')+'</span> <span id="likes-'+post.id+'">'+post.likes_count+'</span>'+
-        '</button>'+
-        '<button onclick="openPostDetail(\"'+post.id+'\")" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;color:#9896B8;font-weight:700;font-size:13px">'+
-          '<span style="font-size:20px">💬</span> <span>'+post.comments_count+'</span>'+
-        '</button>'+
-        '<button onclick="sharePostNative(\"'+post.image_url+'\",\"'+( post.caption||'')+'\")" style="background:none;border:none;cursor:pointer;color:#9896B8;font-size:18px">↗️</button>'+
-        '<button onclick="shareResult(\"'+post.image_url+'\",\"'+( post.caption||'')+'\")" style="background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.3);border-radius:50px;padding:3px 9px;color:#8B5CF6;font-size:10px;font-weight:700;cursor:pointer">🎨 Story</button>'+
-        '<button onclick="openRedline(\"'+post.id+'\",\"'+post.image_url+'\")" style="background:rgba(231,76,60,.15);border:1px solid rgba(231,76,60,.3);border-radius:50px;padding:4px 10px;color:#e74c3c;font-weight:700;font-size:11px;cursor:pointer;margin-left:auto">✏️ Redline</button>'+
-      '</div>'+
-      (post.caption?'<div style="font-size:13px;color:#fff;line-height:1.5;margin-bottom:4px"><span style="font-weight:800">'+post.user_name+'</span> '+post.caption+'</div>':'')+
-      (post.tags?'<div style="font-size:12px;color:#8B5CF6;margin-top:3px">'+post.tags+'</div>':'')+
-    '</div>';
-  return div;
+  var card = document.createElement("div");
+  card.style.cssText="background:#161525;margin-bottom:2px;border-bottom:1px solid rgba(255,255,255,.05)";
+
+  // ── Header ──
+  var header = document.createElement("div");
+  header.style.cssText="display:flex;align-items:center;gap:10px;padding:12px 16px 8px";
+
+  var avatar = document.createElement("div");
+  avatar.style.cssText="width:38px;height:38px;border-radius:50%;background:#2d2a4a;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;cursor:pointer";
+  avatar.textContent = post.user_avatar||"👤";
+  avatar.onclick = function(){openPubProfile(post.user_id, post.user_name);};
+
+  var userInfo = document.createElement("div");
+  userInfo.style.cssText="flex:1";
+  var userName = document.createElement("div");
+  userName.style.cssText="font-weight:800;font-size:13px;color:#fff;cursor:pointer";
+  userName.textContent = post.user_name;
+  userName.onclick = function(){openPubProfile(post.user_id, post.user_name);};
+  var userMeta = document.createElement("div");
+  userMeta.style.cssText="font-size:10px;color:#9896B8;font-weight:500";
+  userMeta.textContent = timeAgo + (post.location?" · 📍"+post.location:"");
+  userInfo.appendChild(userName);
+  userInfo.appendChild(userMeta);
+  header.appendChild(avatar);
+  header.appendChild(userInfo);
+
+  if(A.user && post.user_id === A.user.id){
+    var delBtn = document.createElement("button");
+    delBtn.style.cssText="background:none;border:none;color:#9896B8;font-size:18px;cursor:pointer";
+    delBtn.textContent="⋯";
+    delBtn.onclick = function(){deletePost(post.id);};
+    header.appendChild(delBtn);
+  }
+  card.appendChild(header);
+
+  // ── Image ──
+  var imgWrap = document.createElement("div");
+  imgWrap.style.cursor="pointer";
+  imgWrap.onclick = function(){openPostDetail(post.id);};
+  var img = document.createElement("img");
+  img.src = post.image_url;
+  img.style.cssText="width:100%;display:block;max-height:480px;object-fit:cover";
+  img.loading="lazy";
+  imgWrap.appendChild(img);
+  card.appendChild(imgWrap);
+
+  // ── Actions ──
+  var actions = document.createElement("div");
+  actions.style.cssText="padding:10px 16px";
+
+  var btnRow = document.createElement("div");
+  btnRow.style.cssText="display:flex;align-items:center;gap:14px;margin-bottom:8px";
+
+  // Like button
+  var likeBtn = document.createElement("button");
+  likeBtn.id = "like-btn-"+post.id;
+  likeBtn.setAttribute("data-liked", liked?"1":"0");
+  likeBtn.style.cssText="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;color:"+(liked?"#e74c3c":"#9896B8")+";font-weight:700;font-size:13px;padding:0";
+  likeBtn.innerHTML = "<span style='font-size:20px'>"+(liked?"❤️":"🤍")+"</span> <span id='likes-"+post.id+"'>"+post.likes_count+"</span>";
+  likeBtn.onclick = function(){toggleLike(post.id);};
+  btnRow.appendChild(likeBtn);
+
+  // Comment button
+  var cmtBtn = document.createElement("button");
+  cmtBtn.style.cssText="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;color:#9896B8;font-weight:700;font-size:13px;padding:0";
+  cmtBtn.innerHTML = "<span style='font-size:20px'>💬</span> <span>"+post.comments_count+"</span>";
+  cmtBtn.onclick = function(){openPostDetail(post.id);};
+  btnRow.appendChild(cmtBtn);
+
+  // Redline button (for users with 3+ lessons)
+  var done=Object.values(A.progress||{}).filter(function(v){return v.completed;}).length;
+  if(done>=3 && A.user && post.user_id!==A.user.id){
+    var rlBtn = document.createElement("button");
+    rlBtn.style.cssText="background:rgba(231,76,60,.12);border:1px solid rgba(231,76,60,.3);border-radius:50px;padding:4px 10px;color:#e74c3c;font-size:11px;font-weight:700;cursor:pointer";
+    rlBtn.textContent="✏️ Correggi";
+    rlBtn.title="Redline: apre il disegno con un canvas sopra. Disegna le tue correzioni in rosso (come fa un insegnante d'arte) e pubblicale come risposta.";
+    rlBtn.onclick = function(){openRedline(post.id, post.image_url);};
+    btnRow.appendChild(rlBtn);
+  }
+
+  // Share + Story (right side)
+  var rightBtns = document.createElement("div");
+  rightBtns.style.cssText="margin-left:auto;display:flex;align-items:center;gap:8px";
+
+  var shareBtn = document.createElement("button");
+  shareBtn.style.cssText="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;width:32px;height:32px";
+  shareBtn.innerHTML="<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='#9896B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='18' cy='5' r='3'/><circle cx='6' cy='12' r='3'/><circle cx='18' cy='19' r='3'/><line x1='8.59' y1='13.51' x2='15.42' y2='17.49'/><line x1='15.41' y1='6.51' x2='8.59' y2='10.49'/></svg>";
+  shareBtn.title="Condividi";
+  shareBtn.onclick = function(){sharePostNative(post.image_url, post.caption||"");};
+  rightBtns.appendChild(shareBtn);
+
+  var storyBtn = document.createElement("button");
+  storyBtn.style.cssText="background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.3);border-radius:50px;padding:4px 10px;color:#8B5CF6;font-size:11px;font-weight:700;cursor:pointer";
+  storyBtn.innerHTML="<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' xmlns='http://www.w3.org/2000/svg'><rect x='3' y='3' width='18' height='18' rx='3'/><path d='M8 12l3 3 5-5'/></svg> TikTok";
+  storyBtn.title="Genera una card 9:16 con il disegno + watermark DrawBound pronta da condividere su TikTok, Instagram Stories o Reels";
+  storyBtn.onclick = function(){shareResult(post.image_url, post.caption||"");};
+  rightBtns.appendChild(storyBtn);
+
+  btnRow.appendChild(rightBtns);
+  actions.appendChild(btnRow);
+
+  // Caption + Tags
+  if(post.caption){
+    var cap = document.createElement("div");
+    cap.style.cssText="font-size:13px;color:#fff;line-height:1.5;margin-bottom:3px";
+    cap.innerHTML="<span style='font-weight:800'>"+post.user_name+"</span> "+post.caption;
+    actions.appendChild(cap);
+  }
+  if(post.tags){
+    var tags = document.createElement("div");
+    tags.style.cssText="font-size:12px;color:#8B5CF6;margin-top:2px;font-weight:500";
+    tags.textContent=post.tags;
+    actions.appendChild(tags);
+  }
+  card.appendChild(actions);
+  return card;
 }
 
 function getTimeAgo(date){
@@ -2083,12 +2183,14 @@ async function toggleLike(postId){
   if(!A.user){ showToast("Accedi per mettere like",""); return; }
   var btn = document.getElementById("like-btn-"+postId);
   var countEl = document.getElementById("likes-"+postId);
-  var isLiked = btn&&btn.style.color==="#e74c3c"||btn&&btn.querySelector("span").textContent==="❤️";
+  var isLiked = btn&&btn.getAttribute("data-liked")==="1";
   // Optimistic update
+  if(btn){ btn.setAttribute("data-liked", isLiked?"0":"1"); }
   if(btn){
     btn.style.color = isLiked?"#9896B8":"#e74c3c";
-    btn.querySelector("span").textContent = isLiked?"🤍":"❤️";
-    if(countEl) countEl.textContent = parseInt(countEl.textContent)+(isLiked?-1:1);
+    var iconSpan=btn.querySelector("span");
+    if(iconSpan) iconSpan.textContent = isLiked?"🤍":"❤️";
+    if(countEl) countEl.textContent = parseInt(countEl.textContent||"0")+(isLiked?-1:1);
   }
   try {
     if(isLiked){
@@ -2420,7 +2522,7 @@ async function loadChallengeBanner(){
         '<div style="font-weight:800;font-size:15px;color:#fff;margin-bottom:4px">'+c.title+'</div>'+
         '<div style="font-size:12px;color:#9896B8;margin-bottom:10px">'+c.description+'</div>'+
         '<div style="display:flex;align-items:center;gap:8px">'+
-          '<button onclick="joinChallenge(\"'+c.id+'\")" style="flex:1;padding:8px;background:linear-gradient(135deg,#8B5CF6,#6d28d9);border:none;border-radius:8px;color:#fff;font-weight:800;font-size:12px;cursor:pointer">✏️ Partecipa</button>'+
+          '<button onclick="navTo(\'challenges\')" style="flex:1;padding:8px;background:linear-gradient(135deg,#8B5CF6,#6d28d9);border:none;border-radius:8px;color:#fff;font-weight:800;font-size:12px;cursor:pointer">✏️ Partecipa</button>'+
           '<button onclick="viewChallengeEntries(\"'+c.id+'\",\"'+c.title+'\")" style="padding:8px 12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;font-size:12px;cursor:pointer">'+entryCount+' partecipanti</button>'+
         '</div>'+
       '</div>';
@@ -2431,15 +2533,117 @@ var _activeChallengeId=null;
 function joinChallenge(challengeId){
   if(!A.user){ showToast("Accedi per partecipare",""); return; }
   _activeChallengeId=challengeId;
-  showNewPost();
-  // Pre-fill caption with challenge tag
-  setTimeout(function(){
-    var cap=document.getElementById("post-caption");
-    var tags=document.getElementById("post-tags");
-    if(cap) cap.value="La mia versione per la sfida DrawBound!";
-    if(tags) tags.value="#DrawBound #DTIYS #sfida";
-    showToast("Scatta il tuo disegno e pubblica!","🎨");
-  },300);
+  openChallengeSubmitModal(challengeId);
+}
+
+async function openChallengeSubmitModal(challengeId){
+  // Load challenge details
+  var challenges = await sbFetch("GET","dl_challenges",{filters:"id=eq."+challengeId});
+  var ch = challenges&&challenges[0];
+
+  var modal=document.createElement("div");
+  modal.setAttribute("data-challenge-submit","1");
+  modal.style.cssText="position:fixed;inset:0;background:#0F0E1A;z-index:988;overflow-y:auto;display:flex;flex-direction:column";
+
+  var daysLeft = ch ? Math.max(0,Math.ceil((new Date(ch.end_date)-Date.now())/86400000)) : 0;
+
+  modal.innerHTML=
+    // Header
+    "<div style='background:#161525;padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5;border-bottom:1px solid rgba(255,255,255,.08)'>"+
+      "<button onclick='closeChallengeSubmit()' style='background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;color:#fff;font-size:16px;cursor:pointer'>←</button>"+
+      "<div style='flex:1'><div style='font-weight:800;font-size:15px;color:#fff'>🏆 Partecipa alla Sfida</div>"+
+      "<div style='font-size:10px;color:#9896B8;font-weight:500'>"+daysLeft+" giorni rimasti · "+( ch?ch.prize_tokens:5)+" token in palio</div></div>"+
+    "</div>"+
+    // Challenge brief
+    "<div style='padding:16px;max-width:600px;margin:0 auto;width:100%'>"+
+      "<div style='background:linear-gradient(135deg,rgba(139,92,246,.15),rgba(61,190,122,.08));border:1px solid rgba(139,92,246,.3);border-radius:16px;padding:16px;margin-bottom:16px'>"+
+        "<div style='font-weight:800;font-size:16px;color:#fff;margin-bottom:6px'>"+(ch?ch.title:"Sfida settimanale")+"</div>"+
+        "<div style='font-size:13px;color:#9896B8;line-height:1.6;font-weight:500'>"+(ch?ch.description:"")+"</div>"+
+      "</div>"+
+      // How it works
+      "<div style='margin-bottom:16px'>"+
+        "<div style='font-size:11px;font-weight:800;color:#9896B8;letter-spacing:1px;margin-bottom:10px'>COME PARTECIPARE</div>"+
+        ["1️⃣  Disegna la tua versione del soggetto (carta, tablet, qualsiasi cosa)",
+         "2️⃣  Fotografa o esporta il disegno",
+         "3️⃣  Caricalo qui sotto",
+         "4️⃣  La community vota — i top 3 vincono token!"].map(function(s){
+          return "<div style='display:flex;align-items:flex-start;gap:8px;margin-bottom:8px'><span style='font-size:14px'>"+s.slice(0,2)+"</span><span style='font-size:13px;color:#e0ddf5;font-weight:500'>"+s.slice(3)+"</span></div>";
+        }).join("")+
+      "</div>"+
+      // Upload area
+      "<div id='challenge-img-preview' onclick='openChallengePicker()' style='background:rgba(255,255,255,.04);border:2px dashed rgba(139,92,246,.4);border-radius:16px;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;margin-bottom:14px;overflow:hidden;position:relative;max-width:400px;margin-left:auto;margin-right:auto'>"+
+        "<div id='challenge-img-placeholder'><div style='font-size:48px;margin-bottom:8px'>🎨</div><div style='color:#9896B8;font-size:13px;font-weight:600'>Tocca per caricare il tuo disegno</div></div>"+
+        "<img id='challenge-img-el' style='display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0'/>"+
+      "</div>"+
+      "<input type='file' id='challenge-img-input' accept='image/*' style='display:none'/>"+
+      "<button onclick='submitChallengeEntry()' style='width:100%;padding:14px;background:linear-gradient(135deg,#8B5CF6,#6d28d9);border:none;border-radius:12px;color:#fff;font-weight:800;font-size:15px;cursor:pointer;margin-bottom:10px'>🚀 Pubblica la mia versione</button>"+
+      "<button onclick='closeChallengeSubmit()' style='width:100%;padding:10px;background:none;border:none;color:#9896B8;font-size:12px;cursor:pointer'>Annulla</button>"+
+    "</div>";
+
+  document.body.appendChild(modal);
+  // Attach file input handler after DOM insertion
+  var fi=document.getElementById("challenge-img-input");
+  if(fi) fi.onchange=onChallengeImageSelected;
+  hideBottomNav();
+}
+
+function openChallengePicker(){
+  var fi=document.getElementById("challenge-img-input");
+  if(fi)fi.click();
+}
+function closeChallengeSubmit(){
+  var m=document.querySelector("[data-challenge-submit]");
+  if(m)m.remove();
+  showBottomNav();
+}
+var _challengeImageFile=null;
+function onChallengeImageSelected(e){
+  var file=e.target.files[0]; if(!file) return;
+  _challengeImageFile=file;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    var img=document.getElementById("challenge-img-el");
+    var ph=document.getElementById("challenge-img-placeholder");
+    if(img){img.src=ev.target.result;img.style.display="block";}
+    if(ph)ph.style.display="none";
+  };
+  reader.readAsDataURL(file);
+}
+
+async function submitChallengeEntry(){
+  if(!_challengeImageFile){showToast("Carica prima il tuo disegno!","");return;}
+  var btn=document.querySelector("[data-challenge-submit] button");
+  var submitBtns=document.querySelectorAll("[data-challenge-submit] button");
+  if(submitBtns[submitBtns.length-2]){submitBtns[submitBtns.length-2].textContent="Caricamento...";submitBtns[submitBtns.length-2].disabled=true;}
+  try {
+    var ext=_challengeImageFile.name.split(".").pop()||"jpg";
+    var path="Posts/challenge-"+A.user.id+"-"+Date.now()+"."+ext;
+    var imageUrl=await sbUpload("Posts",path,_challengeImageFile);
+    if(!imageUrl) throw new Error("Upload fallito");
+    // Save challenge entry
+    await sbFetch("POST","dl_challenge_entries",{body:{
+      challenge_id:_activeChallengeId,user_id:A.user.id,user_name:A.user.name,
+      user_avatar:A.user.avatar||"👤",image_url:imageUrl,votes:0,
+      created_at:new Date().toISOString()
+    }});
+    // Also publish as post
+    await sbFetch("POST","dl_posts",{body:{
+      user_id:A.user.id,user_name:A.user.name,user_avatar:A.user.avatar||"👤",
+      image_url:imageUrl,caption:"La mia versione per la sfida DrawBound! 🏆",
+      tags:"#DrawBound #DTIYS #sfida",likes_count:0,comments_count:0,
+      created_at:new Date().toISOString()
+    }});
+    _challengeImageFile=null;
+    _activeChallengeId=null;
+    var m=document.querySelector("[data-challenge-submit]");
+    if(m)m.remove();
+    showBottomNav();
+    showToast("Partecipazione inviata! 🏆 Buona fortuna!","");
+    navTo("feed");
+  } catch(e){
+    showToast("Errore: "+e.message,"");
+    if(submitBtns[submitBtns.length-2]){submitBtns[submitBtns.length-2].textContent="🚀 Pubblica la mia versione";submitBtns[submitBtns.length-2].disabled=false;}
+  }
 }
 
 async function viewChallengeEntries(challengeId, title){
@@ -2573,7 +2777,7 @@ var _redlinePostImg = null;
 
 function openRedline(postId, imageUrl){
   if(!A.user){ showToast("Accedi per fare un redline",""); return; }
-  var done = Object.values(A.progress).filter(function(v){return v.completed;}).length;
+  var done = Object.values(A.progress||{}).filter(function(v){return v.completed;}).length;
   if(done < 3){ showToast("Completa almeno 3 lezioni per fare redline",""); return; }
   _redlinePostId = postId;
   _redlinePostImg = imageUrl;
@@ -3186,40 +3390,6 @@ async function loadExplore(){
 
 // Override search to work in explore screen too
 var _origOnSearchInput = onSearchInput;
-function onSearchInput(q){
-  // Update both search screens
-  var exploreOut = document.getElementById("explore-search-results");
-  var exploreGrid = document.getElementById("explore-grid");
-  if(A.screen==="explore"){
-    if(q&&q.trim()){
-      if(exploreOut) exploreOut.style.display="block";
-      if(exploreGrid) exploreGrid.style.display="none";
-      var out = document.getElementById("explore-search-output");
-      if(out) { out.innerHTML='<div style="text-align:center;padding:20px;color:#9896B8">Ricerca...</div>'; }
-      clearTimeout(_searchTimer);
-      _searchTimer = setTimeout(async function(){
-        var result = await doSearchReturn(q.trim());
-        if(out) out.innerHTML = result;
-      },400);
-    } else {
-      if(exploreOut) exploreOut.style.display="none";
-      if(exploreGrid) exploreGrid.style.display="block";
-    }
-    return;
-  }
-  // Default search screen behavior
-  var trending = document.getElementById("search-trending");
-  var output = document.getElementById("search-output");
-  if(!q||!q.trim()){ if(trending) trending.style.display="block"; if(output) output.style.display="none"; return; }
-  if(trending) trending.style.display="none";
-  if(output){ output.style.display="block"; output.innerHTML='<div style="text-align:center;padding:20px;color:#9896B8">Ricerca...</div>'; }
-  clearTimeout(_searchTimer);
-  _searchTimer = setTimeout(async function(){
-    var result = await doSearchReturn(q.trim());
-    if(output) output.innerHTML = result;
-  }, 400);
-}
-
 async function doSearchReturn(q){
   try {
     var isTag = q.startsWith("#");
@@ -3569,13 +3739,13 @@ var HOME_REWARDS_FREE = [
   {id:"r_border_grn",  icon:"🟢", name:"Cornice Verde",  unlock:"Completa categoria Animali",req:{t:"cat",id:"animals"}},
   {id:"r_border_gld",  icon:"🟡", name:"Cornice Oro",    unlock:"Completa categoria Visi",  req:{t:"cat",id:"faces"}},
   {id:"r_border_pur",  icon:"🟣", name:"Cornice Viola",  unlock:"Completa Chiaroscuro",     req:{t:"cat",id:"chiaroscuro"}},
-  {id:"r_tok_1",       icon:"🪙", name:"1 DrawToken",    unlock:"Prima lezione completata", req:{t:"count",n:1}},
-  {id:"r_tok_2",       icon:"🪙🪙",name:"2 DrawToken",   unlock:"5 lezioni completate",     req:{t:"count",n:5}},
+  {id:"r_tok_1",       icon:"nib", name:"1 DrawToken",    unlock:"Prima lezione completata", req:{t:"count",n:1}},
+  {id:"r_tok_2",       icon:"nib2",name:"2 DrawToken",   unlock:"5 lezioni completate",     req:{t:"count",n:5}},
 ];
 
 var HOME_REWARDS_PREMIUM = [
-  {id:"rp_tok_10", icon:"🪙", name:"10 DrawToken",  desc:"Starter Pack",   price:"1,99", tokens:3},
-  {id:"rp_tok_25", icon:"🪙", name:"25 DrawToken",  desc:"Explorer Pack",  price:"4,99", tokens:10},
+  {id:"rp_tok_10", icon:"", name:"10 DrawToken",  desc:"Starter Pack",   price:"1,99", tokens:3},
+  {id:"rp_tok_25", icon:"", name:"25 DrawToken",  desc:"Explorer Pack",  price:"4,99", tokens:10},
   {id:"rp_pro",    icon:"👑", name:"DrawBound PRO", desc:"Accesso totale", price:"4,99/mese", pro:true},
 ];
 
@@ -3765,7 +3935,7 @@ function renderDrawPass(){
       var d=document.createElement("div");
       d.style.cssText="background:#fff;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 12px rgba(28,27,46,.07);cursor:pointer;position:relative;border:2px solid "+(pack.best?"#FFD60A":"transparent");
       if(pack.best) d.innerHTML="<div style='position:absolute;top:-8px;right:12px;background:linear-gradient(135deg,#FFD60A,#FF9500);border-radius:50px;padding:2px 10px;font-size:9px;font-weight:800;color:#fff'>PIU POPOLARE</div>";
-      d.innerHTML+="<div style='width:44px;height:44px;border-radius:12px;background:"+pack.color+"20;display:flex;align-items:center;justify-content:center;font-size:22px'>🪙</div>"+
+      d.innerHTML+='<div style="width:44px;height:44px;border-radius:12px;background:'+pack.color+'20;display:flex;align-items:center;justify-content:center;font-size:22px">✏️</div>'
         "<div style='flex:1'><div style='font-weight:800;font-size:15px;color:#1C1B2E'>"+pack.tokens+" DrawToken</div>"+
         "<div style='font-size:11px;color:#9896B8'>"+pack.desc+"</div></div>"+
         "<div style='text-align:right'><div style='font-weight:800;font-size:16px;color:"+pack.color+"'>€"+pack.price+"</div>"+
@@ -3794,7 +3964,6 @@ function renderDrawPass(){
     } else { ul.style.display="none"; }
   }
 }
-
 function isFreeTokenEarnable(r){
   if(r.req.t==="count"){
     return Object.values(A.progress).filter(function(v){return v.completed;}).length>=r.req.n;
@@ -4394,150 +4563,1003 @@ function nibIcon(size){
   return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;flex-shrink:0"><path d="M12 1L23 10L12 23L1 10Z" fill="#FFD60A" stroke="#C8A000" stroke-width="1.5"/><path d="M12 8L18 13L12 23L6 13Z" fill="#C8A000"/><line x1="12" y1="15" x2="12" y2="23" stroke="#1C1B2E" stroke-width="2" stroke-linecap="round"/></svg>';
 }
 
-/* ═══════════════ SKILL TREE RENDERER ═══════════════ */
 
-function setStatus(msg){ var el=document.getElementById("splash-status"); if(el) el.textContent=msg; }
+/* ═══════════════ SFIDE / CHALLENGES ═══════════════ */
+var _challengeTab = "active";
 
-
-/* ═══════════════ SKILL TREE RENDERER ═══════════════ */
-function renderSkillTreeView(container){
-  if(!container) return;
-  container.innerHTML="";
-  var S=SKILL_TREE;
-  if(!S||!S.trunk){container.innerHTML="<div style='padding:20px;color:#9896B8;text-align:center'>Skill tree non disponibile</div>";return;}
-  function ld(lessons){if(!lessons||!lessons.length)return false;return lessons.every(function(l){var p=l.split("-");if(p.length<2)return false;var k=pk(p[0],parseInt(p[1]));return A.progress[k]&&A.progress[k].completed;});}
-  function tDone(){return S.trunk.nodes.every(function(n){return ld(n.lessons);});}
-  function nStars(id){var s=getStars("skill",id);return(s.s1?1:0)+(s.s2?1:0)+(s.s3?1:0);}
-  function starRow(n){var r="";for(var i=0;i<3;i++)r+=i<n?"⭐":"☆";return r;}
-  var trunkOK=tDone();
-  // TRUNK
-  var trunk=document.createElement("div");
-  trunk.style.cssText="background:linear-gradient(135deg,rgba(61,190,122,.12),rgba(61,190,122,.04));border:1px solid rgba(61,190,122,.35);border-radius:16px;padding:14px;margin-bottom:16px";
-  var hdr=document.createElement("div");
-  hdr.style.cssText="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(61,190,122,.2)";
-  hdr.innerHTML="<div style='width:42px;height:42px;background:rgba(61,190,122,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px'>🌱</div><div style='flex:1'><div style='font-weight:800;font-size:15px;color:#fff'>Fondamentali</div><div style='font-size:11px;color:#9896B8'>Percorso obbligatorio — completa per sbloccare i rami</div></div>"+(trunkOK?"<span style='font-size:22px'>🏆</span>":"");
-  trunk.appendChild(hdr);
-  S.trunk.nodes.forEach(function(node,i){
-    var done=ld(node.lessons),prev=i===0||ld(S.trunk.nodes[i-1].lessons||[]),stars=nStars(node.id);
-    var row=document.createElement("div");
-    row.style.cssText="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,"+(prev?".08":".03")+");border-radius:10px;padding:10px 12px;opacity:"+(prev?1:.4)+";cursor:"+(prev&&node.lessons&&node.lessons.length?"pointer":"default")+";margin-bottom:5px";
-    row.innerHTML="<div style='width:38px;height:38px;border-radius:50%;background:"+(done?"#3DBE7A":prev?"rgba(61,190,122,.2)":"rgba(255,255,255,.06)")+";display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;border:2px solid "+(done?"#3DBE7A":prev?"rgba(61,190,122,.4)":"rgba(255,255,255,.1)")+"'>"+(done?"✅":node.icon)+"</div><div style='flex:1'><div style='font-weight:700;font-size:13px;color:"+(prev?"#fff":"#9896B8")+"'>"+node.label+"</div><div style='font-size:10px;color:#9896B8'>"+starRow(stars)+"</div></div><div style='font-size:11px;font-weight:700;color:"+(done?"#3DBE7A":"#9896B8")+"'>"+(done?"✓":prev&&node.lessons&&node.lessons.length?"→":"")+"</div>";
-    if(prev&&node.lessons&&node.lessons.length)(function(lid){row.onclick=function(){startFirstLesson(lid);};})(node.lessons[0]);
-    trunk.appendChild(row);
+function setChallengeTab(tab){
+  _challengeTab = tab;
+  ["active","entries","past"].forEach(function(t){
+    var btn=document.getElementById("cht-"+t);
+    if(!btn) return;
+    btn.style.borderBottomColor = t===tab?"#8B5CF6":"transparent";
+    btn.style.color = t===tab?"#fff":"#9896B8";
   });
-  container.appendChild(trunk);
-  // CONNECTOR
-  var conn=document.createElement("div");
-  conn.style.cssText="display:flex;flex-direction:column;align-items:center;margin-bottom:14px";
-  conn.innerHTML="<div style='width:2px;height:16px;background:"+(trunkOK?"#3DBE7A":"rgba(255,255,255,.12)")+"'></div><div style='border-radius:50px;padding:4px 14px;font-size:11px;font-weight:700;border:1px solid "+(trunkOK?"rgba(61,190,122,.5)":"rgba(255,255,255,.1)")+";color:"+(trunkOK?"#3DBE7A":"#9896B8")+";background:"+(trunkOK?"rgba(61,190,122,.15)":"rgba(255,255,255,.05)")+"'>"+(trunkOK?"🔓 Rami sbloccati":"🔒 Completa il tronco per sbloccare")+"</div><div style='width:2px;height:16px;background:rgba(255,255,255,.1)'></div>";
-  container.appendChild(conn);
-  // BRANCHES
-  S.branches.forEach(function(branch){
-    var bEl=document.createElement("div");
-    bEl.style.cssText="border-radius:16px;padding:14px;margin-bottom:12px;border:1px solid rgba(255,255,255,"+(trunkOK?".1":".04")+");opacity:"+(trunkOK?1:.55);
-    var bHdr=document.createElement("div");
-    bHdr.style.cssText="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.06)";
-    bHdr.innerHTML="<div style='width:42px;height:42px;background:"+branch.bg+"22;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px'>"+branch.icon+"</div><div style='flex:1'><div style='font-weight:800;font-size:15px;color:#fff'>"+branch.label+"</div><div style='font-size:10px;font-weight:600;color:"+(trunkOK?branch.color:"#9896B8")+"'>"+(trunkOK?"Sbloccato ✓":"🔒 Completa i Fondamentali prima")+"</div></div>";
-    bEl.appendChild(bHdr);
-    branch.nodes.forEach(function(node){
-      var done=ld(node.lessons||[]),open=trunkOK&&!node.locked,stars=nStars(node.id);
-      var nRow=document.createElement("div");
-      nRow.style.cssText="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,"+(open?".07":".02")+");border-left:3px solid "+(done?branch.color:open?"rgba(255,255,255,.2)":"rgba(255,255,255,.05)")+";border-radius:0 10px 10px 0;padding:9px 12px;opacity:"+(open?1:.4)+";cursor:"+(open&&node.lessons&&node.lessons.length?"pointer":"default")+";margin-bottom:5px";
-      nRow.innerHTML="<div style='font-size:20px;width:28px;text-align:center'>"+(node.locked?"🔒":done?"✅":node.icon)+"</div><div style='flex:1'><div style='font-weight:700;font-size:12px;color:"+(open?"#fff":"#9896B8")+"'>"+node.label+"</div><div style='font-size:9px;color:#9896B8'>"+(node.locked?"Prerequisiti mancanti":starRow(stars))+"</div></div>"+(done?"<span style='color:"+branch.color+";font-size:11px;font-weight:700'>✓</span>":open&&node.lessons&&node.lessons.length?"<span style='color:#9896B8'>→</span>":"");
-      if(open&&node.lessons&&node.lessons.length)(function(lid){nRow.onclick=function(){startFirstLesson(lid);};})(node.lessons[0]);
-      bEl.appendChild(nRow);
-    });
-    container.appendChild(bEl);
-  });
+  loadChallengeContent();
 }
 
-function init(){
-  applyTheme(); // Apply saved theme
-  showScreen("splash");
-  setStatus("Avvio...");
-  // Show privacy if not accepted
-  if(!localGet("dl:privacy")){ checkPrivacy(); }
-  // Check if returning from OAuth (Google/Apple login)
-  if(window.location.hash && window.location.hash.includes("access_token")){
-    checkOAuthCallback().then(function(handled){ if(!handled) proceedInit(); });
-    return;
-  }
-  proceedInit();
-}
-function proceedInit(){
 
-  // STEP 1: after 2s max, show auth regardless (safety net)
-  var authTimer = setTimeout(function(){
-    if(A.screen==="splash"){ setStatus(""); showScreen("auth"); }
-  }, 2000);
-
-  // STEP 2: try to restore session from localStorage
-  var uid = localGet("dl:uid");
-  if(!uid){
-    // No session - just show auth after short splash
-    clearTimeout(authTimer);
-    setTimeout(function(){ setStatus(""); showScreen("auth"); }, 1500);
-    // Load tutorials in background for when user logs in
-    loadTutorialsFromDB().catch(function(){});
-    return;
-  }
-
-  // STEP 3: user has session - load their data
-  setStatus("Accesso in corso...");
-  loadUserSession(uid, authTimer);
-}
-
-async function loadUserSession(uid, authTimer){
+async function loadChallengeContent(){
+  var cont=document.getElementById("challenges-content");
+  if(!cont) return;
+  cont.innerHTML='<div style="text-align:center;padding:30px;color:#9896B8"><div style="width:24px;height:24px;border:3px solid rgba(255,255,255,.1);border-top:3px solid #8B5CF6;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px"></div>Caricamento...</div>';
   try {
-    setStatus("Caricamento dati...");
-    var rows = await Promise.race([
-      sbFetch("GET","dl_users",{filters:"id=eq."+uid}),
-      new Promise(function(r){ setTimeout(function(){ r(null); }, 5000); })
-    ]);
+    if(_challengeTab==="active"){
+      var challenges=await sbFetch("GET","dl_challenges",{filters:"active=eq.true",order:"created_at.desc"});
+      if(!challenges||!challenges.length){
+        cont.innerHTML='<div style="text-align:center;padding:60px 20px"><div style="font-size:48px;margin-bottom:12px">🏆</div><div style="font-weight:800;color:#fff;margin-bottom:8px">Nessuna sfida attiva</div><div style="color:#9896B8;font-size:13px">Torna presto per le prossime sfide!</div></div>';
+        return;
+      }
+      cont.innerHTML="";
+      challenges.forEach(function(c){
+        var daysLeft=Math.max(0,Math.ceil((new Date(c.end_date)-Date.now())/86400000));
+        var card=document.createElement("div");
+        card.style.cssText="background:linear-gradient(135deg,#1a1040,#2d1b69);border-radius:16px;padding:16px;margin-bottom:14px;border:1px solid rgba(139,92,246,.3)";
+        card.innerHTML=
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'+
+            '<div style="background:#8B5CF6;border-radius:6px;padding:3px 8px;font-size:9px;font-weight:800;color:#fff;letter-spacing:1px">SFIDA ATTIVA</div>'+
+            '<div style="font-size:10px;color:#9896B8">⏰ '+daysLeft+' giorni rimasti</div>'+
+          '</div>'+
+          '<div style="font-weight:800;font-size:16px;color:#fff;margin-bottom:6px">'+c.title+'</div>'+
+          '<div style="font-size:13px;color:#9896B8;margin-bottom:12px;line-height:1.5">'+c.description+'</div>'+
+          '<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">'+
+            '<div style="font-size:13px;font-weight:700;color:#FFD60A">🏆 Premio: '+c.prize_tokens+' token</div>'+
+          '</div>'+
+          (c.image_url?'<img src="'+c.image_url+'" style="width:100%;border-radius:10px;margin-bottom:12px;max-height:200px;object-fit:cover"/>':'')+
+          '<div style="display:flex;gap:8px">'+
+// (removed)
+// removed
+          '</div>';
+        cont.appendChild(card);
+      });
+    } else if(_challengeTab==="entries"){
+      if(!A.user){cont.innerHTML='<div style="text-align:center;padding:40px;color:#9896B8">Accedi per vedere le tue partecipazioni</div>';return;}
+      var entries=await sbFetch("GET","dl_challenge_entries",{filters:"user_id=eq."+A.user.id,order:"created_at.desc"});
+      if(!entries||!entries.length){
+        cont.innerHTML='<div style="text-align:center;padding:60px 20px"><div style="font-size:48px;margin-bottom:12px">📝</div><div style="font-weight:800;color:#fff;margin-bottom:8px">Nessuna partecipazione ancora</div><div style="color:#9896B8;font-size:13px">Partecipa a una sfida attiva!</div></div>';
+        return;
+      }
+      cont.innerHTML="";
+      var grid=document.createElement("div");
+      grid.style.cssText="display:grid;grid-template-columns:1fr 1fr;gap:8px";
+      entries.forEach(function(e){
+        var d=document.createElement("div");
+        d.style.cssText="background:#161525;border-radius:12px;overflow:hidden;cursor:pointer";
+        d.innerHTML='<img src="'+e.image_url+'" style="width:100%;aspect-ratio:1;object-fit:cover"/>'+
+          '<div style="padding:8px"><div style="font-size:11px;color:#9896B8">'+getTimeAgo(new Date(e.created_at))+' fa</div>'+
+          '<div style="font-size:12px;color:#fff;font-weight:700;margin-top:2px">❤️ '+e.votes+' voti</div></div>';
+        d.onclick=function(){openPostDetail(e.post_id||"");};
+        grid.appendChild(d);
+      });
+      cont.appendChild(grid);
+    } else {
+      var past=await sbFetch("GET","dl_challenges",{filters:"active=eq.false",order:"created_at.desc",limit:10});
+      if(!past||!past.length){cont.innerHTML='<div style="text-align:center;padding:40px;color:#9896B8">Nessuna sfida passata</div>';return;}
+      cont.innerHTML="";
+      past.forEach(function(c){
+        var d=document.createElement("div");
+        d.style.cssText="background:#161525;border-radius:12px;padding:12px;margin-bottom:10px;opacity:.7";
+        d.innerHTML+="<div style=\'width:44px;height:44px;border-radius:12px;background:"+pack.color+"20;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#FFD60A\'>✏️</div>"<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>DrawBound</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Baloo 2',sans-serif;background:#F7F5FF;min-height:100vh;overflow-x:hidden}
+.screen{display:none;min-height:100vh}
+    #scr-splash.on,#scr-auth.on,#scr-paywall.on,#scr-checkout.on{display:flex!important}
+    #scr-home.on,#scr-category.on,#scr-lesson.on,#scr-profile.on{display:block!important}
+
+input{font-family:'Baloo 2',sans-serif}
+button{font-family:'Baloo 2',sans-serif;cursor:pointer}
+@keyframes pulse{to{transform:scale(1.6)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
     
-    if(!rows || !rows[0]){
-      clearTimeout(authTimer);
-      setStatus(""); showScreen("auth"); return;
-    }
-    
-    A.user = rows[0];
-    
-    // Load the rest in parallel with timeout
-    var results = await Promise.allSettled([
-      sbFetch("GET","dl_subscriptions",{filters:"user_id=eq."+uid}),
-      sbFetch("GET","dl_progress",{filters:"user_id=eq."+uid}),
-      sbFetch("GET","dl_profiles",{filters:"user_id=eq."+uid})
-    ]);
-    
-    var pr = results[0].value, pgRows = results[1].value, prfRow = results[2].value;
-    A.pro = !!(pr && pr[0] && (pr[0].active));
-    
-    var pg = {};
-    if(pgRows) pgRows.forEach(function(r){ pg[r.lesson_key]={step:r.step,completed:r.completed}; });
-    A.progress = pg;
-    
-    A.profile = (prfRow && prfRow[0])
-      ? {avatar:prfRow[0].avatar_id, border:prfRow[0].border_id}
-      : {avatar:"def", border:"none"};
-    
-    await loadTutorialsFromDB();
-    clearTimeout(authTimer);
-    setStatus("");
-    showBottomNav();
-    var ni=document.getElementById("nav-avatar-icon");
-    if(ni) ni.textContent=getAvatarIcon();
-    renderFeed(); showScreen("feed"); navTo("feed");
-    
-  } catch(e) {
-    console.error("loadUserSession error:", e);
-    clearTimeout(authTimer);
-    setStatus(""); showScreen("auth");
-  }
-}
+    body.light-mode #scr-auth{background:#F0EEFF!important}
+
+    /* Navigation */
+    .nav-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:8px 0;cursor:pointer;border:none;background:none;gap:3px;transition:opacity .2s}
+    .nav-tab span.nav-icon{font-size:20px;line-height:1}
+    .nav-tab span.nav-label{font-size:9px;font-weight:700;color:#9896B8}
+    .nav-tab.active span.nav-label{color:#8B5CF6}
+    .nav-tab.active span.nav-icon{filter:drop-shadow(0 0 6px #8B5CF6)}
+
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.card{background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 14px rgba(28,27,46,.07);cursor:pointer;transition:transform .18s;margin-bottom:10px}
+.card:hover{transform:translateY(-2px)}
+.inp{width:100%;padding:12px 16px;border:2px solid #e0ddf5;border-radius:12px;font-size:15px;color:#1C1B2E;background:#faf9ff;outline:none}
+.btn{padding:12px 16px;border:none;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;width:100%;display:block}
+.sticky-bottom{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:2px solid #f0eeff;padding:10px 20px;z-index:50}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1C1B2E;color:#fff;border-radius:50px;padding:10px 22px;font-weight:700;font-size:14px;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,.2);white-space:nowrap;display:none;animation:fi .3s ease}
+
+    /* Light mode */
+    body.light-mode{background:#F0EEFF!important}
+    body.light-mode #scr-feed,body.light-mode #scr-search,body.light-mode #scr-explore,body.light-mode #scr-notif,body.light-mode #scr-chat,body.light-mode #scr-dm{background:#F0EEFF!important}
+    body.light-mode #bottom-nav{background:#fff!important;border-top:1px solid #e0ddf5!important}
+    body.light-mode .nav-tab span.nav-label{color:#4A4868!important}
+    body.light-mode #scr-home{background:#F0EEFF!important}
+    body.light-mode .card{background:#fff!important;box-shadow:0 4px 14px rgba(28,27,46,.08)!important}
 
 
-init();
-</script>
+    /* A11y contrast improvements */
+    .text-secondary { color: #B8B5CC !important; font-weight: 500; }
+    .text-muted { color: #9896B8 !important; font-weight: 500; }
+    body { -webkit-font-smoothing: antialiased; }
+    /* Improve small text readability */
+    [style*="font-size:9px"], [style*="font-size:10px"], [style*="font-size:11px"] { font-weight: 500; }
+
+</style>
+  <!-- PayPal SDK: sostituisci YOUR_PAYPAL_CLIENT_ID con il tuo Client ID da developer.paypal.com -->
+  <!-- PayPal SDK loaded dynamically when needed -->
+  <!-- PWA -->
+  <meta name="theme-color" content="#1C1B2E"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="DrawBound"/>
+  <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;DrawBound&quot;,&quot;short_name&quot;:&quot;DrawBound&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;%231C1B2E&quot;,&quot;theme_color&quot;:&quot;%231C1B2E&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGl2ZWxsb18xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCA1OTUuMjggODQxLjg5Ij4KICA8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMzAuNC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogMi4xLjQgQnVpbGQgMjI2KSAgLS0+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5zdDAgewogICAgICAgIGZpbGw6ICMxYzFiMjk7CiAgICAgIH0KCiAgICAgIC5zdDEgewogICAgICAgIGZpbGw6IHVybCgjU2Z1bWF0dXJhX3NlbnphX25vbWVfMzIyKTsKICAgICAgfQoKICAgICAgLnN0MiB7CiAgICAgICAgZmlsdGVyOiB1cmwoI2dsb3cpOwogICAgICAgIGlzb2xhdGlvbjogaXNvbGF0ZTsKICAgICAgICBvcGFjaXR5OiAuMzsKICAgICAgfQoKICAgICAgLnN0MyB7CiAgICAgICAgc3Ryb2tlOiAjMWMxYjI5OwogICAgICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgICAgICBzdHJva2UtbWl0ZXJsaW1pdDogNC42NTsKICAgICAgICBzdHJva2Utd2lkdGg6IDE2LjI4cHg7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgICA8ZmlsdGVyIGlkPSJnbG93IiB4PSItMjAlIiB5PSItMjAlIiB3aWR0aD0iMTQwJSIgaGVpZ2h0PSIxNDAlIj4KICAgICAgPGZlR2F1c3NpYW5CbHVyIHJlc3VsdD0iYmx1ciIgc3RkRGV2aWF0aW9uPSIxNSIvPgogICAgICA8ZmVDb21wb3NpdGUgaW49IlNvdXJjZUdyYXBoaWMiIGluMj0iYmx1ciIvPgogICAgPC9maWx0ZXI+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9IlNmdW1hdHVyYV9zZW56YV9ub21lXzMyMiIgZGF0YS1uYW1lPSJTZnVtYXR1cmEgc2VuemEgbm9tZSAzMjIiIHgxPSItLjEzIiB5MT0iODQxLjk3IiB4Mj0iMS4wNiIgeTI9Ijg0MC43OCIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSgxOTguMDA2NyAyNTQ3NjcuOTYyMykgc2NhbGUoMTk5LjI2MDEgLTMwMi4yODg0KSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgogICAgICA8c3RvcCBvZmZzZXQ9Ii4zNyIgc3RvcC1jb2xvcj0iIzgxNDM5MyIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNmYmJhMDAiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IGNsYXNzPSJzdDAiIHg9IjM3LjIiIHk9IjE2MC41MSIgd2lkdGg9IjUyMC44NyIgaGVpZ2h0PSI1MjAuODciIHJ4PSIxMjcuODkiIHJ5PSIxMjcuODkiLz4KICA8ZyBjbGFzcz0ic3QyIj4KICAgIDxwb2x5Z29uIHBvaW50cz0iMjk3LjY0IDI2Mi44MiA0MDYuOTMgNDYwLjQ3IDI5Ny42NCA1ODguMzcgMTg4LjM1IDQ2MC40NyAyOTcuNjQgMjYyLjgyIi8+CiAgPC9nPgogIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0yOTcuNjQsMjQwLjkzbDExNi4zMiwyMDcuNzFjNC4yNSw2LjM1LDIuNTUsMTQuOTYtMy44LDE5LjIxLS45Ny42NS0yLjAyLDEuMTctMy4xMiwxLjU2bC0xMDkuNCwxMzEuNTUtMTA5LjQtMTMxLjU1Yy03LjIyLTIuNTMtMTEuMDItMTAuNDMtOC40OC0xNy42NS4zOS0xLjEuOTEtMi4xNSwxLjU2LTMuMTJsMTE2LjMyLTIwNy43MVoiLz4KICA8cGF0aCBjbGFzcz0ic3QzIiBkPSJNMjk3LjY0LDM2NS41NXYyMzUuNDEiLz4KICA8Y2lyY2xlIGNsYXNzPSJzdDAiIGN4PSIyOTcuNjQiIGN5PSIzNjUuNTUiIHI9IjIyLjE2Ii8+Cjwvc3ZnPg==&quot;,&quot;sizes&quot;:&quot;any&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}]}"/>
+</head>
+<body>
+
+<!-- PRIVACY MODAL -->
+<div id="modal-privacy" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#1e1b3a;border-radius:20px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto">
+    <div style="padding:20px 20px 14px;text-align:center;border-bottom:1px solid rgba(255,255,255,.08)">
+      <div style="font-size:40px;margin-bottom:8px">🔒</div>
+      <h2 style="font-weight:800;font-size:20px;color:#fff;margin-bottom:4px">Privacy & Termini</h2>
+      <p style="color:#9896B8;font-size:12px">Leggi prima di continuare</p>
+    </div>
+    <div style="padding:16px 20px;font-size:12px;color:#9896B8;line-height:1.8;max-height:300px;overflow-y:auto">
+      <p style="color:#fff;font-weight:700;margin-bottom:8px">Dati che raccogliamo:</p>
+      <p>• Nome, email e avatar scelto da te<br>
+      • Progressi nei tutorial<br>
+      • Post, like e commenti che pubblichi<br>
+      • Posizione geografica (solo se la aggiungi tu ai post)</p>
+      <p style="color:#fff;font-weight:700;margin:12px 0 8px">Come usiamo i tuoi dati:</p>
+      <p>• Mostrare il tuo profilo agli altri utenti<br>
+      • Salvare i tuoi progressi di apprendimento<br>
+      • Inviare notifiche in-app di like, commenti e follower<br>
+      • <strong>Non vendiamo mai i tuoi dati a terzi</strong></p>
+      <p style="color:#fff;font-weight:700;margin:12px 0 8px">I tuoi diritti:</p>
+      <p>• Puoi cancellare il tuo account in qualsiasi momento<br>
+      • Puoi richiedere l'eliminazione dei dati scrivendo a <span style="color:#8B5CF6">gianlucascattarella@gmail.com</span><br>
+      • I dati sono conservati su server europei (Frankfurt, EU)</p>
+      <p style="color:#fff;font-weight:700;margin:12px 0 8px">Termini d'uso:</p>
+      <p>• Devi avere almeno 13 anni<br>
+      • Non pubblicare contenuti offensivi, violenti o illegali<br>
+      • DrawBound si riserva il diritto di rimuovere contenuti inappropriati<br>
+      • I pagamenti PRO sono soggetti a rimborso entro 14 giorni</p>
+      <p style="margin-top:12px;font-size:10px;color:#635BFF">Versione 1.0 — Maggio 2026 — DrawBound di Gianluca Scattarella</p>
+    </div>
+    <div style="padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+      <button onclick="acceptPrivacy()" style="width:100%;padding:13px;background:linear-gradient(135deg,#8B5CF6,#6d28d9);border:none;border-radius:12px;color:#fff;font-weight:800;font-size:14px;cursor:pointer">
+        ✅ Accetto — Continua
+      </button>
+      <button onclick="window.history.back()" style="width:100%;padding:10px;background:none;border:none;color:#9896B8;font-size:12px;cursor:pointer">
+        Rifiuta ed esci
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- SPLASH -->
+<div class="screen on" id="scr-splash" style="background:#1C1B2E;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+  <div style="margin-bottom:16px"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGl2ZWxsb18xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCA1OTUuMjggODQxLjg5Ij4KICA8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMzAuNC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogMi4xLjQgQnVpbGQgMjI2KSAgLS0+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5zdDAgewogICAgICAgIGZpbGw6ICMxYzFiMjk7CiAgICAgIH0KCiAgICAgIC5zdDEgewogICAgICAgIGZpbGw6IHVybCgjU2Z1bWF0dXJhX3NlbnphX25vbWVfMzIyKTsKICAgICAgfQoKICAgICAgLnN0MiB7CiAgICAgICAgZmlsdGVyOiB1cmwoI2dsb3cpOwogICAgICAgIGlzb2xhdGlvbjogaXNvbGF0ZTsKICAgICAgICBvcGFjaXR5OiAuMzsKICAgICAgfQoKICAgICAgLnN0MyB7CiAgICAgICAgc3Ryb2tlOiAjMWMxYjI5OwogICAgICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgICAgICBzdHJva2UtbWl0ZXJsaW1pdDogNC42NTsKICAgICAgICBzdHJva2Utd2lkdGg6IDE2LjI4cHg7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgICA8ZmlsdGVyIGlkPSJnbG93IiB4PSItMjAlIiB5PSItMjAlIiB3aWR0aD0iMTQwJSIgaGVpZ2h0PSIxNDAlIj4KICAgICAgPGZlR2F1c3NpYW5CbHVyIHJlc3VsdD0iYmx1ciIgc3RkRGV2aWF0aW9uPSIxNSIvPgogICAgICA8ZmVDb21wb3NpdGUgaW49IlNvdXJjZUdyYXBoaWMiIGluMj0iYmx1ciIvPgogICAgPC9maWx0ZXI+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9IlNmdW1hdHVyYV9zZW56YV9ub21lXzMyMiIgZGF0YS1uYW1lPSJTZnVtYXR1cmEgc2VuemEgbm9tZSAzMjIiIHgxPSItLjEzIiB5MT0iODQxLjk3IiB4Mj0iMS4wNiIgeTI9Ijg0MC43OCIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSgxOTguMDA2NyAyNTQ3NjcuOTYyMykgc2NhbGUoMTk5LjI2MDEgLTMwMi4yODg0KSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgogICAgICA8c3RvcCBvZmZzZXQ9Ii4zNyIgc3RvcC1jb2xvcj0iIzgxNDM5MyIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNmYmJhMDAiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IGNsYXNzPSJzdDAiIHg9IjM3LjIiIHk9IjE2MC41MSIgd2lkdGg9IjUyMC44NyIgaGVpZ2h0PSI1MjAuODciIHJ4PSIxMjcuODkiIHJ5PSIxMjcuODkiLz4KICA8ZyBjbGFzcz0ic3QyIj4KICAgIDxwb2x5Z29uIHBvaW50cz0iMjk3LjY0IDI2Mi44MiA0MDYuOTMgNDYwLjQ3IDI5Ny42NCA1ODguMzcgMTg4LjM1IDQ2MC40NyAyOTcuNjQgMjYyLjgyIi8+CiAgPC9nPgogIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0yOTcuNjQsMjQwLjkzbDExNi4zMiwyMDcuNzFjNC4yNSw2LjM1LDIuNTUsMTQuOTYtMy44LDE5LjIxLS45Ny42NS0yLjAyLDEuMTctMy4xMiwxLjU2bC0xMDkuNCwxMzEuNTUtMTA5LjQtMTMxLjU1Yy03LjIyLTIuNTMtMTEuMDItMTAuNDMtOC40OC0xNy42NS4zOS0xLjEuOTEtMi4xNSwxLjU2LTMuMTJsMTE2LjMyLTIwNy43MVoiLz4KICA8cGF0aCBjbGFzcz0ic3QzIiBkPSJNMjk3LjY0LDM2NS41NXYyMzUuNDEiLz4KICA8Y2lyY2xlIGNsYXNzPSJzdDAiIGN4PSIyOTcuNjQiIGN5PSIzNjUuNTUiIHI9IjIyLjE2Ii8+Cjwvc3ZnPg==" style="width:56px;height:56px;object-fit:contain;margin-bottom:8px"/></div>
+  <h1 style="font-size:40px;font-weight:800;color:#fff;margin:0">DrawBound</h1>
+  <p style="color:#9896B8;margin-top:8px">Impara a disegnare, un passo alla volta</p>
+  <p id="splash-status" style="color:#9896B8;font-size:12px;margin-top:12px;min-height:18px"> </p>
+  <div style="margin-top:8px;display:flex;gap:8px">
+    <div class="dot" style="background:#C8F5E0;animation:pulse 1.4s 0s infinite alternate"></div>
+    <div class="dot" style="background:#FFE0C8;animation:pulse 1.4s .2s infinite alternate"></div>
+    <div class="dot" style="background:#FFF3C8;animation:pulse 1.4s .4s infinite alternate"></div>
+    <div class="dot" style="background:#E0D4F5;animation:pulse 1.4s .6s infinite alternate"></div>
+    <div class="dot" style="background:#C8E8F5;animation:pulse 1.4s .8s infinite alternate"></div>
+  </div>
+</div>
+
+<!-- AUTH -->
+<div class="screen" id="scr-auth" style="align-items:center;justify-content:center;padding:20px;">
+  <div style="width:100%;max-width:440px">
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="margin-bottom:8px"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGl2ZWxsb18xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCA1OTUuMjggODQxLjg5Ij4KICA8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMzAuNC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogMi4xLjQgQnVpbGQgMjI2KSAgLS0+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5zdDAgewogICAgICAgIGZpbGw6ICMxYzFiMjk7CiAgICAgIH0KCiAgICAgIC5zdDEgewogICAgICAgIGZpbGw6IHVybCgjU2Z1bWF0dXJhX3NlbnphX25vbWVfMzIyKTsKICAgICAgfQoKICAgICAgLnN0MiB7CiAgICAgICAgZmlsdGVyOiB1cmwoI2dsb3cpOwogICAgICAgIGlzb2xhdGlvbjogaXNvbGF0ZTsKICAgICAgICBvcGFjaXR5OiAuMzsKICAgICAgfQoKICAgICAgLnN0MyB7CiAgICAgICAgc3Ryb2tlOiAjMWMxYjI5OwogICAgICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgICAgICBzdHJva2UtbWl0ZXJsaW1pdDogNC42NTsKICAgICAgICBzdHJva2Utd2lkdGg6IDE2LjI4cHg7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgICA8ZmlsdGVyIGlkPSJnbG93IiB4PSItMjAlIiB5PSItMjAlIiB3aWR0aD0iMTQwJSIgaGVpZ2h0PSIxNDAlIj4KICAgICAgPGZlR2F1c3NpYW5CbHVyIHJlc3VsdD0iYmx1ciIgc3RkRGV2aWF0aW9uPSIxNSIvPgogICAgICA8ZmVDb21wb3NpdGUgaW49IlNvdXJjZUdyYXBoaWMiIGluMj0iYmx1ciIvPgogICAgPC9maWx0ZXI+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9IlNmdW1hdHVyYV9zZW56YV9ub21lXzMyMiIgZGF0YS1uYW1lPSJTZnVtYXR1cmEgc2VuemEgbm9tZSAzMjIiIHgxPSItLjEzIiB5MT0iODQxLjk3IiB4Mj0iMS4wNiIgeTI9Ijg0MC43OCIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSgxOTguMDA2NyAyNTQ3NjcuOTYyMykgc2NhbGUoMTk5LjI2MDEgLTMwMi4yODg0KSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgogICAgICA8c3RvcCBvZmZzZXQ9Ii4zNyIgc3RvcC1jb2xvcj0iIzgxNDM5MyIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNmYmJhMDAiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IGNsYXNzPSJzdDAiIHg9IjM3LjIiIHk9IjE2MC41MSIgd2lkdGg9IjUyMC44NyIgaGVpZ2h0PSI1MjAuODciIHJ4PSIxMjcuODkiIHJ5PSIxMjcuODkiLz4KICA8ZyBjbGFzcz0ic3QyIj4KICAgIDxwb2x5Z29uIHBvaW50cz0iMjk3LjY0IDI2Mi44MiA0MDYuOTMgNDYwLjQ3IDI5Ny42NCA1ODguMzcgMTg4LjM1IDQ2MC40NyAyOTcuNjQgMjYyLjgyIi8+CiAgPC9nPgogIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0yOTcuNjQsMjQwLjkzbDExNi4zMiwyMDcuNzFjNC4yNSw2LjM1LDIuNTUsMTQuOTYtMy44LDE5LjIxLS45Ny42NS0yLjAyLDEuMTctMy4xMiwxLjU2bC0xMDkuNCwxMzEuNTUtMTA5LjQtMTMxLjU1Yy03LjIyLTIuNTMtMTEuMDItMTAuNDMtOC40OC0xNy42NS4zOS0xLjEuOTEtMi4xNSwxLjU2LTMuMTJsMTE2LjMyLTIwNy43MVoiLz4KICA8cGF0aCBjbGFzcz0ic3QzIiBkPSJNMjk3LjY0LDM2NS41NXYyMzUuNDEiLz4KICA8Y2lyY2xlIGNsYXNzPSJzdDAiIGN4PSIyOTcuNjQiIGN5PSIzNjUuNTUiIHI9IjIyLjE2Ii8+Cjwvc3ZnPg==" style="width:56px;height:56px;object-fit:contain;margin-bottom:8px"/></div>
+      <h1 style="font-weight:800;font-size:26px;color:#1C1B2E;margin-bottom:3px">DrawBound</h1>
+      <p style="color:#9896B8;font-size:12px">Il tuo percorso artistico ti aspetta</p>
+    </div>
+    <div style="display:flex;background:#eeecf8;border-radius:14px;padding:4px;margin-bottom:18px">
+      <button id="tab-login" onclick="setTab('login')" style="flex:1;padding:9px;border:none;border-radius:11px;font-weight:700;font-size:13px;background:#fff;color:#1C1B2E;box-shadow:0 2px 8px rgba(0,0,0,.1)">Accedi</button>
+      <button id="tab-reg" onclick="setTab('register')" style="flex:1;padding:9px;border:none;border-radius:11px;font-weight:700;font-size:13px;background:transparent;color:#9896B8">Registrati</button>
+      <button id="tab-phone" onclick="setTab('phone')" style="flex:1;padding:9px;border:none;border-radius:11px;font-weight:700;font-size:13px;background:transparent;color:#9896B8">📱 Telefono</button>
+    </div>
+    <!-- Login panel -->
+    <div id="panel-login" style="background:#fff;border-radius:20px;padding:20px;box-shadow:0 4px 20px rgba(28,27,46,.08)">
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
+        <button onclick="loginWithGoogle()" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;background:#fff;border:2px solid #ddd;border-radius:10px;font-weight:700;font-size:13px;color:#1C1B2E;cursor:pointer;width:100%">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:1.5px solid #e0e0e0;font-family:Arial;font-weight:900;font-size:13px;color:#4285F4">G</span>
+          Continua con Google
+        </button>
+        <button onclick="loginWithApple()" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;background:#1C1B2E;border:2px solid #1C1B2E;border-radius:10px;font-weight:700;font-size:13px;color:#fff;cursor:pointer;width:100%">
+          <span style="font-size:16px">🍎</span> Continua con Apple
+        </button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <div style="flex:1;height:1px;background:#e0ddf5"></div>
+        <span style="color:#9896B8;font-size:11px">oppure con email</span>
+        <div style="flex:1;height:1px;background:#e0ddf5"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <input class="inp" id="l-email" type="email" placeholder="Email"/>
+        <div style="position:relative">
+          <input class="inp" id="l-pwd" type="password" placeholder="Password" style="padding-right:40px"/>
+          <button onclick="togglePwd('l-pwd',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:16px;opacity:.6">○</button>
+        </div>
+        <div id="l-err" style="display:none;background:#fff0f0;border:1px solid #ffcccc;border-radius:8px;padding:8px 12px;color:#c0392b;font-size:12px"></div>
+        <button class="btn" onclick="doLogin()" style="background:linear-gradient(135deg,#8B5CF6,#6d28d9);color:#fff">Accedi</button>
+      </div>
+      <p style="text-align:center;color:#9896B8;font-size:11px;margin-top:10px">Non hai un account? <span onclick="setTab('register')" style="color:#8B5CF6;font-weight:700;cursor:pointer">Registrati gratis</span></p>
+    </div>
+    <!-- Phone panel -->
+    <div id="panel-phone" style="display:none;background:#fff;border-radius:20px;padding:20px;box-shadow:0 4px 20px rgba(28,27,46,.08)">
+      <div id="phone-step-1">
+        <p style="font-size:12px;color:#9896B8;margin-bottom:12px;line-height:1.6">Inserisci il tuo numero. Riceverai un codice OTP via SMS.</p>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <select id="phone-prefix" style="padding:11px 8px;border:2px solid #e0ddf5;border-radius:10px;font-family:'Baloo 2',sans-serif;font-size:13px;color:#1C1B2E;background:#faf9ff;width:90px">
+            <option value="+39">🇮🇹 +39</option>
+            <option value="+1">🇺🇸 +1</option>
+            <option value="+44">🇬🇧 +44</option>
+            <option value="+33">🇫🇷 +33</option>
+            <option value="+49">🇩🇪 +49</option>
+            <option value="+34">🇪🇸 +34</option>
+            <option value="+55">🇧🇷 +55</option>
+          </select>
+          <input class="inp" id="phone-number" type="tel" placeholder="333 1234567" style="flex:1"/>
+        </div>
+        <div id="phone-err" style="display:none;background:#fff0f0;border:1px solid #ffcccc;border-radius:8px;padding:8px 12px;color:#c0392b;font-size:12px;margin-bottom:8px"></div>
+        <button class="btn" id="phone-send-btn" onclick="sendOTP()" style="background:linear-gradient(135deg,#8B5CF6,#6d28d9);color:#fff">📲 Invia codice OTP</button>
+      </div>
+      <div id="phone-step-2" style="display:none">
+        <div style="text-align:center;margin-bottom:14px">
+          <div style="font-size:36px;margin-bottom:6px">📲</div>
+          <p style="font-weight:800;font-size:14px;color:#1C1B2E">Codice inviato!</p>
+          <p id="phone-sent-to" style="font-size:12px;color:#9896B8">Controlla gli SMS</p>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:center;margin-bottom:12px" id="otp-inputs">
+          <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,0)" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:800;border:2px solid #e0ddf5;border-radius:10px;color:#1C1B2E;background:#faf9ff;outline:none"/>
+          <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,1)" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:800;border:2px solid #e0ddf5;border-radius:10px;color:#1C1B2E;background:#faf9ff;outline:none"/>
+          <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,2)" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:800;border:2px solid #e0ddf5;border-radius:10px;color:#1C1B2E;background:#faf9ff;outline:none"/>
+          <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,3)" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:800;border:2px solid #e0ddf5;border-radius:10px;color:#1C1B2E;background:#faf9ff;outline:none"/>
+          <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,4)" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:800;border:2px solid #e0ddf5;border-radius:10px;color:#1C1B2E;background:#faf9ff;outline:none"/>
+          <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,5)" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:800;border:2px solid #e0ddf5;border-radius:10px;color:#1C1B2E;background:#faf9ff;outline:none"/>
+        </div>
+        <div id="otp-err" style="display:none;background:#fff0f0;border:1px solid #ffcccc;border-radius:8px;padding:8px 12px;color:#c0392b;font-size:12px;margin-bottom:8px;text-align:center"></div>
+        <button class="btn" id="otp-verify-btn" onclick="verifyOTP()" style="background:linear-gradient(135deg,#3DBE7A,#2D9B5E);color:#fff;margin-bottom:8px">Verifica codice</button>
+        <button onclick="resetPhone()" style="width:100%;padding:8px;background:none;border:none;color:#9896B8;font-size:12px;cursor:pointer">← Cambia numero</button>
+      </div>
+    </div>
+
+    <!-- Register panel -->
+    <div id="panel-reg" style="display:none;background:#fff;border-radius:20px;padding:20px;box-shadow:0 4px 20px rgba(28,27,46,.08)">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <input class="inp" id="r-name" type="text" placeholder="Nome completo"/>
+        <input class="inp" id="r-email" type="email" placeholder="Email"/>
+        <div style="position:relative">
+          <input class="inp" id="r-pwd" type="password" placeholder="Password (min. 6 caratteri)" style="padding-right:40px"/>
+          <button onclick="togglePwd('r-pwd',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:16px;opacity:.6">○</button>
+        </div>
+        <input class="inp" id="r-pwd2" type="password" placeholder="Conferma password"/>
+        <div id="r-err" style="display:none;background:#fff0f0;border:1px solid #ffcccc;border-radius:8px;padding:8px 12px;color:#c0392b;font-size:12px"></div>
+        <button class="btn" onclick="doReg()" id="r-btn" style="background:linear-gradient(135deg,#3DBE7A,#2D9B5E);color:#fff">🎉 Crea account</button>
+      </div>
+      <p style="text-align:center;color:#9896B8;font-size:11px;margin-top:10px">Hai un account? <span onclick="setTab('login')" style="color:#8B5CF6;font-weight:700;cursor:pointer">Accedi</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- HOME -->
+<div class="screen" id="scr-home" style="background:#0F0E1A;min-height:100vh;padding-bottom:80px">
+
+  <!-- TOP BAR -->
+  <div style="background:#1C1B2E;padding:12px 16px;position:sticky;top:0;z-index:20;border-bottom:1px solid rgba(255,255,255,.06)">
+    <div style="max-width:720px;margin:0 auto;display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:8px">
+        <img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGl2ZWxsb18xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCA1OTUuMjggODQxLjg5Ij4KICA8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMzAuNC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogMi4xLjQgQnVpbGQgMjI2KSAgLS0+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5zdDAgewogICAgICAgIGZpbGw6ICMxYzFiMjk7CiAgICAgIH0KCiAgICAgIC5zdDEgewogICAgICAgIGZpbGw6IHVybCgjU2Z1bWF0dXJhX3NlbnphX25vbWVfMzIyKTsKICAgICAgfQoKICAgICAgLnN0MiB7CiAgICAgICAgZmlsdGVyOiB1cmwoI2dsb3cpOwogICAgICAgIGlzb2xhdGlvbjogaXNvbGF0ZTsKICAgICAgICBvcGFjaXR5OiAuMzsKICAgICAgfQoKICAgICAgLnN0MyB7CiAgICAgICAgc3Ryb2tlOiAjMWMxYjI5OwogICAgICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgICAgICBzdHJva2UtbWl0ZXJsaW1pdDogNC42NTsKICAgICAgICBzdHJva2Utd2lkdGg6IDE2LjI4cHg7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgICA8ZmlsdGVyIGlkPSJnbG93IiB4PSItMjAlIiB5PSItMjAlIiB3aWR0aD0iMTQwJSIgaGVpZ2h0PSIxNDAlIj4KICAgICAgPGZlR2F1c3NpYW5CbHVyIHJlc3VsdD0iYmx1ciIgc3RkRGV2aWF0aW9uPSIxNSIvPgogICAgICA8ZmVDb21wb3NpdGUgaW49IlNvdXJjZUdyYXBoaWMiIGluMj0iYmx1ciIvPgogICAgPC9maWx0ZXI+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9IlNmdW1hdHVyYV9zZW56YV9ub21lXzMyMiIgZGF0YS1uYW1lPSJTZnVtYXR1cmEgc2VuemEgbm9tZSAzMjIiIHgxPSItLjEzIiB5MT0iODQxLjk3IiB4Mj0iMS4wNiIgeTI9Ijg0MC43OCIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSgxOTguMDA2NyAyNTQ3NjcuOTYyMykgc2NhbGUoMTk5LjI2MDEgLTMwMi4yODg0KSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgogICAgICA8c3RvcCBvZmZzZXQ9Ii4zNyIgc3RvcC1jb2xvcj0iIzgxNDM5MyIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNmYmJhMDAiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IGNsYXNzPSJzdDAiIHg9IjM3LjIiIHk9IjE2MC41MSIgd2lkdGg9IjUyMC44NyIgaGVpZ2h0PSI1MjAuODciIHJ4PSIxMjcuODkiIHJ5PSIxMjcuODkiLz4KICA8ZyBjbGFzcz0ic3QyIj4KICAgIDxwb2x5Z29uIHBvaW50cz0iMjk3LjY0IDI2Mi44MiA0MDYuOTMgNDYwLjQ3IDI5Ny42NCA1ODguMzcgMTg4LjM1IDQ2MC40NyAyOTcuNjQgMjYyLjgyIi8+CiAgPC9nPgogIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0yOTcuNjQsMjQwLjkzbDExNi4zMiwyMDcuNzFjNC4yNSw2LjM1LDIuNTUsMTQuOTYtMy44LDE5LjIxLS45Ny42NS0yLjAyLDEuMTctMy4xMiwxLjU2bC0xMDkuNCwxMzEuNTUtMTA5LjQtMTMxLjU1Yy03LjIyLTIuNTMtMTEuMDItMTAuNDMtOC40OC0xNy42NS4zOS0xLjEuOTEtMi4xNSwxLjU2LTMuMTJsMTE2LjMyLTIwNy43MVoiLz4KICA8cGF0aCBjbGFzcz0ic3QzIiBkPSJNMjk3LjY0LDM2NS41NXYyMzUuNDEiLz4KICA8Y2lyY2xlIGNsYXNzPSJzdDAiIGN4PSIyOTcuNjQiIGN5PSIzNjUuNTUiIHI9IjIyLjE2Ii8+Cjwvc3ZnPg==" style="width:28px;height:28px;object-fit:contain;flex-shrink:0"/>
+        <div>
+          <div style="font-weight:800;font-size:16px;color:#fff;line-height:1">DrawBound</div>
+          <div id="home-greeting" style="color:#9896B8;font-size:10px">Ciao!</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div id="pro-badge"></div>
+        <button onclick="showDrawPass()" style="background:rgba(255,214,10,.15);border:1px solid rgba(255,214,10,.3);border-radius:50px;padding:4px 10px;font-weight:800;font-size:11px;color:#FFD60A;cursor:pointer;display:flex;align-items:center;gap:4px">
+          <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;flex-shrink:0"><path d="M12 1L23 10L12 23L1 10Z" fill="#FFD60A" stroke="#C8A000" stroke-width="1.5"/><path d="M12 8L18 13L12 23L6 13Z" fill="#C8A000"/><line x1="12" y1="15" x2="12" y2="23" stroke="#1C1B2E" stroke-width="2" stroke-linecap="round"/></svg><span id="home-token-balance" style="margin-left:3px">0</span>
+        </button>
+        <button onclick="navTo('notif')" style="position:relative;background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;font-size:17px;cursor:pointer">
+          🔔<div id="notif-badge" style="display:none;position:absolute;top:-2px;right:-2px;background:#e74c3c;border-radius:50%;width:14px;height:14px;font-size:8px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center"></div>
+        </button>
+        <button id="admin-btn" onclick="showCfg()" style="display:none;background:rgba(255,255,255,.06);border:none;border-radius:50%;width:32px;height:32px;font-size:13px;cursor:pointer">⚙️</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width:720px;margin:0 auto;padding:14px 14px 0">
+
+    <!-- STREAK BANNER (Duolingo style) -->
+    <div id="streak-banner" style="display:none;background:linear-gradient(135deg,#FF6B00,#FF9500);border-radius:16px;padding:14px 18px;margin-bottom:12px;display:flex;align-items:center;gap:14px;cursor:pointer" onclick="showStreakInfo()">
+      <div style="font-size:42px;line-height:1">🔥</div>
+      <div style="flex:1">
+        <div id="streak-count-big" style="font-weight:900;font-size:28px;color:#fff;line-height:1">0</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:2px">giorni di fila</div>
+      </div>
+      <div style="text-align:right">
+        <div id="streak-mult-label" style="font-weight:800;font-size:16px;color:#fff">1x</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.7)">token multiplier</div>
+        <div id="streak-today" style="margin-top:4px;font-size:10px;font-weight:700;background:rgba(255,255,255,.2);border-radius:50px;padding:2px 8px;color:#fff">✅ Oggi OK</div>
+      </div>
+    </div>
+
+    <!-- PROFILE HERO CARD -->
+    <div style="background:linear-gradient(135deg,#1e1b3a,#2d2a4a);border-radius:20px;padding:18px;margin-bottom:12px;position:relative;overflow:hidden">
+      <div style="position:absolute;right:-20px;top:-20px;width:100px;height:100px;background:radial-gradient(circle,rgba(139,92,246,.25),transparent);border-radius:50%"></div>
+
+      <!-- Avatar + Info -->
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+        <div style="position:relative;cursor:pointer;flex-shrink:0" onclick="navTo('profile')">
+          <div id="hero-avatar" style="width:64px;height:64px;border-radius:50%;background:#3d3a5a;display:flex;align-items:center;justify-content:center;font-size:30px;border:3px solid #8B5CF6"></div>
+          <div style="position:absolute;bottom:0;right:0;background:#8B5CF6;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;border:2px solid #1e1b3a">✏️</div>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div id="hero-name" style="font-weight:800;font-size:17px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div>
+          <div id="hero-email" style="font-size:10px;color:#9896B8;margin-top:1px"></div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:5px">
+            <div id="hero-level-badge" style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.1);border-radius:50px;padding:3px 10px">
+              <span id="hero-level-icon" style="font-size:12px">🌱</span>
+              <span id="hero-level-name" style="font-size:11px;font-weight:800;color:#fff">Principiante</span>
+            </div>
+            <div id="streak-badge" style="display:none"></div>
+          </div>
+        </div>
+        <button onclick="toggleRewards()" id="rewards-toggle-btn" style="background:linear-gradient(135deg,#FFD60A,#FF9500);border:none;border-radius:50px;padding:6px 12px;font-weight:800;font-size:11px;color:#fff;cursor:pointer;flex-shrink:0">🎁</button>
+      </div>
+
+      <!-- Stats row -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+        <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:8px;text-align:center">
+          <div id="stat-lessons-done" style="font-weight:800;font-size:18px;color:#3DBE7A">0</div>
+          <div style="font-size:9px;color:#9896B8">Lezioni</div>
+        </div>
+        <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:8px;text-align:center">
+          <div id="stat-cats-num" style="font-weight:800;font-size:18px;color:#FFD60A">0</div>
+          <div style="font-size:9px;color:#9896B8">Categorie</div>
+        </div>
+        <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:8px;text-align:center;cursor:pointer" onclick="showDrawPass()">
+          <div style="display:flex;align-items:center;justify-content:center;gap:4px;font-weight:800;font-size:18px;color:#FF9500"><svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;flex-shrink:0"><path d="M12 1L23 10L12 23L1 10Z" fill="#FFD60A" stroke="#C8A000" stroke-width="1.5"/><path d="M12 8L18 13L12 23L6 13Z" fill="#C8A000"/><line x1="12" y1="15" x2="12" y2="23" stroke="#1C1B2E" stroke-width="2" stroke-linecap="round"/></svg><span id="stat-tokens-big">0</span></div>
+          <div style="font-size:9px;color:#9896B8">Token</div>
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      <div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span id="progress-text" style="font-size:11px;color:#9896B8;font-weight:500">0 di 18 lezioni</span>
+          <span id="hero-next-level" style="font-size:10px;color:#8B5CF6;font-weight:700"></span>
+        </div>
+        <div style="background:rgba(255,255,255,.08);border-radius:50px;height:7px;overflow:hidden">
+          <div id="progress-bar" style="width:0%;background:linear-gradient(90deg,#8B5CF6,#3DBE7A);height:100%;border-radius:50px;transition:width .8s"></div>
+        </div>
+      </div>
+      <!-- XP Bar -->
+      <div style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+          <span id="xp-text" style="font-size:10px;color:#FFD60A;font-weight:700">Lv.0 · 0 XP</span>
+          <span style="font-size:10px;color:#9896B8;font-weight:500">Guadagna XP completando lezioni</span>
+        </div>
+        <div style="background:rgba(255,255,255,.06);border-radius:50px;height:5px;overflow:hidden">
+          <div id="xp-bar" style="width:0%;background:linear-gradient(90deg,#FFD60A,#FF9500);height:100%;border-radius:50px;transition:width .6s"></div>
+        </div>
+      </div>
+
+      <!-- Continue card -->
+      <div id="continue-card" style="display:none;background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.3);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="continueLastLesson()">
+        <div id="continue-icon" style="font-size:22px">📝</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:9px;font-weight:800;color:#8B5CF6;letter-spacing:1px;margin-bottom:2px">CONTINUA DA DOVE ERI</div>
+          <div id="continue-title" style="font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div>
+          <div id="continue-step" style="font-size:10px;color:#9896B8">Passo 1</div>
+        </div>
+        <div style="background:#8B5CF6;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:800;color:#fff;flex-shrink:0">▶ Vai</div>
+      </div>
+
+      <!-- Rewards panel -->
+      <div id="rewards-panel" style="display:none;margin-top:12px;border-top:1px solid rgba(255,255,255,.08);padding-top:12px">
+        <div style="font-size:10px;font-weight:800;color:#9896B8;letter-spacing:1px;margin-bottom:8px">PREMI GRATUITI</div>
+        <div id="home-rewards-free" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px"></div>
+        <div style="font-size:10px;font-weight:800;color:#9896B8;letter-spacing:1px;margin:10px 0 8px">PREMI PREMIUM</div>
+        <div id="home-rewards-premium" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px"></div>
+        <button onclick="showDrawPass()" style="width:100%;margin-top:10px;padding:8px;background:rgba(255,214,10,.1);border:1px solid rgba(255,214,10,.25);border-radius:10px;color:#FFD60A;font-weight:800;font-size:11px;cursor:pointer"><svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;flex-shrink:0"><path d="M12 1L23 10L12 23L1 10Z" fill="#FFD60A" stroke="#C8A000" stroke-width="1.5"/><path d="M12 8L18 13L12 23L6 13Z" fill="#C8A000"/><line x1="12" y1="15" x2="12" y2="23" stroke="#1C1B2E" stroke-width="2" stroke-linecap="round"/></svg> DrawPass Shop</button>
+      </div>
+    </div>
+
+    <!-- CATEGORIES / SKILL TREE TOGGLE -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <span style="font-weight:800;font-size:15px;color:#fff" id="section-title">Categorie</span>
+      <div style="display:flex;gap:6px">
+        <button id="view-list-btn" onclick="setHomeView('list')" style="background:#8B5CF6;border:none;border-radius:50px;padding:5px 12px;color:#fff;font-weight:700;font-size:11px;cursor:pointer">📋 Lista</button>
+        <button id="view-tree-btn" onclick="setHomeView('tree')" style="background:rgba(255,255,255,.08);border:none;border-radius:50px;padding:5px 12px;color:#9896B8;font-weight:700;font-size:11px;cursor:pointer">🌳 Skill Tree</button>
+      </div>
+    </div>
+
+    <!-- CATEGORY GRID -->
+    <div id="cat-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
+
+    <!-- SKILL TREE VIEW -->
+    <div id="skill-tree-view" style="display:none"></div>
+
+    <!-- FEATURE CARDS -->
+    <div id="home-feature-cards" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+      <div style="background:linear-gradient(135deg,#1a1e2e,#1e2438);border-radius:16px;padding:14px;cursor:pointer" onclick="showNewPost()">
+        <div style="font-size:26px;margin-bottom:6px">📸</div>
+        <div style="font-weight:800;font-size:12px;color:#fff;margin-bottom:3px">Condividi</div>
+        <div style="font-size:10px;color:#9896B8">Pubblica il tuo disegno</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#1e1a10,#2e2614);border-radius:16px;padding:14px;cursor:pointer" onclick="showDrawPass()">
+        <div style="font-size:26px;margin-bottom:6px">🎟️</div>
+        <div style="font-weight:800;font-size:12px;color:#fff;margin-bottom:3px">DrawPass</div>
+        <div style="font-size:10px;color:#9896B8">Sblocca lezioni singole</div>
+      </div>
+    </div>
+
+    <!-- PRO CTA -->
+    <div id="pro-cta-card" style="display:none;background:linear-gradient(135deg,#1C1B2E,#2d2a4a);border-radius:16px;padding:16px;margin-top:10px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="showScreen('paywall')">
+      <div style="font-size:36px">👑</div>
+      <div style="flex:1">
+        <div style="font-weight:800;font-size:14px;color:#fff">Sblocca DrawBound PRO</div>
+        <div style="font-size:11px;color:#9896B8">Tutte le lezioni avanzate</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#FFD60A,#FF9500);border-radius:10px;padding:6px 12px;font-weight:800;font-size:11px;color:#fff;white-space:nowrap">Da €4,99</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CATEGORY -->
+<div class="screen" id="scr-category">
+  <div id="cat-header"></div>
+  <div style="max-width:600px;margin:0 auto;padding:16px 20px" id="cat-content"></div>
+</div>
+
+<!-- LESSON -->
+<div class="screen" id="scr-lesson">
+  <div style="background:#fff;border-bottom:2px solid #f0eeff;padding:10px 20px;position:sticky;top:0;z-index:10">
+    <div style="max-width:640px;margin:0 auto">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+        <button id="les-back" onclick="goBackFromLesson()" style="border:none;border-radius:50px;padding:3px 9px;font-weight:700;font-size:10px">← Indietro</button>
+        <div id="les-title" style="flex:1;font-weight:800;font-size:12px;color:#1C1B2E"></div>
+        <span id="les-counter" style="border-radius:50px;padding:2px 8px;font-size:10px;font-weight:700"></span>
+      </div>
+      <div style="background:#f0eeff;border-radius:50px;height:6px">
+        <div id="les-progress" style="width:0%;height:100%;border-radius:50px;transition:width .4s cubic-bezier(.4,0,.2,1)"></div>
+      </div>
+    </div>
+  </div>
+  <div style="max-width:640px;margin:0 auto;padding:12px 20px 80px">
+    <div id="step-dots" style="display:flex;gap:4px;justify-content:center;margin-bottom:12px;flex-wrap:wrap"></div>
+    <div id="svg-container" style="border-radius:13px;overflow:hidden;margin-bottom:11px;box-shadow:0 4px 14px rgba(28,27,46,.06)"></div>
+    <div id="step-card" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 5px 20px rgba(28,27,46,.08);margin-bottom:10px"></div>
+    <div id="steps-list" style="background:#fff;border-radius:13px;padding:11px;box-shadow:0 4px 10px rgba(28,27,46,.05)">
+      <div style="font-weight:800;font-size:11px;color:#1C1B2E;margin-bottom:5px">📋 Tutti i passi</div>
+      <div id="steps-inner"></div>
+    </div>
+  </div>
+  <div class="sticky-bottom">
+    <div style="max-width:640px;margin:0 auto;display:flex;gap:8px">
+      <button id="btn-prev" onclick="prevStep()" style="display:none;padding:10px 13px;background:#f5f3ff;border:none;border-radius:10px;font-weight:700;font-size:12px;color:#4A4868">← Prec.</button>
+      <button onclick="openCamera()" title="Fotografa il tuo disegno" style="padding:10px 13px;background:#f5f3ff;border:none;border-radius:10px;font-size:16px;cursor:pointer">📸</button>
+      <button id="btn-next" onclick="nextStep()" style="flex:1;padding:10px;border:none;border-radius:10px;font-weight:800;font-size:13px;color:#fff">Passo Successivo →</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAYWALL -->
+<div class="screen" id="scr-paywall" style="background:linear-gradient(160deg,#1C1B2E 0%,#2d2a4a 100%);align-items:center;justify-content:center;padding:24px;align-items:center;justify-content:center;padding:24px">
+  <div style="width:100%;max-width:360px">
+    <button onclick="showScreen(A.cat?'category':'home')" style="background:rgba(255,255,255,.1);border:none;border-radius:50px;padding:5px 11px;color:#9896B8;font-weight:600;font-size:11px;margin-bottom:14px">← Torna indietro</button>
+    <div style="background:rgba(255,255,255,.05);border-radius:20px;padding:22px;border:1px solid rgba(255,255,255,.1)">
+      <div style="text-align:center;margin-bottom:18px">
+        <div style="font-size:48px;margin-bottom:4px">👑</div>
+        <h2 style="font-weight:800;font-size:22px;color:#fff;margin-bottom:3px">DrawBound PRO</h2>
+        <p style="color:#9896B8;font-size:11px">Sblocca tutte le lezioni avanzate</p>
+      </div>
+      <div style="margin-bottom:16px">
+        <div style="display:flex;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.07)"><span>🎨</span><span style="color:#e0ddf5;font-size:12px;font-weight:600"> Lezioni Avanzate</span></div>
+        <div style="display:flex;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.07)"><span>📐</span><span style="color:#e0ddf5;font-size:12px;font-weight:600"> SVG interattivi</span></div>
+        <div style="display:flex;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.07)"><span>💡</span><span style="color:#e0ddf5;font-size:12px;font-weight:600"> Consigli pro</span></div>
+        <div style="display:flex;gap:6px;align-items:center;padding:6px 0"><span>🏆</span><span style="color:#e0ddf5;font-size:12px;font-weight:600"> Certificati</span></div>
+      </div>
+      <div style="display:flex;gap:7px;margin-bottom:12px">
+        <div onclick="setPayPlan('monthly')" id="plan-m" style="flex:1;border-radius:10px;padding:11px 7px;text-align:center;cursor:pointer;border:2px solid #FFD60A;background:rgba(255,214,10,.1)">
+          <div style="font-weight:800;font-size:10px;color:#FFD60A;margin-bottom:2px">Mensile</div>
+          <div style="font-weight:800;font-size:17px;color:#fff">€4,99</div>
+          <div style="font-size:9px;color:#9896B8">/mese</div>
+        </div>
+        <div onclick="setPayPlan('yearly')" id="plan-y" style="flex:1;border-radius:10px;padding:11px 7px;text-align:center;cursor:pointer;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);position:relative">
+          <div style="position:absolute;top:-7px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#FFD60A,#FF9500);border-radius:50px;padding:1px 7px;font-size:8px;font-weight:800;color:#fff">−40%</div>
+          <div style="font-weight:800;font-size:10px;color:#9896B8;margin-bottom:2px">Annuale</div>
+          <div style="font-weight:800;font-size:17px;color:#fff">€39,99</div>
+          <div style="font-size:9px;color:#9896B8">/anno</div>
+        </div>
+      </div>
+      <button class="btn" onclick="showScreen('checkout')" style="background:linear-gradient(135deg,#FFD60A,#FF9500);color:#fff">Abbonati ora 🚀</button>
+      <p style="text-align:center;color:#9896B8;font-size:9px;margin-top:7px">Disdici in qualsiasi momento</p>
+    </div>
+  </div>
+</div>
+
+<!-- CHECKOUT -->
+<div class="screen" id="scr-checkout" style="align-items:center;justify-content:center;padding:24px;">
+  <div style="width:100%;max-width:360px">
+    <div id="checkout-success" style="display:none;text-align:center;padding:32px">
+      <div style="font-size:64px;margin-bottom:9px">🎉</div>
+      <h2 style="font-weight:800;font-size:20px;color:#1C1B2E">Benvenuto nel PRO!</h2>
+      <p style="color:#9896B8">Tutte le lezioni sbloccate.</p>
+      <div style="width:34px;height:34px;border:4px solid #3DBE7A;border-top:4px solid transparent;border-radius:50%;animation:spin 1s linear infinite;margin:16px auto"></div>
+    </div>
+    <div id="checkout-form">
+      <button onclick="showScreen('paywall')" style="background:#f0eeff;border:none;border-radius:50px;padding:5px 11px;font-weight:700;font-size:11px;color:#4A4868;margin-bottom:14px">← Piani</button>
+      <div style="background:#fff;border-radius:20px;padding:20px;box-shadow:0 8px 30px rgba(28,27,46,.09)">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid #f0eeff">
+          <div style="width:22px;height:22px;background:#635BFF;border-radius:5px;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;font-size:11px">S</div>
+          <span style="font-weight:800;font-size:13px;color:#1C1B2E">Pagamento sicuro</span>
+          <span style="margin-left:auto;font-size:10px;color:#9896B8">🔒 SSL</span>
+        </div>
+        <div id="checkout-plan-info" style="background:#f9f7ff;border-radius:10px;padding:10px;margin-bottom:14px;font-size:11px;display:flex;justify-content:space-between">
+          <span style="font-weight:700;color:#4A4868">DrawBound PRO Mensile</span>
+          <span style="font-weight:800;color:#1C1B2E">€4,99/mese</span>
+        </div>
+        <div style="margin-bottom:9px">
+          <label style="font-weight:700;font-size:10px;color:#4A4868;display:block;margin-bottom:2px">Numero carta</label>
+          <div style="border:2px solid #e0ddf5;border-radius:8px;padding:9px 11px;display:flex;align-items:center;gap:6px;background:#faf9ff">
+            <span style="font-size:14px">💳</span>
+            <span style="color:#c0bdd8;font-family:monospace;font-size:12px">4242 4242 4242 4242</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <div style="flex:1">
+            <label style="font-weight:700;font-size:10px;color:#4A4868;display:block;margin-bottom:2px">Scadenza</label>
+            <div style="border:2px solid #e0ddf5;border-radius:8px;padding:9px 11px;background:#faf9ff;color:#c0bdd8;font-family:monospace;font-size:12px">12/28</div>
+          </div>
+          <div style="flex:1">
+            <label style="font-weight:700;font-size:10px;color:#4A4868;display:block;margin-bottom:2px">CVC</label>
+            <div style="border:2px solid #e0ddf5;border-radius:8px;padding:9px 11px;background:#faf9ff;color:#c0bdd8;font-family:monospace;font-size:12px">123</div>
+          </div>
+        </div>
+        <div id="paypal-buttons-container" style="margin-bottom:8px"></div>
+        <div id="paypal-loading" style="text-align:center;padding:14px;color:#9896B8;font-size:12px">
+          <div style="width:24px;height:24px;border:3px solid #e0ddf5;border-top:3px solid #635BFF;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 8px"></div>
+          Caricamento PayPal…
+        </div>
+        <p style="text-align:center;color:#9896B8;font-size:9px;margin-top:4px">🔒 Pagamento sicuro · Powered by <strong>PayPal</strong></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- PROFILE -->
+<div class="screen" id="scr-profile" style="padding-bottom:30px">
+  <div style="background:#1C1B2E;padding:16px 20px 12px">
+    <div style="max-width:600px;margin:0 auto;display:flex;align-items:center;gap:10px">
+      <button onclick="renderHome();showScreen('home')" style="background:rgba(255,255,255,.1);border:none;border-radius:50px;padding:4px 12px;font-weight:700;font-size:11px;color:#9896B8;cursor:pointer">← Home</button>
+      <span style="font-weight:800;font-size:17px;color:#fff">Il mio profilo</span>
+    </div>
+  </div>
+  <div style="max-width:600px;margin:0 auto;padding:20px 20px">
+    <!-- Avatar card -->
+    <div style="background:linear-gradient(135deg,#2d2a4a,#3d3a5a);border-radius:20px;padding:24px;text-align:center;margin-bottom:18px">
+      <div id="profile-avatar-display" style="width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:38px;margin:0 auto 12px;background:#3d3a5a"></div>
+      <div id="profile-name" style="font-weight:800;font-size:20px;color:#fff;margin-bottom:2px"></div>
+      <div id="profile-email" style="font-size:12px;color:#9896B8;margin-top:2px"></div><div id="profile-bio" style="font-size:12px;color:#e0ddf5;margin:6px 0 12px;min-height:16px;font-style:italic"></div><button onclick="openBioEdit()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:50px;padding:5px 16px;color:#9896B8;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:12px">✏️ Modifica bio</button>
+      <div style="display:flex;justify-content:center;gap:20px">
+        <div style="text-align:center"><div id="prof-stat-lessons" style="font-weight:800;font-size:22px;color:#C8F5E0">0</div><div style="font-size:10px;color:#9896B8">Lezioni</div></div>
+        <div style="width:1px;background:rgba(255,255,255,.1)"></div>
+        <div style="text-align:center"><div id="prof-stat-cats" style="font-weight:800;font-size:22px;color:#FFD60A">0</div><div style="font-size:10px;color:#9896B8">Categorie</div></div>
+        <div style="width:1px;background:rgba(255,255,255,.1)"></div>
+        <div style="text-align:center"><div id="prof-stat-pct" style="font-weight:800;font-size:22px;color:#FF9500">0</div><div style="font-size:10px;color:#9896B8">Lezioni</div></div>
+      </div>
+    </div>
+    <!-- Avatar selector -->
+    <div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 4px 14px rgba(28,27,46,.07)">
+      <div style="font-weight:800;font-size:14px;color:#1C1B2E;margin-bottom:12px">🎭 Scegli il tuo avatar</div>
+      <div id="avatar-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px"></div>
+    </div>
+    <!-- Border selector -->
+    <div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 4px 14px rgba(28,27,46,.07)">
+      <div style="font-weight:800;font-size:14px;color:#1C1B2E;margin-bottom:12px">✨ Stile cornice</div>
+      <div id="border-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px"></div>
+    </div>
+    <!-- Achievements -->
+    <div style="background:#fff;border-radius:16px;padding:16px;box-shadow:0 4px 14px rgba(28,27,46,.07)">
+      <div style="font-weight:800;font-size:14px;color:#1C1B2E;margin-bottom:12px">🏅 Achievement</div>
+      <div id="achievements-list"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- CAMERA INPUT (hidden) -->
+<input type="file" accept="image/*" capture="environment" id="camera-input" style="display:none" onchange="onPhotoSelected(event)"/>
+
+<!-- PHOTO MODAL -->
+<div id="modal-photo" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:960;align-items:flex-end;justify-content:center;padding:0">
+  <div style="background:#1C1B2E;border-radius:22px 22px 0 0;width:100%;max-width:480px;max-height:95vh;overflow-y:auto">
+    <div style="padding:14px 18px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#1C1B2E;border-bottom:1px solid rgba(255,255,255,.08)">
+      <span style="font-weight:800;font-size:16px;color:#fff">📸 Il tuo disegno</span>
+      <button onclick="closePhoto()" style="background:rgba(255,255,255,.1);border:none;border-radius:50%;width:30px;height:30px;color:#fff;font-size:14px;cursor:pointer">✕</button>
+    </div>
+    <div style="padding:16px">
+      <!-- Canvas preview with watermark -->
+      <div style="position:relative;border-radius:14px;overflow:hidden;margin-bottom:14px;background:#000">
+        <canvas id="photo-canvas" style="width:100%;display:block;max-height:55vh;object-fit:contain"></canvas>
+      </div>
+      <!-- Watermark toggle -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+          <input type="checkbox" id="watermark-toggle" checked onchange="redrawCanvas()" style="width:16px;height:16px;accent-color:#8B5CF6"/>
+          <span style="font-size:12px;color:#9896B8;font-weight:600">Watermark DrawBound</span>
+        </label>
+      </div>
+      <!-- Caption -->
+      <div style="margin-bottom:12px">
+        <input id="photo-caption" type="text" maxlength="150"
+          style="width:100%;padding:11px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:12px;color:#fff;font-family:'Baloo 2',sans-serif;font-size:13px;outline:none"
+          placeholder="Aggiungi una didascalia... 🎨"/>
+      </div>
+      <!-- Share buttons -->
+      <button onclick="sharePhoto()" style="width:100%;padding:13px;background:linear-gradient(135deg,#8B5CF6,#6d28d9);border:none;border-radius:12px;color:#fff;font-weight:800;font-size:14px;cursor:pointer;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px">
+        <span>🚀</span> Condividi sui social
+      </button>
+      <div style="display:flex;gap:8px;margin-bottom:6px">
+        <button onclick="downloadPhoto()" style="flex:1;padding:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:#fff;font-weight:700;font-size:12px;cursor:pointer">⬇️ Salva foto</button>
+        <button onclick="openCamera()" style="flex:1;padding:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:#fff;font-weight:700;font-size:12px;cursor:pointer">🔄 Nuova foto</button>
+      </div>
+      <p style="text-align:center;color:#9896B8;font-size:10px;margin-top:6px;line-height:1.6">
+        Apre direttamente WhatsApp · Instagram · TikTok · Facebook · Storie
+      </p>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- FEED SOCIAL -->
+<div class="screen" id="scr-feed" style="background:#0F0E1A;min-height:100vh;padding-bottom:70px">
+  <!-- Feed top bar -->
+  <div style="background:#161525;border-bottom:1px solid rgba(255,255,255,.08);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10">
+    <div style="display:flex;align-items:center;gap:8px"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGl2ZWxsb18xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCA1OTUuMjggODQxLjg5Ij4KICA8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMzAuNC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogMi4xLjQgQnVpbGQgMjI2KSAgLS0+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5zdDAgewogICAgICAgIGZpbGw6ICMxYzFiMjk7CiAgICAgIH0KCiAgICAgIC5zdDEgewogICAgICAgIGZpbGw6IHVybCgjU2Z1bWF0dXJhX3NlbnphX25vbWVfMzIyKTsKICAgICAgfQoKICAgICAgLnN0MiB7CiAgICAgICAgZmlsdGVyOiB1cmwoI2dsb3cpOwogICAgICAgIGlzb2xhdGlvbjogaXNvbGF0ZTsKICAgICAgICBvcGFjaXR5OiAuMzsKICAgICAgfQoKICAgICAgLnN0MyB7CiAgICAgICAgc3Ryb2tlOiAjMWMxYjI5OwogICAgICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgICAgICBzdHJva2UtbWl0ZXJsaW1pdDogNC42NTsKICAgICAgICBzdHJva2Utd2lkdGg6IDE2LjI4cHg7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgICA8ZmlsdGVyIGlkPSJnbG93IiB4PSItMjAlIiB5PSItMjAlIiB3aWR0aD0iMTQwJSIgaGVpZ2h0PSIxNDAlIj4KICAgICAgPGZlR2F1c3NpYW5CbHVyIHJlc3VsdD0iYmx1ciIgc3RkRGV2aWF0aW9uPSIxNSIvPgogICAgICA8ZmVDb21wb3NpdGUgaW49IlNvdXJjZUdyYXBoaWMiIGluMj0iYmx1ciIvPgogICAgPC9maWx0ZXI+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9IlNmdW1hdHVyYV9zZW56YV9ub21lXzMyMiIgZGF0YS1uYW1lPSJTZnVtYXR1cmEgc2VuemEgbm9tZSAzMjIiIHgxPSItLjEzIiB5MT0iODQxLjk3IiB4Mj0iMS4wNiIgeTI9Ijg0MC43OCIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSgxOTguMDA2NyAyNTQ3NjcuOTYyMykgc2NhbGUoMTk5LjI2MDEgLTMwMi4yODg0KSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgogICAgICA8c3RvcCBvZmZzZXQ9Ii4zNyIgc3RvcC1jb2xvcj0iIzgxNDM5MyIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNmYmJhMDAiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IGNsYXNzPSJzdDAiIHg9IjM3LjIiIHk9IjE2MC41MSIgd2lkdGg9IjUyMC44NyIgaGVpZ2h0PSI1MjAuODciIHJ4PSIxMjcuODkiIHJ5PSIxMjcuODkiLz4KICA8ZyBjbGFzcz0ic3QyIj4KICAgIDxwb2x5Z29uIHBvaW50cz0iMjk3LjY0IDI2Mi44MiA0MDYuOTMgNDYwLjQ3IDI5Ny42NCA1ODguMzcgMTg4LjM1IDQ2MC40NyAyOTcuNjQgMjYyLjgyIi8+CiAgPC9nPgogIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0yOTcuNjQsMjQwLjkzbDExNi4zMiwyMDcuNzFjNC4yNSw2LjM1LDIuNTUsMTQuOTYtMy44LDE5LjIxLS45Ny42NS0yLjAyLDEuMTctMy4xMiwxLjU2bC0xMDkuNCwxMzEuNTUtMTA5LjQtMTMxLjU1Yy03LjIyLTIuNTMtMTEuMDItMTAuNDMtOC40OC0xNy42NS4zOS0xLjEuOTEtMi4xNSwxLjU2LTMuMTJsMTE2LjMyLTIwNy43MVoiLz4KICA8cGF0aCBjbGFzcz0ic3QzIiBkPSJNMjk3LjY0LDM2NS41NXYyMzUuNDEiLz4KICA8Y2lyY2xlIGNsYXNzPSJzdDAiIGN4PSIyOTcuNjQiIGN5PSIzNjUuNTUiIHI9IjIyLjE2Ii8+Cjwvc3ZnPg==" style="width:28px;height:28px;object-fit:contain;flex-shrink:0"/><span style="font-weight:800;font-size:18px;color:#fff">DrawBound</span></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button onclick="navTo('explore')" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;font-size:17px;cursor:pointer">🔍</button>
+      <button onclick="navTo('chat')" style="position:relative;background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;font-size:17px;cursor:pointer">
+        💬<div id="feed-chat-badge" style="display:none;position:absolute;top:-2px;right:-2px;background:#e74c3c;border-radius:50%;width:14px;height:14px;font-size:8px;color:#fff;display:flex;align-items:center;justify-content:center"></div>
+      </button>
+      <button onclick="navTo('notif')" style="position:relative;background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;font-size:17px;cursor:pointer">
+        🔔<div id="feed-notif-badge" style="display:none;position:absolute;top:-2px;right:-2px;background:#e74c3c;border-radius:50%;width:14px;height:14px;font-size:8px;color:#fff;display:flex;align-items:center;justify-content:center"></div>
+      </button>
+    </div>
+  </div>
+  <!-- Stories bar -->
+  <div style="background:#161525;border-bottom:1px solid rgba(255,255,255,.06);padding:10px 16px;overflow-x:auto;white-space:nowrap">
+    <div style="display:inline-flex;gap:12px;align-items:center">
+      <!-- Add post button -->
+      <div onclick="showNewPost()" style="display:inline-flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer">
+        <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#8B5CF6,#3DBE7A);display:flex;align-items:center;justify-content:center;font-size:22px">➕</div>
+        <span style="font-size:9px;color:#9896B8;font-weight:600">Pubblica</span>
+      </div>
+      <!-- User stories placeholder -->
+      <div id="stories-row" style="display:inline-flex;gap:12px"></div>
+    </div>
+  </div>
+
+  <!-- Community Challenge Banner -->
+  <div id="challenge-banner" style="display:none"></div>
+
+  <!-- Filter tabs -->
+  <div style="display:flex;gap:8px;padding:10px 16px;background:#0F0E1A;border-bottom:1px solid rgba(255,255,255,.05)">
+    <button id="feed-filter-all" onclick="setFeedFilter('all')" style="flex:1;padding:8px;background:#8B5CF6;border:none;border-radius:50px;color:#fff;font-weight:700;font-size:12px;cursor:pointer">🔥 In Evidenza</button>
+    <button id="feed-filter-following" onclick="setFeedFilter('following')" style="flex:1;padding:8px;background:rgba(255,255,255,.06);border:none;border-radius:50px;color:#9896B8;font-weight:700;font-size:12px;cursor:pointer">👥 Seguiti</button>
+    <button id="feed-filter-new" onclick="setFeedFilter('new')" style="flex:1;padding:8px;background:rgba(255,255,255,.06);border:none;border-radius:50px;color:#9896B8;font-weight:700;font-size:12px;cursor:pointer">🆕 Recenti</button>
+  </div>
+  <!-- Feed posts -->
+  <div id="feed-posts" style="max-width:640px;margin:0 auto;padding:10px 0">
+    <div id="feed-loading" style="text-align:center;padding:40px;color:#9896B8">
+      <div style="width:28px;height:28px;border:3px solid rgba(255,255,255,.1);border-top:3px solid #8B5CF6;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px"></div>
+      Caricamento...
+    </div>
+  </div>
+</div>
+
+<!-- NEW POST MODAL -->
+<div id="modal-newpost" style="display:none;position:fixed;inset:0;background:#0F0E1A;z-index:980;overflow-y:auto">
+  <div style="max-width:600px;margin:0 auto;padding:16px">
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.08)">
+      <button onclick="closeNewPost()" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;color:#fff;font-size:16px;cursor:pointer">✕</button>
+      <span style="font-weight:800;font-size:16px;color:#fff;flex:1">Nuovo Post</span>
+      <button id="publish-btn" onclick="publishPost()" style="background:linear-gradient(135deg,#8B5CF6,#6d28d9);border:none;border-radius:50px;padding:8px 20px;color:#fff;font-weight:800;font-size:13px;cursor:pointer">Pubblica</button>
+    </div>
+
+    <!-- Image preview -->
+    <div id="post-img-preview" onclick="openPhotoSource()" style="background:rgba(255,255,255,.04);border:2px dashed rgba(255,255,255,.15);border-radius:16px;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;margin-bottom:14px;overflow:hidden;position:relative">
+      <div id="post-img-placeholder">
+        <div style="font-size:48px;margin-bottom:8px">🖼️</div>
+        <div style="color:#9896B8;font-size:13px;font-weight:600">Tocca per aggiungere foto</div>
+        <div style="color:#9896B8;font-size:11px;margin-top:4px">oppure scatta con la fotocamera</div>
+      </div>
+      <img id="post-img-el" style="display:none;width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>
+    </div>
+    
+
+    <!-- Caption -->
+    <textarea id="post-caption" placeholder="Scrivi una didascalia..." style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 14px;color:#fff;font-family:'Baloo 2',sans-serif;font-size:14px;resize:none;height:80px;outline:none;margin-bottom:10px"></textarea>
+
+    <!-- Tags -->
+    <input id="post-tags" type="text" placeholder="#disegno #tutorial #arte" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:11px 14px;color:#8B5CF6;font-family:'Baloo 2',sans-serif;font-size:13px;outline:none;margin-bottom:10px"/>
+
+    <!-- Location -->
+    <div style="display:flex;gap:8px;align-items:center">
+      <input id="post-location" type="text" placeholder="📍 Aggiungi posizione (opzionale)" style="flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:11px 14px;color:#fff;font-family:'Baloo 2',sans-serif;font-size:13px;outline:none"/>
+      <button onclick="getLocation()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:11px 14px;color:#9896B8;font-size:13px;cursor:pointer">📍</button>
+    </div>
+
+    <!-- Linked lesson -->
+    <div id="post-lesson-link" style="margin-top:10px;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2);border-radius:12px;padding:10px 14px;display:none;align-items:center;gap:8px">
+      <span style="font-size:16px">🎨</span>
+      <span id="post-lesson-name" style="font-size:12px;color:#9896B8;flex:1"></span>
+      <button onclick="document.getElementById('post-lesson-link').style.display='none'" style="background:none;border:none;color:#9896B8;cursor:pointer">✕</button>
+    </div>
+  </div>
+</div>
+
+<!-- POST DETAIL MODAL -->
+<div id="modal-post-detail" style="display:none;position:fixed;inset:0;background:#0F0E1A;z-index:981;overflow-y:auto">
+  <div style="max-width:600px;margin:0 auto">
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:0;background:#0F0E1A;z-index:5">
+      <button onclick="closePostDetail()" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;color:#fff;font-size:16px;cursor:pointer">←</button>
+      <span style="font-weight:800;font-size:16px;color:#fff">Post</span>
+    </div>
+    <div id="post-detail-content"></div>
+  </div>
+</div>
+
+
+<!-- PUBLIC PROFILE -->
+<div class="screen" id="scr-pubprofile" style="background:#0F0E1A;min-height:100vh;padding-bottom:70px">
+  <div style="background:#161525;border-bottom:1px solid rgba(255,255,255,.08);padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10">
+    <button onclick="closePubProfile()" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;color:#fff;font-size:16px;cursor:pointer">←</button>
+    <span id="pubprof-username" style="font-weight:800;font-size:16px;color:#fff;flex:1"></span>
+  </div>
+  <div id="pubprof-content" style="max-width:640px;margin:0 auto"></div>
+</div>
+
+
+<!-- NOTIFICATIONS -->
+<div class="screen" id="scr-notif" style="background:#0F0E1A;min-height:100vh;padding-bottom:70px">
+  <div style="background:#161525;border-bottom:1px solid rgba(255,255,255,.08);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10">
+    <span style="font-weight:800;font-size:18px;color:#fff">🔔 Notifiche</span>
+    <button onclick="markAllRead()" style="background:none;border:none;color:#8B5CF6;font-size:12px;font-weight:700;cursor:pointer">Segna tutte lette</button>
+  </div>
+  <div id="notif-list" style="max-width:640px;margin:0 auto"></div>
+</div>
+
+<!-- SEARCH -->
+<div class="screen" id="scr-search" style="background:#0F0E1A;min-height:100vh;padding-bottom:70px">
+  <div style="background:#161525;border-bottom:1px solid rgba(255,255,255,.08);padding:12px 16px;position:sticky;top:0;z-index:10">
+    <div style="display:flex;align-items:center;gap:10px;max-width:640px;margin:0 auto">
+      <button onclick="navTo('feed')" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;color:#fff;font-size:16px;cursor:pointer;flex-shrink:0">←</button>
+      <div style="flex:1;position:relative">
+        <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px">🔍</span>
+        <input id="search-input" type="text" placeholder="Cerca utenti, hashtag, tutorial..."
+          oninput="onSearchInput(this.value)"
+          style="width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:50px;padding:10px 14px 10px 38px;color:#fff;font-family:'Baloo 2',sans-serif;font-size:14px;outline:none"/>
+      </div>
+    </div>
+  </div>
+  <div id="search-results" style="max-width:640px;margin:0 auto;padding:16px">
+    <!-- Trending hashtags -->
+    <div id="search-trending">
+      <div style="font-size:11px;font-weight:800;color:#9896B8;letter-spacing:1px;margin-bottom:12px">TRENDING</div>
+      <div id="trending-tags" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+      <div style="font-size:11px;font-weight:800;color:#9896B8;letter-spacing:1px;margin:16px 0 12px">ARTISTI</div>
+      <div id="suggested-users"></div>
+    </div>
+    <div id="search-output" style="display:none"></div>
+  </div>
+</div>
+
+
+<!-- ESPLORA -->
+<div class="screen" id="scr-explore" style="background:#0F0E1A;min-height:100vh;padding-bottom:70px">
+  <div style="background:#161525;border-bottom:1px solid rgba(255,255,255,.08);padding:12px 16px;position:sticky;top:0;z-index:10">
+    <div style="max-width:640px;margin:0 auto;display:flex;align-items:center;gap:10px">
+      <button onclick="navTo('feed')" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;color:#fff;font-size:16px;cursor:pointer;flex-shrink:0">←</button>
+      <div style="flex:1;position:relative">
+        <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px">🔍</span>
+        <input id="explore-search" type="text" placeholder="Cerca utenti o #hashtag..."
+          oninput="onSearchInput(this.value)"
+          style="width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:50px;padding:10px 14px 10px 38px;color:#fff;font-family:'Baloo 2',sans-serif;font-size:14px;outline:none"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter pills -->
+  <div style="display:flex;gap:8px;padding:12px 16px;overflow-x:auto;white-space:nowrap;background:#161525">
+    <button id="exp-all" onclick="setExploreFilter('all')" style="background:#8B5CF6;border:none;border-radius:50px;padding:6px 16px;color:#fff;font-weight:700;font-size:12px;cursor:pointer;flex-shrink:0">🔥 Trending</button>
+    <button id="exp-recent" onclick="setExploreFilter('recent')" style="background:rgba(255,255,255,.08);border:none;border-radius:50px;padding:6px 16px;color:#9896B8;font-weight:700;font-size:12px;cursor:pointer;flex-shrink:0">🆕 Recenti</button>
+    <button id="exp-animals" onclick="setExploreFilter('animals')" style="background:rgba(255,255,255,.08);border:none;border-radius:50px;padding:6px 16px;color:#9896B8;font-weight:700;font-size:12px;cursor:pointer;flex-shrink:0">🐾 Animali</button>
+    <button id="exp-faces" onclick="setExploreFilter('faces')" style="background:rgba(255,255,255,.08);border:none;border-radius:50px;padding:6px 16px;color:#9896B8;font-weight:700;font-size:12px;cursor:pointer;flex-shrink:0">🎨 Visi</button>
+    <button id="exp-nature" onclick="setExploreFilter('nature')" style="background:rgba(255,255,255,.08);border:none;border-radius:50px;padding:6px 16px;color:#9896B8;font-weight:700;font-size:12px;cursor:pointer;flex-shrink:0">🌿 Natura</button>
+  </div>
+
+  <!-- Search results (reuse from search screen) -->
+  <div id="explore-search-results" style="display:none;max-width:640px;margin:0 auto;padding:16px">
+    <div id="explore-search-output"></div>
+  </div>
+
+  <!-- Posts grid -->
+  <div id="explore-grid" style="max-width:640px;margin:0 auto">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;padding:2px" id="explore-posts-grid">
+      <div style="grid-column:1/-1;text-align:center;padding:40px;color:#9896B8">Caricamento...</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- CHAT INBOX -->
+<div class="screen" id="scr-chat" style="background:#0F0E1A;min-height:100vh;padding-bottom:70px">
+  <div style="background:#161525;border-bottom:1px solid rgba(255,255,255,.08);padding:12px 16px;position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between">
+    <span style="font-weight:800;font-size:18px;color:#fff">💬 Messaggi</span>
+    <div id="chat-unread-badge" style="display:none;background:#e74c3c;border-radius:50px;padding:2px 8px;font-size:11px;font-weight:800;color:#fff"></div>
+  </div>
+  <div id="chat-inbox" style="max-width:640px;margin:0 auto">
+    <div style="text-align:center;padding:40px;color:#9896B8">Caricamento...</div>
+  </div>
+</div>
+
+<!-- SINGLE DM CHAT -->
+<div class="screen" id="scr-dm" style="background:#0F0E1A;min-height:100vh;display:flex;flex-direction:column">
+  <div style="background:#161525;border-bottom:1px solid rgba(255,255,255,.08);padding:10px 16px;position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:10px">
+    <button onclick="navTo('chat')" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;color:#fff;font-size:16px;cursor:pointer;flex-shrink:0">←</button>
+    <div id="dm-header-avatar" style="width:36px;height:36px;border-radius:50%;background:#2d2a4a;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">👤</div>
+    <span id="dm-header-name" style="font-weight:800;font-size:15px;color:#fff;flex:1"></span>
+  </div>
+  <div id="dm-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;max-width:640px;margin:0 auto;width:100%;padding-bottom:70px"></div>
+  <div style="position:fixed;bottom:0;left:0;right:0;background:#161525;border-top:1px solid rgba(255,255,255,.08);padding:10px 16px;z-index:10">
+    <div style="max-width:640px;margin:0 auto;display:flex;gap:8px;align-items:center">
+      <input id="dm-input" type="text" placeholder="Scrivi un messaggio..."
+        onkeydown="if(event.key==='Enter')sendDM()"
+        style="flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:50px;padding:10px 16px;color:#fff;font-family:'Baloo 2',sans-serif;font-size:14px;outline:none"/>
+      <button onclick="sendDM()" style="background:#8B5CF6;border:none;border-radius:50%;width:40px;height:40px;color:#fff;font-size:18px;cursor:pointer;flex-shrink:0">↑</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- SKILL TREE SCREEN -->
+<div class="screen" id="scr-skilltree" style="background:#0A0918;min-height:100vh;padding-bottom:80px">
+  <div style="background:rgba(10,9,24,.95);backdrop-filter:blur(10px);padding:12px 16px;position:sticky;top:0;z-index:10;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px">
+    <button onclick="navTo('home')" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;color:#fff;font-size:16px;cursor:pointer;flex-shrink:0">←</button>
+    <span style="font-weight:800;font-size:18px;color:#fff;flex:1">🌳 Skill Tree</span>
+    <div style="font-size:11px;color:#9896B8" id="st-stats"></div>
+  </div>
+
+  <!-- Legend -->
+  <div style="display:flex;gap:12px;padding:10px 16px;overflow-x:auto;border-bottom:1px solid rgba(255,255,255,.06)">
+    <div style="display:flex;align-items:center;gap:5px;flex-shrink:0"><div style="width:12px;height:12px;border-radius:50%;background:#3DBE7A"></div><span style="font-size:10px;color:#9896B8">Completato</span></div>
+    <div style="display:flex;align-items:center;gap:5px;flex-shrink:0"><div style="width:12px;height:12px;border-radius:50%;background:#8B5CF6"></div><span style="font-size:10px;color:#9896B8">In corso</span></div>
+    <div style="display:flex;align-items:center;gap:5px;flex-shrink:0"><div style="width:12px;height:12px;border-radius:50%;background:#2d2a4a;border:1px solid #555"></div><span style="font-size:10px;color:#9896B8">Disponibile</span></div>
+    <div style="display:flex;align-items:center;gap:5px;flex-shrink:0"><div style="width:12px;height:12px;border-radius:50%;background:#1a1a2e;border:1px dashed #333"></div><span style="font-size:10px;color:#9896B8">Bloccato</span></div>
+    <div style="display:flex;align-items:center;gap:5px;flex-shrink:0"><div style="width:12px;height:12px;border-radius:50%;background:linear-gradient(135deg,#FFD60A,#FF9500)"></div><span style="font-size:10px;color:#9896B8">PRO</span></div>
+  </div>
+
+  <div id="skill-tree-container" style="padding:20px 16px;max-width:700px;margin:0 auto"></div>
+</div>
+
+
+<!-- DRAWPASS SHOP -->
+<div class="screen" id="scr-drawpass" style="background:#F7F5FF;padding-bottom:40px">
+  <div style="background:linear-gradient(135deg,#1C1B2E,#2d2a4a);padding:20px 20px 30px">
+    <div style="max-width:600px;margin:0 auto">
+      <button onclick="renderHome();showScreen(A.prevScreen||'home')" style="background:rgba(255,255,255,.1);border:none;border-radius:50px;padding:4px 12px;color:#9896B8;font-weight:700;font-size:11px;cursor:pointer;margin-bottom:16px">&#8592; Indietro</button>
+      <div style="text-align:center">
+        <div style="font-size:52px;margin-bottom:8px">🎟️</div>
+        <h1 style="font-weight:800;font-size:24px;color:#fff;margin-bottom:4px">DrawPass</h1>
+        <p style="color:#9896B8;font-size:12px">Token per sbloccare lezioni singole</p>
+        <div style="background:rgba(255,214,10,.15);border:2px solid rgba(255,214,10,.3);border-radius:50px;padding:12px 28px;display:inline-flex;align-items:center;gap:10px;margin-top:12px">
+          <span style="font-size:24px"><svg width="22" height="22" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 1L23 10L12 23L1 10Z" fill="#FFD60A" stroke="#C8A000" stroke-width="1.5"/><path d="M12 8L18 13L12 23L6 13Z" fill="#C8A000"/><line x1="12" y1="15" x2="12" y2="23" stroke="#1C1B2E" stroke-width="2" stroke-linecap="round"/></svg></span>
+          <div>
+            <div id="dp-balance" style="font-weight:800;font-size:28px;color:#FFD60A;line-height:1">0</div>
+            <div style="color:#9896B8;font-size:11px;text-align:center">DrawToken</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="max-width:600px;margin:0 auto;padding:0 20px">
+    <!-- Free tokens section -->
+    <div style="background:#fff;border-radius:16px;padding:16px;margin-top:-16px;box-shadow:0 8px 24px rgba(28,27,46,.1);margin-bottom:16px">
+      <div style="font-weight:800;font-size:14px;color:#1C1B2E;margin-bottom:12px">🎁 Token Gratuiti</div>
+      <div id="free-tokens-list"></div>
+    </div>
+    <!-- Buy token packs -->
+    <div style="font-weight:800;font-size:14px;color:#1C1B2E;margin-bottom:10px">🛍️ Acquista Token</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px" id="token-packs"></div>
+    <!-- Unlocked lessons -->
+    <div id="unlocked-with-tokens-section" style="display:none">
+      <div style="font-weight:800;font-size:14px;color:#1C1B2E;margin-bottom:10px">🔓 Lezioni sbloccate con token</div>
+      <div id="unlocked-with-tokens-list"></div>
+    </div>
+    <!-- How it works -->
+    <div style="background:#f0eeff;border-radius:14px;padding:14px;margin-top:4px">
+      <div style="font-weight:800;font-size:13px;color:#8B5CF6;margin-bottom:8px">Come funzionano i DrawToken?</div>
+      <div style="font-size:12px;color:#4A4868;line-height:1.8">
+        🪙 5 token = 1 lezione PRO sbloccata per sempre<br>
+        🎁 Guadagni token gratis completando i tutorial<br>
+        👑 Con PRO accedi a tutto senza usare token<br>
+        ⏳ I token non scadono mai
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div id="modal-cfg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:900;align-items:center;justify-content:center;padding:16px">
+  <div style="background:#fff;border-radius:22px;width:100%;max-width:440px;max-height:90vh;overflow:auto">
+    <div style="padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #f0eeff;position:sticky;top:0;background:#fff">
+      <span style="font-weight:800;font-size:17px;color:#1C1B2E">⚙️ Impostazioni</span>
+      <button onclick="hideCfg()" style="background:#f0eeff;border:none;border-radius:50%;width:30px;height:30px;font-size:15px">✕</button>
+    </div>
+    <div style="padding:14px 20px">
+      <p style="color:#9896B8;font-size:12px;margin-bottom:12px;line-height:1.6">📧 <strong>EmailJS</strong> - Crea account su <strong>emailjs.com</strong>, aggiungi servizio Gmail e template con <code style="font-size:10px">{{{to_email}}}, {{{user_name}}}, {{{total_users}}}</code>.</p>
+
+      <!-- Tutorial Icons Guide -->
+      <div style="background:#f9f7ff;border-radius:12px;padding:12px;margin-bottom:14px;border:1px solid #e0ddf5">
+        <div style="font-weight:800;font-size:12px;color:#1C1B2E;margin-bottom:8px">🎨 Icone Tutorial</div>
+        <p style="color:#9896B8;font-size:11px;margin-bottom:8px;line-height:1.5">Modifica le icone direttamente da <strong>Supabase → Table Editor → dl_tutorials</strong>, colonna <code style="font-size:10px">icon</code>. Copia un'emoji qui sotto:</p>
+        <div id="emoji-grid" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
+        <p style="color:#9896B8;font-size:10px">Tocca un'emoji per copiarla negli appunti</p>
+      </div>
+      <label style="font-weight:700;font-size:11px;color:#4A4868;display:block;margin-bottom:3px">Admin email</label>
+      <input class="inp" id="cfg-email" type="email" style="margin-bottom:9px;font-size:13px"/>
+      <label style="font-weight:700;font-size:11px;color:#4A4868;display:block;margin-bottom:3px">Service ID</label>
+      <input class="inp" id="cfg-svc" type="text" style="margin-bottom:9px;font-size:13px"/>
+      <label style="font-weight:700;font-size:11px;color:#4A4868;display:block;margin-bottom:3px">Template ID</label>
+      <input class="inp" id="cfg-tpl" type="text" style="margin-bottom:9px;font-size:13px"/>
+      <label style="font-weight:700;font-size:11px;color:#4A4868;display:block;margin-bottom:3px">Public Key</label>
+      <input class="inp" id="cfg-key" type="text" style="margin-bottom:14px;font-size:13px"/>
+      <button class="btn" id="cfg-save-btn" onclick="saveCfg()" style="background:linear-gradient(135deg,#8B5CF6,#6d28d9);color:#fff;margin-bottom:10px">💾 Salva</button>
+      <button class="btn" id="theme-toggle-btn" onclick="toggleDarkMode()" style="background:rgba(255,255,255,.1);color:#fff;margin-bottom:18px">☀️ Modalità chiara</button>
+      <div style="font-weight:800;font-size:14px;color:#1C1B2E;margin-bottom:9px">👥 Iscritti (<span id="users-count">0</span>)</div>
+      <div id="users-list" style="max-height:150px;overflow:auto;border:2px solid #f0eeff;border-radius:10px;margin-bottom:10px">
+        <div style="padding:12px;text-align:center;color:#9896B8;font-size:11px">Nessun iscritto ancora.</div>
+      </div>
+      <button class="btn" onclick="doExportCSV()" style="background:#f0eeff;color:#8B5CF6;font-size:12px;padding:9px">⬇️ Esporta CSV</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════ CONSTANTS ═══════════════ */
+const BG = {animals:"#C8F5E0",faces:"#FFF3C8",architecture:"#C8E8F5",chiaroscuro:"#E0D4F5",nature:"#D0F0E4",food:"#FFE0C8"};
+const AC = {animals:"#3DBE7A",faces:"#D4A200",architecture:"#3B9FD4",chiaroscuro:"#8B5CF6",nature:"#2E9E6B",food:"#FF8C4B"};
+
+/* ═══════════════ STATE ═══════════════ */
+const A = {screen:'splash',user:null,pro:false,progress:{},cat:null,lesson:null,step:0,payPlan:'monthly',allUsers:[]};
+
+
+/* ═══════════════  */</script>
 
 <!-- BOTTOM NAV (Facebook style) -->
 <div id="bottom-nav" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#161525;border-top:1px solid rgba(255,255,255,.08);z-index:100;padding:0 8px;padding-bottom:env(safe-area-inset-bottom,0)">
