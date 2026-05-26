@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>DrawLearn v2.5</title>
+<title>DrawBound</title>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700;800&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -51,8 +51,8 @@ button{font-family:'Baloo 2',sans-serif;cursor:pointer}
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-  <meta name="apple-mobile-web-app-title" content="DrawLearn"/>
-  <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;DrawLearn&quot;,&quot;short_name&quot;:&quot;DrawLearn&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;%231C1B2E&quot;,&quot;theme_color&quot;:&quot;%231C1B2E&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231C1B2E'/%3E%3Ctext y='.9em' font-size='80'%3E%E2%9C%8F%EF%B8%8F%3C/text%3E%3C/svg%3E&quot;,&quot;sizes&quot;:&quot;any&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}]}"/>
+  <meta name="apple-mobile-web-app-title" content="DrawBound"/>
+  <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;DrawBound&quot;,&quot;short_name&quot;:&quot;DrawBound&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;%231C1B2E&quot;,&quot;theme_color&quot;:&quot;%231C1B2E&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGl2ZWxsb18xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCA1OTUuMjggODQxLjg5Ij4KICA8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMzAuNC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogMi4xLjQgQnVpbGQgMjI2KSAgLS0+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5zdDAgewogICAgICAgIGZpbGw6ICMxYzFiMjk7CiAgICAgIH0KCiAgICAgIC5zdDEgewogICAgICAgIGZpbGw6IHVybCgjU2Z1bWF0dXJhX3NlbnphX25vbWVfMzIyKTsKICAgICAgfQoKICAgICAgLnN0MiB7CiAgICAgICAgZmlsdGVyOiB1cmwoI2dsb3cpOwogICAgICAgIGlzb2xhdGlvbjogaXNvbGF0ZTsKICAgICAgICBvcGFjaXR5OiAuMzsKICAgICAgfQoKICAgICAgLnN0MyB7CiAgICAgICAgc3Ryb2tlOiAjMWMxYjI5OwogICAgICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgICAgICBzdHJva2UtbWl0ZXJsaW1pdDogNC42NTsKICAgICAgICBzdHJva2Utd2lkdGg6IDE2LjI4cHg7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgICA8ZmlsdGVyIGlkPSJnbG93IiB4PSItMjAlIiB5PSItMjAlIiB3aWR0aD0iMTQwJSIgaGVpZ2h0PSIxNDAlIj4KICAgICAgPGZlR2F1c3NpYW5CbHVyIHJlc3VsdD0iYmx1ciIgc3RkRGV2aWF0aW9uPSIxNSIvPgogICAgICA8ZmVDb21wb3NpdGUgaW49IlNvdXJjZUdyYXBoaWMiIGluMj0iYmx1ciIvPgogICAgPC9maWx0ZXI+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9IlNmdW1hdHVyYV9zZW56YV9ub21lXzMyMiIgZGF0YS1uYW1lPSJTZnVtYXR1cmEgc2VuemEgbm9tZSAzMjIiIHgxPSItLjEzIiB5MT0iODQxLjk3IiB4Mj0iMS4wNiIgeTI9Ijg0MC43OCIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSgxOTguMDA2NyAyNTQ3NjcuOTYyMykgc2NhbGUoMTk5LjI2MDEgLTMwMi4yODg0KSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgogICAgICA8c3RvcCBvZmZzZXQ9Ii4zNyIgc3RvcC1jb2xvcj0iIzgxNDM5MyIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNmYmJhMDAiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IGNsYXNzPSJzdDAiIHg9IjM3LjIiIHk9IjE2MC41MSIgd2lkdGg9IjUyMC44NyIgaGVpZ2h0PSI1MjAuODciIHJ4PSIxMjcuODkiIHJ5PSIxMjcuODkiLz4KICA8ZyBjbGFzcz0ic3QyIj4KICAgIDxwb2x5Z29uIHBvaW50cz0iMjk3LjY0IDI2Mi44MiA0MDYuOTMgNDYwLjQ3IDI5Ny42NCA1ODguMzcgMTg4LjM1IDQ2MC40NyAyOTcuNjQgMjYyLjgyIi8+CiAgPC9nPgogIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0yOTcuNjQsMjQwLjkzbDExNi4zMiwyMDcuNzFjNC4yNSw2LjM1LDIuNTUsMTQuOTYtMy44LDE5LjIxLS45Ny42NS0yLjAyLDEuMTctMy4xMiwxLjU2bC0xMDkuNCwxMzEuNTUtMTA5LjQtMTMxLjU1Yy03LjIyLTIuNTMtMTEuMDItMTAuNDMtOC40OC0xNy42NS4zOS0xLjEuOTEtMi4xNSwxLjU2LTMuMTJsMTE2LjMyLTIwNy43MVoiLz4KICA8cGF0aCBjbGFzcz0ic3QzIiBkPSJNMjk3LjY0LDM2NS41NXYyMzUuNDEiLz4KICA8Y2lyY2xlIGNsYXNzPSJzdDAiIGN4PSIyOTcuNjQiIGN5PSIzNjUuNTUiIHI9IjIyLjE2Ii8+Cjwvc3ZnPg==&quot;,&quot;sizes&quot;:&quot;any&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}]}"/>
 </head>
 <body>
 
@@ -82,9 +82,9 @@ button{font-family:'Baloo 2',sans-serif;cursor:pointer}
       <p style="color:#fff;font-weight:700;margin:12px 0 8px">Termini d'uso:</p>
       <p>• Devi avere almeno 13 anni<br>
       • Non pubblicare contenuti offensivi, violenti o illegali<br>
-      • DrawLearn si riserva il diritto di rimuovere contenuti inappropriati<br>
+      • DrawBound si riserva il diritto di rimuovere contenuti inappropriati<br>
       • I pagamenti PRO sono soggetti a rimborso entro 14 giorni</p>
-      <p style="margin-top:12px;font-size:10px;color:#635BFF">Versione 1.0 — Maggio 2026 — DrawLearn di Gianluca Scattarella</p>
+      <p style="margin-top:12px;font-size:10px;color:#635BFF">Versione 1.0 — Maggio 2026 — DrawBound di Gianluca Scattarella</p>
     </div>
     <div style="padding:16px 20px;display:flex;flex-direction:column;gap:8px">
       <button onclick="acceptPrivacy()" style="width:100%;padding:13px;background:linear-gradient(135deg,#8B5CF6,#6d28d9);border:none;border-radius:12px;color:#fff;font-weight:800;font-size:14px;cursor:pointer">
@@ -101,8 +101,8 @@ button{font-family:'Baloo 2',sans-serif;cursor:pointer}
 
 <!-- SPLASH -->
 <div class="screen on" id="scr-splash" style="background:#1C1B2E;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;text-align:center">
-  <div style="font-size:72px;margin-bottom:16px">✏️</div>
-  <h1 style="font-size:40px;font-weight:800;color:#fff;margin:0">DrawLearn</h1>
+  <div style="margin-bottom:16px"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGl2ZWxsb18xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCA1OTUuMjggODQxLjg5Ij4KICA8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMzAuNC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogMi4xLjQgQnVpbGQgMjI2KSAgLS0+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5zdDAgewogICAgICAgIGZpbGw6ICMxYzFiMjk7CiAgICAgIH0KCiAgICAgIC5zdDEgewogICAgICAgIGZpbGw6IHVybCgjU2Z1bWF0dXJhX3NlbnphX25vbWVfMzIyKTsKICAgICAgfQoKICAgICAgLnN0MiB7CiAgICAgICAgZmlsdGVyOiB1cmwoI2dsb3cpOwogICAgICAgIGlzb2xhdGlvbjogaXNvbGF0ZTsKICAgICAgICBvcGFjaXR5OiAuMzsKICAgICAgfQoKICAgICAgLnN0MyB7CiAgICAgICAgc3Ryb2tlOiAjMWMxYjI5OwogICAgICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgICAgICBzdHJva2UtbWl0ZXJsaW1pdDogNC42NTsKICAgICAgICBzdHJva2Utd2lkdGg6IDE2LjI4cHg7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgICA8ZmlsdGVyIGlkPSJnbG93IiB4PSItMjAlIiB5PSItMjAlIiB3aWR0aD0iMTQwJSIgaGVpZ2h0PSIxNDAlIj4KICAgICAgPGZlR2F1c3NpYW5CbHVyIHJlc3VsdD0iYmx1ciIgc3RkRGV2aWF0aW9uPSIxNSIvPgogICAgICA8ZmVDb21wb3NpdGUgaW49IlNvdXJjZUdyYXBoaWMiIGluMj0iYmx1ciIvPgogICAgPC9maWx0ZXI+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9IlNmdW1hdHVyYV9zZW56YV9ub21lXzMyMiIgZGF0YS1uYW1lPSJTZnVtYXR1cmEgc2VuemEgbm9tZSAzMjIiIHgxPSItLjEzIiB5MT0iODQxLjk3IiB4Mj0iMS4wNiIgeTI9Ijg0MC43OCIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSgxOTguMDA2NyAyNTQ3NjcuOTYyMykgc2NhbGUoMTk5LjI2MDEgLTMwMi4yODg0KSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgogICAgICA8c3RvcCBvZmZzZXQ9Ii4zNyIgc3RvcC1jb2xvcj0iIzgxNDM5MyIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNmYmJhMDAiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IGNsYXNzPSJzdDAiIHg9IjM3LjIiIHk9IjE2MC41MSIgd2lkdGg9IjUyMC44NyIgaGVpZ2h0PSI1MjAuODciIHJ4PSIxMjcuODkiIHJ5PSIxMjcuODkiLz4KICA8ZyBjbGFzcz0ic3QyIj4KICAgIDxwb2x5Z29uIHBvaW50cz0iMjk3LjY0IDI2Mi44MiA0MDYuOTMgNDYwLjQ3IDI5Ny42NCA1ODguMzcgMTg4LjM1IDQ2MC40NyAyOTcuNjQgMjYyLjgyIi8+CiAgPC9nPgogIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0yOTcuNjQsMjQwLjkzbDExNi4zMiwyMDcuNzFjNC4yNSw2LjM1LDIuNTUsMTQuOTYtMy44LDE5LjIxLS45Ny42NS0yLjAyLDEuMTctMy4xMiwxLjU2bC0xMDkuNCwxMzEuNTUtMTA5LjQtMTMxLjU1Yy03LjIyLTIuNTMtMTEuMDItMTAuNDMtOC40OC0xNy42NS4zOS0xLjEuOTEtMi4xNSwxLjU2LTMuMTJsMTE2LjMyLTIwNy43MVoiLz4KICA8cGF0aCBjbGFzcz0ic3QzIiBkPSJNMjk3LjY0LDM2NS41NXYyMzUuNDEiLz4KICA8Y2lyY2xlIGNsYXNzPSJzdDAiIGN4PSIyOTcuNjQiIGN5PSIzNjUuNTUiIHI9IjIyLjE2Ii8+Cjwvc3ZnPg==" style="width:56px;height:56px;object-fit:contain;margin-bottom:8px"/></div>
+  <h1 style="font-size:40px;font-weight:800;color:#fff;margin:0">DrawBound</h1>
   <p style="color:#9896B8;margin-top:8px">Impara a disegnare, un passo alla volta</p>
   <p id="splash-status" style="color:#9896B8;font-size:12px;margin-top:12px;min-height:18px"> </p>
   <div style="margin-top:8px;display:flex;gap:8px">
@@ -118,8 +118,8 @@ button{font-family:'Baloo 2',sans-serif;cursor:pointer}
 <div class="screen" id="scr-auth" style="align-items:center;justify-content:center;padding:20px;">
   <div style="width:100%;max-width:440px">
     <div style="text-align:center;margin-bottom:20px">
-      <div style="font-size:50px;margin-bottom:5px">✏️</div>
-      <h1 style="font-weight:800;font-size:26px;color:#1C1B2E;margin-bottom:3px">DrawLearn</h1>
+      <div style="margin-bottom:8px"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGl2ZWxsb18xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCA1OTUuMjggODQxLjg5Ij4KICA8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMzAuNC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogMi4xLjQgQnVpbGQgMjI2KSAgLS0+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5zdDAgewogICAgICAgIGZpbGw6ICMxYzFiMjk7CiAgICAgIH0KCiAgICAgIC5zdDEgewogICAgICAgIGZpbGw6IHVybCgjU2Z1bWF0dXJhX3NlbnphX25vbWVfMzIyKTsKICAgICAgfQoKICAgICAgLnN0MiB7CiAgICAgICAgZmlsdGVyOiB1cmwoI2dsb3cpOwogICAgICAgIGlzb2xhdGlvbjogaXNvbGF0ZTsKICAgICAgICBvcGFjaXR5OiAuMzsKICAgICAgfQoKICAgICAgLnN0MyB7CiAgICAgICAgc3Ryb2tlOiAjMWMxYjI5OwogICAgICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgICAgICBzdHJva2UtbWl0ZXJsaW1pdDogNC42NTsKICAgICAgICBzdHJva2Utd2lkdGg6IDE2LjI4cHg7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgICA8ZmlsdGVyIGlkPSJnbG93IiB4PSItMjAlIiB5PSItMjAlIiB3aWR0aD0iMTQwJSIgaGVpZ2h0PSIxNDAlIj4KICAgICAgPGZlR2F1c3NpYW5CbHVyIHJlc3VsdD0iYmx1ciIgc3RkRGV2aWF0aW9uPSIxNSIvPgogICAgICA8ZmVDb21wb3NpdGUgaW49IlNvdXJjZUdyYXBoaWMiIGluMj0iYmx1ciIvPgogICAgPC9maWx0ZXI+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9IlNmdW1hdHVyYV9zZW56YV9ub21lXzMyMiIgZGF0YS1uYW1lPSJTZnVtYXR1cmEgc2VuemEgbm9tZSAzMjIiIHgxPSItLjEzIiB5MT0iODQxLjk3IiB4Mj0iMS4wNiIgeTI9Ijg0MC43OCIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSgxOTguMDA2NyAyNTQ3NjcuOTYyMykgc2NhbGUoMTk5LjI2MDEgLTMwMi4yODg0KSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgogICAgICA8c3RvcCBvZmZzZXQ9Ii4zNyIgc3RvcC1jb2xvcj0iIzgxNDM5MyIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNmYmJhMDAiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IGNsYXNzPSJzdDAiIHg9IjM3LjIiIHk9IjE2MC41MSIgd2lkdGg9IjUyMC44NyIgaGVpZ2h0PSI1MjAuODciIHJ4PSIxMjcuODkiIHJ5PSIxMjcuODkiLz4KICA8ZyBjbGFzcz0ic3QyIj4KICAgIDxwb2x5Z29uIHBvaW50cz0iMjk3LjY0IDI2Mi44MiA0MDYuOTMgNDYwLjQ3IDI5Ny42NCA1ODguMzcgMTg4LjM1IDQ2MC40NyAyOTcuNjQgMjYyLjgyIi8+CiAgPC9nPgogIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0yOTcuNjQsMjQwLjkzbDExNi4zMiwyMDcuNzFjNC4yNSw2LjM1LDIuNTUsMTQuOTYtMy44LDE5LjIxLS45Ny42NS0yLjAyLDEuMTctMy4xMiwxLjU2bC0xMDkuNCwxMzEuNTUtMTA5LjQtMTMxLjU1Yy03LjIyLTIuNTMtMTEuMDItMTAuNDMtOC40OC0xNy42NS4zOS0xLjEuOTEtMi4xNSwxLjU2LTMuMTJsMTE2LjMyLTIwNy43MVoiLz4KICA8cGF0aCBjbGFzcz0ic3QzIiBkPSJNMjk3LjY0LDM2NS41NXYyMzUuNDEiLz4KICA8Y2lyY2xlIGNsYXNzPSJzdDAiIGN4PSIyOTcuNjQiIGN5PSIzNjUuNTUiIHI9IjIyLjE2Ii8+Cjwvc3ZnPg==" style="width:56px;height:56px;object-fit:contain;margin-bottom:8px"/></div>
+      <h1 style="font-weight:800;font-size:26px;color:#1C1B2E;margin-bottom:3px">DrawBound</h1>
       <p style="color:#9896B8;font-size:12px">Il tuo percorso artistico ti aspetta</p>
     </div>
     <div style="display:flex;background:#eeecf8;border-radius:14px;padding:4px;margin-bottom:18px">
@@ -216,7 +216,7 @@ button{font-family:'Baloo 2',sans-serif;cursor:pointer}
   <div style="background:#1C1B2E;padding:16px 20px 12px">
     <div style="max-width:700px;margin:0 auto;display:flex;align-items:center;justify-content:space-between">
       <div>
-        <div style="display:flex;align-items:center;gap:7px"><span style="font-size:20px">✏️</span><span style="font-weight:800;font-size:18px;color:#fff">DrawLearn</span></div>
+        <div style="display:flex;align-items:center;gap:7px"><span style="font-size:20px">✏️</span><span style="font-weight:800;font-size:18px;color:#fff">DrawBound</span></div>
         <div id="home-greeting" style="color:#9896B8;font-size:11px;margin-top:1px">Ciao!</div>
       </div>
       <div style="display:flex;align-items:center;gap:6px">
@@ -301,7 +301,7 @@ button{font-family:'Baloo 2',sans-serif;cursor:pointer}
     <div style="background:rgba(255,255,255,.05);border-radius:20px;padding:22px;border:1px solid rgba(255,255,255,.1)">
       <div style="text-align:center;margin-bottom:18px">
         <div style="font-size:48px;margin-bottom:4px">👑</div>
-        <h2 style="font-weight:800;font-size:22px;color:#fff;margin-bottom:3px">DrawLearn PRO</h2>
+        <h2 style="font-weight:800;font-size:22px;color:#fff;margin-bottom:3px">DrawBound PRO</h2>
         <p style="color:#9896B8;font-size:11px">Sblocca tutte le lezioni avanzate</p>
       </div>
       <div style="margin-bottom:16px">
@@ -347,7 +347,7 @@ button{font-family:'Baloo 2',sans-serif;cursor:pointer}
           <span style="margin-left:auto;font-size:10px;color:#9896B8">🔒 SSL</span>
         </div>
         <div id="checkout-plan-info" style="background:#f9f7ff;border-radius:10px;padding:10px;margin-bottom:14px;font-size:11px;display:flex;justify-content:space-between">
-          <span style="font-weight:700;color:#4A4868">DrawLearn PRO Mensile</span>
+          <span style="font-weight:700;color:#4A4868">DrawBound PRO Mensile</span>
           <span style="font-weight:800;color:#1C1B2E">€4,99/mese</span>
         </div>
         <div style="margin-bottom:9px">
@@ -439,7 +439,7 @@ button{font-family:'Baloo 2',sans-serif;cursor:pointer}
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
         <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
           <input type="checkbox" id="watermark-toggle" checked onchange="redrawCanvas()" style="width:16px;height:16px;accent-color:#8B5CF6"/>
-          <span style="font-size:12px;color:#9896B8;font-weight:600">Watermark DrawLearn</span>
+          <span style="font-size:12px;color:#9896B8;font-weight:600">Watermark DrawBound</span>
         </label>
       </div>
       <!-- Caption -->
@@ -469,7 +469,7 @@ button{font-family:'Baloo 2',sans-serif;cursor:pointer}
 <div class="screen" id="scr-feed" style="background:#0F0E1A;min-height:100vh;padding-bottom:70px">
   <!-- Feed top bar -->
   <div style="background:#161525;border-bottom:1px solid rgba(255,255,255,.08);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10">
-    <span style="font-weight:800;font-size:20px;color:#fff">✏️ DrawLearn</span>
+    <div style="display:flex;align-items:center;gap:8px"><img src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGl2ZWxsb18xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCA1OTUuMjggODQxLjg5Ij4KICA8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMzAuNC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogMi4xLjQgQnVpbGQgMjI2KSAgLS0+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5zdDAgewogICAgICAgIGZpbGw6ICMxYzFiMjk7CiAgICAgIH0KCiAgICAgIC5zdDEgewogICAgICAgIGZpbGw6IHVybCgjU2Z1bWF0dXJhX3NlbnphX25vbWVfMzIyKTsKICAgICAgfQoKICAgICAgLnN0MiB7CiAgICAgICAgZmlsdGVyOiB1cmwoI2dsb3cpOwogICAgICAgIGlzb2xhdGlvbjogaXNvbGF0ZTsKICAgICAgICBvcGFjaXR5OiAuMzsKICAgICAgfQoKICAgICAgLnN0MyB7CiAgICAgICAgc3Ryb2tlOiAjMWMxYjI5OwogICAgICAgIHN0cm9rZS1saW5lY2FwOiByb3VuZDsKICAgICAgICBzdHJva2UtbWl0ZXJsaW1pdDogNC42NTsKICAgICAgICBzdHJva2Utd2lkdGg6IDE2LjI4cHg7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgICA8ZmlsdGVyIGlkPSJnbG93IiB4PSItMjAlIiB5PSItMjAlIiB3aWR0aD0iMTQwJSIgaGVpZ2h0PSIxNDAlIj4KICAgICAgPGZlR2F1c3NpYW5CbHVyIHJlc3VsdD0iYmx1ciIgc3RkRGV2aWF0aW9uPSIxNSIvPgogICAgICA8ZmVDb21wb3NpdGUgaW49IlNvdXJjZUdyYXBoaWMiIGluMj0iYmx1ciIvPgogICAgPC9maWx0ZXI+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9IlNmdW1hdHVyYV9zZW56YV9ub21lXzMyMiIgZGF0YS1uYW1lPSJTZnVtYXR1cmEgc2VuemEgbm9tZSAzMjIiIHgxPSItLjEzIiB5MT0iODQxLjk3IiB4Mj0iMS4wNiIgeTI9Ijg0MC43OCIgZ3JhZGllbnRUcmFuc2Zvcm09InRyYW5zbGF0ZSgxOTguMDA2NyAyNTQ3NjcuOTYyMykgc2NhbGUoMTk5LjI2MDEgLTMwMi4yODg0KSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgogICAgICA8c3RvcCBvZmZzZXQ9Ii4zNyIgc3RvcC1jb2xvcj0iIzgxNDM5MyIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNmYmJhMDAiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IGNsYXNzPSJzdDAiIHg9IjM3LjIiIHk9IjE2MC41MSIgd2lkdGg9IjUyMC44NyIgaGVpZ2h0PSI1MjAuODciIHJ4PSIxMjcuODkiIHJ5PSIxMjcuODkiLz4KICA8ZyBjbGFzcz0ic3QyIj4KICAgIDxwb2x5Z29uIHBvaW50cz0iMjk3LjY0IDI2Mi44MiA0MDYuOTMgNDYwLjQ3IDI5Ny42NCA1ODguMzcgMTg4LjM1IDQ2MC40NyAyOTcuNjQgMjYyLjgyIi8+CiAgPC9nPgogIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0yOTcuNjQsMjQwLjkzbDExNi4zMiwyMDcuNzFjNC4yNSw2LjM1LDIuNTUsMTQuOTYtMy44LDE5LjIxLS45Ny42NS0yLjAyLDEuMTctMy4xMiwxLjU2bC0xMDkuNCwxMzEuNTUtMTA5LjQtMTMxLjU1Yy03LjIyLTIuNTMtMTEuMDItMTAuNDMtOC40OC0xNy42NS4zOS0xLjEuOTEtMi4xNSwxLjU2LTMuMTJsMTE2LjMyLTIwNy43MVoiLz4KICA8cGF0aCBjbGFzcz0ic3QzIiBkPSJNMjk3LjY0LDM2NS41NXYyMzUuNDEiLz4KICA8Y2lyY2xlIGNsYXNzPSJzdDAiIGN4PSIyOTcuNjQiIGN5PSIzNjUuNTUiIHI9IjIyLjE2Ii8+Cjwvc3ZnPg==" style="width:28px;height:28px;object-fit:contain;flex-shrink:0"/><span style="font-weight:800;font-size:18px;color:#fff">DrawBound</span></div>
     <div style="display:flex;align-items:center;gap:8px">
       <button onclick="navTo('explore')" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;font-size:17px;cursor:pointer">🔍</button>
       <button onclick="navTo('chat')" style="position:relative;background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;font-size:17px;cursor:pointer">
@@ -1037,7 +1037,7 @@ function showScreen(name){
     var info=document.getElementById("checkout-plan-info");
     if(info){
       var monthly=A.payPlan==="monthly";
-      info.innerHTML="<span style='font-weight:700;color:#4A4868'>DrawLearn PRO "+(monthly?"Mensile":"Annuale")+"</span><span style='font-weight:800;color:#1C1B2E'>"+(monthly?"€4,99/mese":"€39,99/anno")+"</span>";
+      info.innerHTML="<span style='font-weight:700;color:#4A4868'>DrawBound PRO "+(monthly?"Mensile":"Annuale")+"</span><span style='font-weight:800;color:#1C1B2E'>"+(monthly?"€4,99/mese":"€39,99/anno")+"</span>";
     }
     setTimeout(initPayPal, 100); // init PayPal after DOM is visible
   }
@@ -1592,7 +1592,7 @@ function setPayPlan(plan){
   document.getElementById("plan-y").style.background=plan==="yearly"?"rgba(255,214,10,.1)":"rgba(255,255,255,.05)";
   document.getElementById("plan-y").querySelectorAll("div")[1].style.color=plan==="yearly"?"#FFD60A":"#9896B8";
   var info=document.getElementById("checkout-plan-info");
-  if(info)info.innerHTML='<span style="font-weight:700;color:#4A4868">DrawLearn PRO '+(plan==="monthly"?"Mensile":"Annuale")+'</span><span style="font-weight:800;color:#1C1B2E">'+(plan==="monthly"?"€4,99/mese":"€39,99/anno")+'</span>';
+  if(info)info.innerHTML='<span style="font-weight:700;color:#4A4868">DrawBound PRO '+(plan==="monthly"?"Mensile":"Annuale")+'</span><span style="font-weight:800;color:#1C1B2E">'+(plan==="monthly"?"€4,99/mese":"€39,99/anno")+'</span>';
   var pb=document.getElementById("pay-btn");if(pb)pb.textContent="🔒 Paga "+(plan==="monthly"?"€4,99":"€39,99");
 }
 async function doPay(){
@@ -1684,7 +1684,7 @@ var ACHIEVEMENTS = [
   {id:"shade",  icon:"🌗", name:"Maestro ombre",     desc:"Completa tutto il Chiaroscuro",           req:{t:"cat",id:"chiaroscuro"}},
   {id:"nature2",icon:"🌿", name:"Naturalista",       desc:"Completa tutte le lezioni Natura",       req:{t:"cat",id:"nature"}},
   {id:"food2",  icon:"🍰", name:"Foodie artista",    desc:"Completa tutte le lezioni Cibo",         req:{t:"cat",id:"food"}},
-  {id:"pro",    icon:"👑", name:"DrawLearn PRO",     desc:"Attiva l'abbonamento PRO",               req:{t:"pro"}},
+  {id:"pro",    icon:"👑", name:"DrawBound PRO",     desc:"Attiva l'abbonamento PRO",               req:{t:"pro"}},
 ];
 
 function isUnlocked(req){
@@ -1842,7 +1842,7 @@ function navTo(screen){
   else if(screen==="explore"){ showScreen("explore"); loadExplore(); setTimeout(function(){var si=document.getElementById("explore-search");if(si)si.focus();},100); }
   else showScreen(screen);
   // Update nav tabs
-  ["feed","home","profile"].forEach(function(s){
+  ["feed","home","profile","chat"].forEach(function(s){
     var el=document.getElementById("nav-"+s);
     if(el) el.classList.toggle("active", s===screen);
   });
@@ -1925,7 +1925,8 @@ function buildPostCard(post, liked){
         '<button onclick="openPostDetail(\"'+post.id+'\")" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;color:#9896B8;font-weight:700;font-size:13px">'+
           '<span style="font-size:20px">💬</span> <span>'+post.comments_count+'</span>'+
         '</button>'+
-        '<button onclick="sharePostNative(\"'+post.image_url+'\",\"'+( post.caption||'')+'\")" style="background:none;border:none;cursor:pointer;color:#9896B8;font-size:20px;margin-left:auto">↗️</button>'+
+        '<button onclick="sharePostNative(\"'+post.image_url+'\",\"'+( post.caption||'')+'\")" style="background:none;border:none;cursor:pointer;color:#9896B8;font-size:20px">↗️</button>'+
+        '<button onclick="openRedline(\"'+post.id+'\",\"'+post.image_url+'\")" style="background:rgba(231,76,60,.15);border:1px solid rgba(231,76,60,.3);border-radius:50px;padding:4px 10px;color:#e74c3c;font-weight:700;font-size:11px;cursor:pointer;margin-left:auto">✏️ Redline</button>'+
       '</div>'+
       (post.caption?'<div style="font-size:13px;color:#fff;line-height:1.5;margin-bottom:4px"><span style="font-weight:800">'+post.user_name+'</span> '+post.caption+'</div>':'')+
       (post.tags?'<div style="font-size:12px;color:#8B5CF6;margin-top:3px">'+post.tags+'</div>':'')+
@@ -1970,7 +1971,7 @@ async function toggleLike(postId){
 
 async function sharePostNative(imageUrl, caption){
   if(navigator.share){
-    try{ await navigator.share({title:"DrawLearn",text:caption||"Guarda il mio disegno!",url:imageUrl}); }
+    try{ await navigator.share({title:"DrawBound",text:caption||"Guarda il mio disegno!",url:imageUrl}); }
     catch(e){}
   } else {
     var a=document.createElement("a");a.href=imageUrl;a.target="_blank";a.click();
@@ -2088,7 +2089,7 @@ async function openPostDetail(postId){
     content.innerHTML =
       '<img src="'+post.image_url+'" style="width:100%;display:block;max-height:400px;object-fit:cover"/>'+
       '<div style="padding:14px 16px">'+
-        '<div style="display:flex;gap:16px;margin-bottom:12px">'+
+        '<div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">'+
           '<button id="like-btn-'+post.id+'" onclick="toggleLike(\"'+post.id+'\")" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;color:'+( liked?"#e74c3c":"#9896B8")+';font-weight:700;font-size:14px">'+
             '<span style="font-size:22px">'+( liked?"❤️":"🤍")+'</span> <span id="likes-'+post.id+'">'+post.likes_count+'</span>'+
           '</button>'+
@@ -2394,6 +2395,178 @@ function renderSkillTree(catGrid){
     section.appendChild(row);
     treeEl.appendChild(section);
   });
+}
+
+
+/* ═══════════════ REDLINE ═══════════════ */
+var _redlineColor = "#e74c3c";
+var _redlineSize  = 4;
+var _redlineDrawing = false;
+var _redlineHistory = [];
+var _redlinePostId = null;
+var _redlinePostImg = null;
+
+function openRedline(postId, imageUrl){
+  if(!A.user){ showToast("Accedi per fare un redline",""); return; }
+  var done = Object.values(A.progress).filter(function(v){return v.completed;}).length;
+  if(done < 3){ showToast("Completa almeno 3 lezioni per fare redline",""); return; }
+  _redlinePostId = postId;
+  _redlinePostImg = imageUrl;
+  var modal = document.getElementById("modal-redline");
+  var img   = document.getElementById("redline-bg-img");
+  var canvas= document.getElementById("redline-canvas");
+  img.src = imageUrl;
+  img.onload = function(){
+    canvas.width  = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    canvas.style.width  = img.offsetWidth  + "px";
+    canvas.style.height = img.offsetHeight + "px";
+    _redlineHistory = [];
+    var ctx=canvas.getContext("2d");
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+  };
+  modal.style.display = "flex";
+}
+
+function closeRedline(){
+  document.getElementById("modal-redline").style.display = "none";
+}
+
+function setRedlineColor(color, btn){
+  _redlineColor = color;
+  document.querySelectorAll("#redline-colors button").forEach(function(b){
+    b.style.border = "none";
+  });
+  if(btn) btn.style.border = "3px solid #fff";
+}
+
+function clearRedline(){
+  var canvas = document.getElementById("redline-canvas");
+  var ctx = canvas.getContext("2d");
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  _redlineHistory = [];
+}
+
+function undoRedline(){
+  _redlineHistory.pop();
+  var canvas = document.getElementById("redline-canvas");
+  var ctx = canvas.getContext("2d");
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  _redlineHistory.forEach(function(stroke){
+    drawStroke(ctx, stroke);
+  });
+}
+
+function drawStroke(ctx, stroke){
+  if(!stroke||stroke.length<2) return;
+  ctx.strokeStyle = stroke[0].color;
+  ctx.lineWidth   = stroke[0].size;
+  ctx.lineCap     = "round";
+  ctx.lineJoin    = "round";
+  ctx.beginPath();
+  ctx.moveTo(stroke[0].x, stroke[0].y);
+  for(var i=1;i<stroke.length;i++) ctx.lineTo(stroke[i].x,stroke[i].y);
+  ctx.stroke();
+}
+
+function getCanvasPos(canvas, e){
+  var rect = canvas.getBoundingClientRect();
+  var scaleX = canvas.width / rect.width;
+  var scaleY = canvas.height / rect.height;
+  var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  var clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  return {x:(clientX-rect.left)*scaleX, y:(clientY-rect.top)*scaleY};
+}
+
+// Attach canvas events after DOM loads
+document.addEventListener("DOMContentLoaded", function(){
+  var canvas = document.getElementById("redline-canvas");
+  if(!canvas) return;
+  var ctx = canvas.getContext("2d");
+  var currentStroke = [];
+
+  function startDraw(e){
+    e.preventDefault();
+    _redlineDrawing = true;
+    var size = parseInt(document.getElementById("redline-size").value)||4;
+    _redlineSize = size;
+    var pos = getCanvasPos(canvas,e);
+    currentStroke = [{x:pos.x,y:pos.y,color:_redlineColor,size:_redlineSize}];
+    ctx.strokeStyle = _redlineColor;
+    ctx.lineWidth = _redlineSize;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.beginPath();
+    ctx.moveTo(pos.x,pos.y);
+  }
+  function moveDraw(e){
+    if(!_redlineDrawing) return;
+    e.preventDefault();
+    var pos = getCanvasPos(canvas,e);
+    currentStroke.push({x:pos.x,y:pos.y,color:_redlineColor,size:_redlineSize});
+    ctx.lineTo(pos.x,pos.y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(pos.x,pos.y);
+  }
+  function endDraw(e){
+    if(!_redlineDrawing) return;
+    _redlineDrawing = false;
+    if(currentStroke.length>1) _redlineHistory.push(currentStroke);
+    currentStroke = [];
+  }
+  canvas.addEventListener("mousedown",  startDraw);
+  canvas.addEventListener("mousemove",  moveDraw);
+  canvas.addEventListener("mouseup",    endDraw);
+  canvas.addEventListener("touchstart", startDraw, {passive:false});
+  canvas.addEventListener("touchmove",  moveDraw,  {passive:false});
+  canvas.addEventListener("touchend",   endDraw);
+});
+
+async function submitRedline(){
+  var canvas  = document.getElementById("redline-canvas");
+  var bgImg   = document.getElementById("redline-bg-img");
+  if(_redlineHistory.length===0){ showToast("Disegna qualcosa prima!",""); return; }
+
+  // Merge background + redline strokes into one image
+  var merged = document.createElement("canvas");
+  merged.width  = canvas.width;
+  merged.height = canvas.height;
+  var mctx = merged.getContext("2d");
+  mctx.drawImage(bgImg, 0, 0, merged.width, merged.height);
+  mctx.drawImage(canvas, 0, 0);
+
+  // Convert to blob and upload
+  merged.toBlob(async function(blob){
+    var btn = document.querySelector("#modal-redline button:last-child");
+    if(btn){ btn.textContent="Pubblicazione..."; btn.disabled=true; }
+    try {
+      var file = new File([blob],"redline-"+Date.now()+".jpg",{type:"image/jpeg"});
+      var path = "Posts/redline-"+A.user.id+"-"+Date.now()+".jpg";
+      var url  = await sbUpload("Posts", path, file);
+      if(!url) throw new Error("Upload fallito");
+      await sbFetch("POST","dl_posts",{body:{
+        user_id:A.user.id, user_name:A.user.name, user_avatar:A.user.avatar||"👤",
+        image_url:url,
+        caption:"✏️ Redline di @"+A.user.name.replace(/ /g,"_"),
+        tags:"#redline #drawbound #feedback",
+        lesson_id: _redlinePostId||"",
+        likes_count:0, comments_count:0,
+        created_at:new Date().toISOString()
+      }});
+      // Notify original post author
+      if(_redlinePostId){
+        var orig=await sbFetch("GET","dl_posts",{filters:"id=eq."+_redlinePostId,select:"user_id,user_name"});
+        if(orig&&orig[0]) sendNotification(orig[0].user_id,"redline","ha fatto un redline del tuo disegno!",_redlinePostId,url);
+      }
+      closeRedline();
+      showToast("Redline pubblicato!","✏️");
+      navTo("feed");
+    } catch(e){
+      showToast("Errore: "+e.message,"");
+    }
+    if(btn){ btn.textContent="Pubblica"; btn.disabled=false; }
+  }, "image/jpeg", 0.92);
 }
 
 /* ═══════════════ BIO EDITING ═══════════════ */
@@ -3036,7 +3209,7 @@ var HOME_REWARDS_FREE = [
 var HOME_REWARDS_PREMIUM = [
   {id:"rp_tok_10", icon:"🪙", name:"10 DrawToken",  desc:"Starter Pack",   price:"1,99", tokens:3},
   {id:"rp_tok_25", icon:"🪙", name:"25 DrawToken",  desc:"Explorer Pack",  price:"4,99", tokens:10},
-  {id:"rp_pro",    icon:"👑", name:"DrawLearn PRO", desc:"Accesso totale", price:"4,99/mese", pro:true},
+  {id:"rp_pro",    icon:"👑", name:"DrawBound PRO", desc:"Accesso totale", price:"4,99/mese", pro:true},
 ];
 
 function toggleRewards(){
@@ -3399,8 +3572,8 @@ function initPayPal(){
     createOrder: function(data, actions){
       var amount = A.payPlan === "yearly" ? "39.99" : "4.99";
       var desc = A.payPlan === "yearly"
-        ? "DrawLearn PRO - Abbonamento Annuale"
-        : "DrawLearn PRO - Abbonamento Mensile";
+        ? "DrawBound PRO - Abbonamento Annuale"
+        : "DrawBound PRO - Abbonamento Mensile";
       return actions.order.create({
         purchase_units: [{
           description: desc,
@@ -3408,7 +3581,7 @@ function initPayPal(){
         }],
         application_context: {
           shipping_preference: "NO_SHIPPING",
-          brand_name: "DrawLearn"
+          brand_name: "DrawBound"
         }
       });
     },
@@ -3479,7 +3652,7 @@ function showPhotoModal(dataUrl){
   var cap=document.getElementById("photo-caption");
   if(cap){
     var tutName=A.lesson?A.lesson.title:"il mio disegno";
-    cap.value="Ho imparato a disegnare "+tutName+" con DrawLearn! #DrawLearn #Arte #Tutorial";
+    cap.value="Ho imparato a disegnare "+tutName+" con DrawBound! #DrawBound #Arte #Tutorial";
   }
   document.getElementById("modal-photo").style.display="flex";
   // Draw after modal is visible
@@ -3506,7 +3679,7 @@ function redrawCanvas(){
       var fs=Math.round(barH*0.55);
       ctx.font="bold "+fs+"px 'Arial', sans-serif";
       ctx.fillStyle="#fff";
-      ctx.fillText("✏️ DrawLearn",8,canvas.height-Math.round(barH*0.22));
+      ctx.fillText("DrawBound",8,canvas.height-Math.round(barH*0.22));
       if(A.lesson){
         ctx.font=Math.round(fs*0.8)+"px 'Arial', sans-serif";
         ctx.fillStyle="rgba(255,255,255,0.75)";
@@ -3527,12 +3700,12 @@ function getCanvasBlob(cb){
 
 async function sharePhoto(){
   var cap=document.getElementById("photo-caption");
-  var text=(cap?cap.value:"DrawLearn")+("\n\nhttps://gianluca85vt.github.io/drawlearn");
+  var text=(cap?cap.value:"DrawBound")+("\n\nhttps://gianluca85vt.github.io/drawlearn");
   getCanvasBlob(async function(blob){
     var file=new File([blob],"drawlearn-disegno.jpg",{type:"image/jpeg"});
     if(navigator.share){
       try{
-        var sd={title:"DrawLearn - "+( A.lesson?A.lesson.title:"Il mio disegno"),text:text};
+        var sd={title:"DrawBound - "+( A.lesson?A.lesson.title:"Il mio disegno"),text:text};
         if(navigator.canShare&&navigator.canShare({files:[file]})) sd.files=[file];
         else sd.url="https://gianluca85vt.github.io/drawlearn";
         await navigator.share(sd);
@@ -3879,9 +4052,14 @@ init();
       <span class="nav-icon">🎨</span>
       <span class="nav-label">Impara</span>
     </button>
-    <button class="nav-tab" id="nav-new" onclick="showNewPost()" style="position:relative">
-      <div style="width:48px;height:48px;background:linear-gradient(135deg,#8B5CF6,#3DBE7A);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin-top:-16px;box-shadow:0 4px 20px rgba(139,92,246,.5)">➕</div>
+    <button class="nav-tab" id="nav-new" onclick="showNewPost()" style="position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center">
+      <div style="width:50px;height:50px;background:linear-gradient(135deg,#8B5CF6,#3DBE7A);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;margin-top:-18px;box-shadow:0 4px 20px rgba(139,92,246,.5)">➕</div>
       <span class="nav-label" style="margin-top:3px">Post</span>
+    </button>
+    <button class="nav-tab" id="nav-chat" onclick="navTo('chat')" style="position:relative">
+      <span class="nav-icon">💬</span>
+      <div id="chat-badge" style="display:none;position:absolute;top:4px;right:calc(50% - 18px);background:#e74c3c;border-radius:50px;min-width:14px;height:14px;font-size:8px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 3px"></div>
+      <span class="nav-label">Chat</span>
     </button>
     <button class="nav-tab" id="nav-profile" onclick="navTo('profile')">
       <span class="nav-icon" id="nav-avatar-icon">👤</span>
@@ -3922,6 +4100,38 @@ init();
 </div>
 <input type="file" id="post-img-camera" accept="image/*" capture="environment" style="display:none" onchange="onPostImageSelected(event)"/>
 <input type="file" id="post-img-gallery" accept="image/*" style="display:none" onchange="onPostImageSelected(event)"/>
+
+
+<!-- REDLINE MODAL -->
+<div id="modal-redline" style="display:none;position:fixed;inset:0;background:#000;z-index:985;flex-direction:column">
+  <!-- Header -->
+  <div style="background:#1C1B2E;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0">
+    <button onclick="closeRedline()" style="background:rgba(255,255,255,.1);border:none;border-radius:50%;width:34px;height:34px;color:#fff;font-size:16px;cursor:pointer;flex-shrink:0">✕</button>
+    <span style="font-weight:800;font-size:15px;color:#fff;flex:1">✏️ Redline</span>
+    <button onclick="submitRedline()" style="background:#e74c3c;border:none;border-radius:50px;padding:7px 18px;color:#fff;font-weight:800;font-size:13px;cursor:pointer">Pubblica</button>
+  </div>
+  <!-- Tools -->
+  <div style="background:#1C1B2E;padding:8px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.1)">
+    <span style="font-size:11px;color:#9896B8;font-weight:700">Colore:</span>
+    <div id="redline-colors" style="display:flex;gap:6px">
+      <button onclick="setRedlineColor('#e74c3c',this)" style="width:24px;height:24px;background:#e74c3c;border-radius:50%;border:3px solid #fff;cursor:pointer"></button>
+      <button onclick="setRedlineColor('#3DBE7A',this)" style="width:24px;height:24px;background:#3DBE7A;border-radius:50%;border:none;cursor:pointer"></button>
+      <button onclick="setRedlineColor('#FFD60A',this)" style="width:24px;height:24px;background:#FFD60A;border-radius:50%;border:none;cursor:pointer"></button>
+      <button onclick="setRedlineColor('#fff',this)" style="width:24px;height:24px;background:#fff;border-radius:50%;border:none;cursor:pointer"></button>
+    </div>
+    <span style="font-size:11px;color:#9896B8;font-weight:700;margin-left:6px">Spessore:</span>
+    <input type="range" id="redline-size" min="2" max="20" value="4" style="width:70px;accent-color:#e74c3c"/>
+    <button onclick="clearRedline()" style="background:rgba(255,255,255,.1);border:none;border-radius:6px;padding:4px 10px;color:#fff;font-size:11px;cursor:pointer;margin-left:auto">🗑️ Cancella</button>
+    <button onclick="undoRedline()" style="background:rgba(255,255,255,.1);border:none;border-radius:6px;padding:4px 10px;color:#fff;font-size:11px;cursor:pointer">↩ Annulla</button>
+  </div>
+  <!-- Canvas area -->
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative">
+    <div style="position:relative;max-width:100%;max-height:100%">
+      <img id="redline-bg-img" style="display:block;max-width:100vw;max-height:calc(100vh - 120px);object-fit:contain" src=""/>
+      <canvas id="redline-canvas" style="position:absolute;top:0;left:0;cursor:crosshair;touch-action:none"></canvas>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
