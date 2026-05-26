@@ -43,6 +43,14 @@ button{font-family:'Baloo 2',sans-serif;cursor:pointer}
     body.light-mode #scr-home{background:#F0EEFF!important}
     body.light-mode .card{background:#fff!important;box-shadow:0 4px 14px rgba(28,27,46,.08)!important}
 
+
+    /* A11y contrast improvements */
+    .text-secondary { color: #B8B5CC !important; font-weight: 500; }
+    .text-muted { color: #9896B8 !important; font-weight: 500; }
+    body { -webkit-font-smoothing: antialiased; }
+    /* Improve small text readability */
+    [style*="font-size:9px"], [style*="font-size:10px"], [style*="font-size:11px"] { font-weight: 500; }
+
 </style>
   <!-- PayPal SDK: sostituisci YOUR_PAYPAL_CLIENT_ID con il tuo Client ID da developer.paypal.com -->
   <!-- PayPal SDK loaded dynamically when needed -->
@@ -294,13 +302,23 @@ button{font-family:'Baloo 2',sans-serif;cursor:pointer}
       </div>
 
       <!-- Progress bar -->
-      <div style="margin-bottom:8px">
+      <div style="margin-bottom:6px">
         <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-          <span id="progress-text" style="font-size:11px;color:#9896B8">0 di 18 lezioni</span>
+          <span id="progress-text" style="font-size:11px;color:#9896B8;font-weight:500">0 di 18 lezioni</span>
           <span id="hero-next-level" style="font-size:10px;color:#8B5CF6;font-weight:700"></span>
         </div>
         <div style="background:rgba(255,255,255,.08);border-radius:50px;height:7px;overflow:hidden">
-          <div id="progress-bar" style="width:0%;background:linear-gradient(90deg,#8B5CF6,#3DBE7A);height:100%;border-radius:50px;transition:width .8s cubic-bezier(.4,0,.2,1)"></div>
+          <div id="progress-bar" style="width:0%;background:linear-gradient(90deg,#8B5CF6,#3DBE7A);height:100%;border-radius:50px;transition:width .8s"></div>
+        </div>
+      </div>
+      <!-- XP Bar -->
+      <div style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+          <span id="xp-text" style="font-size:10px;color:#FFD60A;font-weight:700">Lv.0 · 0 XP</span>
+          <span style="font-size:10px;color:#9896B8;font-weight:500">Guadagna XP completando lezioni</span>
+        </div>
+        <div style="background:rgba(255,255,255,.06);border-radius:50px;height:5px;overflow:hidden">
+          <div id="xp-bar" style="width:0%;background:linear-gradient(90deg,#FFD60A,#FF9500);height:100%;border-radius:50px;transition:width .6s"></div>
         </div>
       </div>
 
@@ -609,8 +627,9 @@ button{font-family:'Baloo 2',sans-serif;cursor:pointer}
 
   <!-- Filter tabs -->
   <div style="display:flex;gap:8px;padding:10px 16px;background:#0F0E1A;border-bottom:1px solid rgba(255,255,255,.05)">
-    <button id="feed-filter-all" onclick="setFeedFilter('all')" style="flex:1;padding:8px;background:#8B5CF6;border:none;border-radius:50px;color:#fff;font-weight:800;font-size:12px;cursor:pointer">Tutti</button>
-    <button id="feed-filter-following" onclick="setFeedFilter('following')" style="flex:1;padding:8px;background:rgba(255,255,255,.06);border:none;border-radius:50px;color:#9896B8;font-weight:800;font-size:12px;cursor:pointer">Seguiti</button>
+    <button id="feed-filter-all" onclick="setFeedFilter('all')" style="flex:1;padding:8px;background:#8B5CF6;border:none;border-radius:50px;color:#fff;font-weight:700;font-size:12px;cursor:pointer">🔥 In Evidenza</button>
+    <button id="feed-filter-following" onclick="setFeedFilter('following')" style="flex:1;padding:8px;background:rgba(255,255,255,.06);border:none;border-radius:50px;color:#9896B8;font-weight:700;font-size:12px;cursor:pointer">👥 Seguiti</button>
+    <button id="feed-filter-new" onclick="setFeedFilter('new')" style="flex:1;padding:8px;background:rgba(255,255,255,.06);border:none;border-radius:50px;color:#9896B8;font-weight:700;font-size:12px;cursor:pointer">🆕 Recenti</button>
   </div>
   <!-- Feed posts -->
   <div id="feed-posts" style="max-width:640px;margin:0 auto;padding:10px 0">
@@ -1485,7 +1504,7 @@ function renderHome(){
     if(pb) pb.innerHTML='<span style="background:linear-gradient(135deg,#FFD60A,#FF9500);border-radius:50px;padding:3px 10px;font-weight:800;font-size:10px;color:#fff">👑 PRO</span>';
     if(proCard) proCard.style.display="none";
   } else {
-    if(pb) pb.innerHTML='<button onclick="showScreen(\'paywall\')" style="background:linear-gradient(135deg,#FFD60A,#FF9500);border:none;border-radius:50px;padding:4px 10px;font-weight:800;font-size:10px;color:#fff;cursor:pointer">👑 PRO</button>';
+    if(pb) pb.innerHTML='<button onclick="showProBenefits()" style="background:linear-gradient(135deg,#FFD60A,#FF9500);border:none;border-radius:50px;padding:4px 10px;font-weight:800;font-size:10px;color:#fff;cursor:pointer">👑 PRO</button>';
     if(proCard) proCard.style.display="flex";
   }
 
@@ -1520,9 +1539,11 @@ function renderHome(){
   if(cc&&last&&last.catId){ cc.style.display="flex"; var ci=document.getElementById("continue-icon"); if(ci) ci.textContent=last.icon||"📝"; var ct=document.getElementById("continue-title"); if(ct) ct.textContent=last.title||"Lezione"; var cs=document.getElementById("continue-step"); if(cs) cs.textContent="Passo "+(last.step+1); }
   else if(cc) cc.style.display="none";
 
-  // Streak banner
+  // Streak banner + XP
   renderStreakBanner();
   updateTokenUI();
+  updateXPBar();
+  offerStreakFreeze();
 
   // Category grid
   var grid=document.getElementById("cat-grid"); grid.innerHTML="";
@@ -1658,6 +1679,7 @@ async function nextStep(){
   var done=ns>=tot;
   var prevDone=Object.values(A.progress).filter(function(v){return v.completed;}).length;
   A.progress[key]={completed:done,step:ns};
+  if(!done) addXP(5); // 5 XP per step
   // Save only this lesson's progress
   var uid_s=localGet("dl:uid");
   if(uid_s&&sbReady()){
@@ -1955,7 +1977,19 @@ async function renderFeed(){
 
   try {
     var posts;
-    if(_feedFilter === "following" && A.user){
+    if(_feedFilter === "new"){
+      // "In Evidenza" = trending in last 48h (sorted by likes, recent first)
+      var since48h=new Date(Date.now()-172800000).toISOString();
+      posts = await sbFetch("GET","dl_posts",{
+        filters:"created_at=gte."+since48h,
+        order:"likes_count.desc,created_at.desc",
+        limit:20
+      });
+      if(!posts||posts.length<3){
+        // Fallback: all posts by likes if not enough recent content
+        posts = await sbFetch("GET","dl_posts",{order:"likes_count.desc,created_at.desc",limit:20});
+      }
+    } else if(_feedFilter === "following" && A.user){
       var fol = await sbFetch("GET","dl_follows",{filters:"follower_id=eq."+A.user.id,select:"following_id"});
       if(!fol||!fol.length){
         container.innerHTML='<div style="text-align:center;padding:60px 20px"><div style="font-size:48px;margin-bottom:12px">👥</div><div style="font-weight:800;color:#fff;margin-bottom:8px">Non segui nessuno ancora</div><div style="color:#9896B8;font-size:13px">Scopri gli artisti nel feed generale</div><button onclick="setFeedFilter(\'all\')" style="margin-top:16px;background:#8B5CF6;border:none;border-radius:50px;padding:10px 24px;color:#fff;font-weight:800;cursor:pointer">Vedi tutti i post</button></div>';
@@ -1964,7 +1998,17 @@ async function renderFeed(){
       var ids = fol.map(function(f){return f.following_id;}).join(",");
       posts = await sbFetch("GET","dl_posts",{filters:"user_id=in.("+ids+")",order:"created_at.desc",limit:20});
     } else {
-      posts = await sbFetch("GET","dl_posts",{order:"created_at.desc",limit:20});
+      // "In Evidenza" = trending in last 48h (sorted by likes, recent first)
+      var since48h=new Date(Date.now()-172800000).toISOString();
+      posts = await sbFetch("GET","dl_posts",{
+        filters:"created_at=gte."+since48h,
+        order:"likes_count.desc,created_at.desc",
+        limit:20
+      });
+      if(!posts||posts.length<3){
+        // Fallback: all posts by likes if not enough recent content
+        posts = await sbFetch("GET","dl_posts",{order:"likes_count.desc,created_at.desc",limit:20});
+      }
     }
     if(!posts){ container.innerHTML='<div style="text-align:center;padding:40px;color:#9896B8">Errore nel caricamento</div>'; return; }
     if(posts.length===0){
@@ -2014,7 +2058,8 @@ function buildPostCard(post, liked){
         '<button onclick="openPostDetail(\"'+post.id+'\")" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;color:#9896B8;font-weight:700;font-size:13px">'+
           '<span style="font-size:20px">💬</span> <span>'+post.comments_count+'</span>'+
         '</button>'+
-        '<button onclick="sharePostNative(\"'+post.image_url+'\",\"'+( post.caption||'')+'\")" style="background:none;border:none;cursor:pointer;color:#9896B8;font-size:20px">↗️</button>'+
+        '<button onclick="sharePostNative(\"'+post.image_url+'\",\"'+( post.caption||'')+'\")" style="background:none;border:none;cursor:pointer;color:#9896B8;font-size:18px">↗️</button>'+
+        '<button onclick="shareResult(\"'+post.image_url+'\",\"'+( post.caption||'')+'\")" style="background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.3);border-radius:50px;padding:3px 9px;color:#8B5CF6;font-size:10px;font-weight:700;cursor:pointer">🎨 Story</button>'+
         '<button onclick="openRedline(\"'+post.id+'\",\"'+post.image_url+'\")" style="background:rgba(231,76,60,.15);border:1px solid rgba(231,76,60,.3);border-radius:50px;padding:4px 10px;color:#e74c3c;font-weight:700;font-size:11px;cursor:pointer;margin-left:auto">✏️ Redline</button>'+
       '</div>'+
       (post.caption?'<div style="font-size:13px;color:#fff;line-height:1.5;margin-bottom:4px"><span style="font-weight:800">'+post.user_name+'</span> '+post.caption+'</div>':'')+
@@ -2675,80 +2720,60 @@ async function submitRedline(){
 
 /* ═══════════════ SKILL TREE V2 ═══════════════ */
 
-var SKILL_TREE = [
-  {
-    id:"env", label:"🌄 Environment", color:"#2E9E6B", bg:"#0d2018",
-    desc:"Disegna mondi e ambienti credibili",
-    branches:[
-      {
-        id:"nature_branch", label:"🌿 Natura",
-        nodes:[
-          {catId:"nature", lesId:1, label:"Fiore 6 Petali",     icon:"🌸", req:[]},
-          {catId:"nature", lesId:2, label:"Albero",             icon:"🌳", req:["nature-1"]},
-          {catId:"nature", lesId:3, label:"Paesaggio",          icon:"🏔️", req:["nature-2"], pro:true},
-        ]
-      },
-      {
-        id:"arch_branch", label:"🏛️ Architettura",
-        nodes:[
-          {catId:"architecture", lesId:1, label:"1 Punto Fuga",  icon:"📐", req:[]},
-          {catId:"architecture", lesId:2, label:"2 Punti Fuga",  icon:"📏", req:["architecture-1"]},
-          {catId:"architecture", lesId:3, label:"3 Punti Fuga",  icon:"🏙️", req:["architecture-2"], pro:true},
-        ]
-      }
+var SKILL_TREE = {
+  trunk: {
+    id:"trunk", icon:"🌱", label:"Fondamentali", color:"#3DBE7A", bg:"#C8F5E0",
+    desc:"Il punto di partenza obbligatorio",
+    nodes:[
+      {id:"t1",icon:"📏",label:"Linee & Forme",   lessons:["animals-1"],stars:0},
+      {id:"t2",icon:"📦",label:"Solidi 3D",       lessons:["architecture-1"],stars:0},
+      {id:"t3",icon:"🌗",label:"Luci & Ombre",    lessons:["chiaroscuro-1","chiaroscuro-2"],stars:0},
+      {id:"t4",icon:"📐",label:"Proporzioni Base",lessons:["faces-2"],stars:0},
     ]
   },
-  {
-    id:"char", label:"🎭 Character Design", color:"#8B5CF6", bg:"#130d24",
-    desc:"Crea personaggi memorabili in ogni stile",
-    branches:[
-      {
-        id:"manga_branch", label:"⛩️ Manga / Stile",
-        nodes:[
-          {catId:"faces", lesId:1, label:"Manga Base",           icon:"⛩️", req:[]},
-          {catId:"faces", lesId:2, label:"Metodo Loomis",        icon:"📐", req:["faces-1"]},
-          {catId:"faces", lesId:3, label:"Ritratto Realistico",  icon:"🎭", req:["faces-2"], pro:true},
-        ]
-      },
-      {
-        id:"animal_branch", label:"🐾 Animali",
-        nodes:[
-          {catId:"animals", lesId:1, label:"Gatto Kawaii",       icon:"🐱", req:[]},
-          {catId:"animals", lesId:2, label:"Cagnolino",          icon:"🐶", req:["animals-1"]},
-          {catId:"animals", lesId:3, label:"Volpe Realistica",   icon:"🦊", req:["animals-2"], pro:true},
-        ]
-      }
-    ]
-  },
-  {
-    id:"vfx", label:"💡 Luce & Ombre", color:"#D4A200", bg:"#1a1400",
-    desc:"Padroneggia luce, volume e chiaroscuro",
-    branches:[
-      {
-        id:"shade_branch", label:"🌗 Chiaroscuro",
-        nodes:[
-          {catId:"chiaroscuro", lesId:1, label:"Sfumato",        icon:"☁️", req:[]},
-          {catId:"chiaroscuro", lesId:2, label:"Tratteggio",     icon:"✏️", req:["chiaroscuro-1"]},
-          {catId:"chiaroscuro", lesId:3, label:"Puntinismo",     icon:"·",  req:["chiaroscuro-2"], pro:true},
-        ]
-      }
-    ]
-  },
-  {
-    id:"still", label:"🍎 Still Life & Cibo", color:"#FF8C4B", bg:"#1a0d06",
-    desc:"Osservazione, forma e composizione",
-    branches:[
-      {
-        id:"food_branch", label:"🍕 Illustrazione",
-        nodes:[
-          {catId:"food", lesId:1, label:"Pizza Cartoon",         icon:"🍕", req:[]},
-          {catId:"food", lesId:2, label:"Torta Scenografica",    icon:"🎂", req:["food-1"]},
-          {catId:"food", lesId:3, label:"Still Life",            icon:"🍱", req:["food-2"], pro:true},
-        ]
-      }
-    ]
-  }
-];
+  branches:[
+    {
+      id:"realism", icon:"🎭", label:"Realismo & Accademia",
+      color:"#3B9FD4", bg:"#C8E8F5", unlockAfter:"t3",
+      nodes:[
+        {id:"r1",icon:"👤",label:"Anatomia Umana",   lessons:["faces-2"],prereq:"trunk"},
+        {id:"r2",icon:"🖼️",label:"Ritratto",         lessons:["faces-3"],prereq:"r1"},
+        {id:"r3",icon:"🏔️",label:"Paesaggi dal Vero",lessons:["nature-3"],prereq:"r1"},
+        {id:"r4",icon:"🌿",label:"Panneggi",         lessons:[],prereq:"r2",locked:true},
+      ]
+    },
+    {
+      id:"manga", icon:"⛩️", label:"Manga & Anime",
+      color:"#e74c3c", bg:"#FFE0E0", unlockAfter:"t2",
+      nodes:[
+        {id:"m1",icon:"👁️",label:"Occhi Espressivi",  lessons:["faces-1"],prereq:"trunk"},
+        {id:"m2",icon:"💇",label:"Capigliature Dyn.", lessons:[],prereq:"m1"},
+        {id:"m3",icon:"🎌",label:"Inchiostrazione",   lessons:[],prereq:"m1"},
+        {id:"m4",icon:"⚡",label:"Posa d'Azione",    lessons:[],prereq:"r1",locked:true},
+      ]
+    },
+    {
+      id:"concept", icon:"🎮", label:"Concept Art & Game Design",
+      color:"#8B5CF6", bg:"#E0D4F5", unlockAfter:"t4",
+      nodes:[
+        {id:"c1",icon:"🏛️",label:"Architettura",      lessons:["architecture-1","architecture-2"],prereq:"trunk"},
+        {id:"c2",icon:"🗡️",label:"Armi & Props",      lessons:["architecture-3"],prereq:"c1"},
+        {id:"c3",icon:"🌆",label:"Environment Art",   lessons:["nature-2","nature-3"],prereq:"c1"},
+        {id:"c4",icon:"🦸",label:"Character RPG",     lessons:[],prereq:"c2",locked:true},
+      ]
+    },
+    {
+      id:"stylized", icon:"🎨", label:"Stylized & Cartoon",
+      color:"#FF8C4B", bg:"#FFE0C8", unlockAfter:"t1",
+      nodes:[
+        {id:"s1",icon:"🐱",label:"Kawaii Animals",  lessons:["animals-1","animals-2"],prereq:"trunk"},
+        {id:"s2",icon:"🍕",label:"Food & Objects",  lessons:["food-1","food-2"],prereq:"s1"},
+        {id:"s3",icon:"🌸",label:"Botanica",        lessons:["nature-1"],prereq:"s1"},
+        {id:"s4",icon:"🦄",label:"Mascotte",        lessons:["animals-3"],prereq:"s2"},
+      ]
+    }
+  ]
+};
 
 function showSkillTree(){
   renderSkillTreeV2();
@@ -3505,10 +3530,13 @@ async function toggleFollow(userId){
 /* ── Feed filter (All / Following) ── */
 function setFeedFilter(filter){
   _feedFilter = filter;
-  var allBtn = document.getElementById("feed-filter-all");
-  var folBtn = document.getElementById("feed-filter-following");
-  if(allBtn){ allBtn.style.background=filter==="all"?"#8B5CF6":"rgba(255,255,255,.06)"; allBtn.style.color=filter==="all"?"#fff":"#9896B8"; }
-  if(folBtn){ folBtn.style.background=filter==="following"?"#8B5CF6":"rgba(255,255,255,.06)"; folBtn.style.color=filter==="following"?"#fff":"#9896B8"; }
+  ["all","following","new"].forEach(function(f){
+    var btn=document.getElementById("feed-filter-"+f);
+    if(!btn) return;
+    var active=f===filter;
+    btn.style.background=active?"#8B5CF6":"rgba(255,255,255,.06)";
+    btn.style.color=active?"#fff":"#9896B8";
+  });
   renderFeed();
 }
 
