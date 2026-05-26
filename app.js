@@ -656,7 +656,7 @@ function renderHome(){
   }
 
   // Category cards
-  var grid=document.getElementById("cat-grid");
+  var grid=document.getElementById("home-cat-grid");
   grid.innerHTML="";
   CATS.forEach(function(cat,idx){
     var bg=BG[cat.id]||"#f5f5f5", ac=AC[cat.id]||"#555";
@@ -699,6 +699,21 @@ function renderHome(){
     grid.appendChild(div);
   });
 
+
+  // Skill tree toggle button
+  var sbtn = document.getElementById("skill-view-btn");
+  if(sbtn) sbtn.textContent = _skillView==="list"?"🌳 Skill Tree":"📋 Lista";
+
+  // Se skill tree attivo, mostra albero invece della griglia
+  var skillContainer = document.getElementById("skill-tree-container");
+  var catGrid = document.getElementById("home-cat-grid");
+  if(_skillView === "tree"){
+    if(skillContainer){ skillContainer.style.display="block"; renderSkillTree(skillContainer); }
+    if(catGrid) catGrid.style.display="none";
+  } else {
+    if(skillContainer) skillContainer.style.display="none";
+    if(catGrid) catGrid.style.display="";
+  }
   updateTokenUI();
 }
 
@@ -1163,7 +1178,7 @@ function buildPostCard(post, liked){
     // Actions
     '<div style="padding:10px 16px">'+
       '<div style="display:flex;align-items:center;gap:16px;margin-bottom:8px">'+
-        '<button id="like-btn-'+post.id+'" onclick="toggleLike(\"'+post.id+'\")" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;color:'+( liked?'#e74c3c':'#9896B8')+';font-weight:700;font-size:13px">'+
+        '<button id="like-btn-'+post.id+'" data-liked="'+(liked?'1':'0')+'" onclick="toggleLike(\"'+post.id+'\")" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;color:'+( liked?'#e74c3c':'#9896B8')+';font-weight:700;font-size:13px">'+
           '<span style="font-size:20px">'+( liked?'❤️':'🤍')+'</span> <span id="likes-'+post.id+'">'+post.likes_count+'</span>'+
         '</button>'+
         '<button onclick="openPostDetail(\"'+post.id+'\")" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;color:#9896B8;font-weight:700;font-size:13px">'+
@@ -2326,13 +2341,13 @@ function setTokens(n){
   updateTokenUI();
   // Apply skill tree view if active
   if(_skillView==="tree"){
-    var cg=document.getElementById("cat-grid");
+    var cg=document.getElementById("home-cat-grid");
     if(cg) renderSkillTree(cg);
     // Remove tree if switching back to list
   } else {
     var treeEl=document.getElementById("skill-tree-view");
     if(treeEl) treeEl.style.display="none";
-    var cg2=document.getElementById("cat-grid");
+    var cg2=document.getElementById("home-cat-grid");
     if(cg2) cg2.style.display="grid";
   }
 }

@@ -178,12 +178,12 @@
   <div style="background:#1C1B2E;padding:16px 20px 12px">
     <div style="max-width:700px;margin:0 auto;display:flex;align-items:center;justify-content:space-between">
       <div>
-        <div style="display:flex;align-items:center;gap:7px"><span style="font-size:20px">✏️</span><span style="font-weight:800;font-size:18px;color:#fff">DrawLearn</span></div>
+        <div style="display:flex;align-items:center;gap:7px"><span style="font-size:20px">✏️</span><span style="font-weight:800;font-size:18px;color:#fff">DrawBound</span></div>
         <div id="home-greeting" style="color:#9896B8;font-size:11px;margin-top:1px">Ciao!</div>
       </div>
       <div style="display:flex;align-items:center;gap:6px">
         <div id="pro-badge"></div>
-        <button onclick="showDrawPass()" title="DrawPass" style="background:rgba(255,255,255,.1);border:none;border-radius:50px;padding:4px 10px;font-weight:700;font-size:10px;color:#FFD60A;cursor:pointer;display:flex;align-items:center;gap:4px"><span>🪙</span><span id="home-token-balance">0</span></button><button onclick="showProfile()" id="home-avatar-btn" style="background:rgba(255,255,255,.1);border:none;border-radius:50%;width:30px;height:30px;font-size:16px;cursor:pointer">👤</button><button onclick="showCfg()" style="background:rgba(255,255,255,.1);border:none;border-radius:50%;width:30px;height:30px;font-size:14px">⚙️</button>
+        <button onclick="showDrawPass()" title="DrawPass" style="background:rgba(255,255,255,.1);border:none;border-radius:50px;padding:4px 10px;font-weight:700;font-size:10px;color:#FFD60A;cursor:pointer;display:flex;align-items:center;gap:4px"><span>✒️</span><span id="home-token-balance">0</span></button><button onclick="showProfile()" id="home-avatar-btn" style="background:rgba(255,255,255,.1);border:none;border-radius:50%;width:30px;height:30px;font-size:16px;cursor:pointer">👤</button><button onclick="showCfg()" style="background:rgba(255,255,255,.1);border:none;border-radius:50%;width:30px;height:30px;font-size:14px">⚙️</button>
         <button onclick="doLogout()" style="background:rgba(255,255,255,.1);border:none;border-radius:50px;padding:4px 10px;font-weight:600;font-size:10px;color:#9896B8">Esci</button>
       </div>
     </div>
@@ -210,11 +210,15 @@
         <!-- Premium rewards row -->
         <div style="font-size:11px;font-weight:800;color:#9896B8;margin:12px 0 8px;letter-spacing:1px">PREMI PREMIUM</div>
         <div id="home-rewards-premium" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px"></div>
-        <button onclick="showDrawPass()" style="width:100%;margin-top:10px;padding:8px;background:rgba(255,214,10,.15);border:1px solid rgba(255,214,10,.3);border-radius:10px;color:#FFD60A;font-weight:800;font-size:11px;cursor:pointer">🪙 Vai al DrawPass Shop</button>
+        <button onclick="showDrawPass()" style="width:100%;margin-top:10px;padding:8px;background:rgba(255,214,10,.15);border:1px solid rgba(255,214,10,.3);border-radius:10px;color:#FFD60A;font-weight:800;font-size:11px;cursor:pointer">✒️ Vai al DrawPass Shop</button>
       </div>
     </div>
-    <h2 style="font-weight:800;font-size:16px;color:#1C1B2E;margin:0 0 9px">Scegli una categoria</h2>
-    <div id="cat-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:0 0 9px">
+      <h2 style="font-weight:800;font-size:16px;color:var(--text-primary,#1C1B2E)">Scegli una categoria</h2>
+      <button id="skill-view-btn" onclick="toggleSkillView()" style="background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.3);border-radius:50px;padding:5px 12px;color:#8B5CF6;font-size:11px;font-weight:800;cursor:pointer">🌳 Skill Tree</button>
+    </div>
+    <div id="home-cat-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
+    <div id="skill-tree-container" style="display:none;padding-bottom:20px"></div>
   </div>
 </div>
 

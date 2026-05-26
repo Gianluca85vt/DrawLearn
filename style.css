@@ -17,7 +17,9 @@ button{font-family:'Baloo 2',sans-serif;cursor:pointer}
     body.light-mode #scr-auth{background:#F0EEFF!important}
 
     /* Navigation */
-    .nav-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:8px 0;cursor:pointer;border:none;background:none;gap:3px;transition:opacity .2s}
+    /* fix nav centering */
+#bottom-nav > div{width:100%}
+.nav-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:8px 0;cursor:pointer;border:none;background:none;gap:3px;transition:opacity .2s}
     .nav-tab span.nav-icon{font-size:20px;line-height:1}
     .nav-tab span.nav-label{font-size:9px;font-weight:700;color:#9896B8}
     .nav-tab.active span.nav-label{color:#8B5CF6}
