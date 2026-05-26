@@ -13,8 +13,8 @@
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-  <meta name="apple-mobile-web-app-title" content="DrawLearn"/>
-  <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;DrawLearn&quot;,&quot;short_name&quot;:&quot;DrawLearn&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;%231C1B2E&quot;,&quot;theme_color&quot;:&quot;%231C1B2E&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231C1B2E'/%3E%3Ctext y='.9em' font-size='80'%3E%E2%9C%8F%EF%B8%8F%3C/text%3E%3C/svg%3E&quot;,&quot;sizes&quot;:&quot;any&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}]}"/>
+  <meta name="apple-mobile-web-app-title" content="DrawBound"/>
+  <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;DrawBound&quot;,&quot;short_name&quot;:&quot;DrawBound&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;%231C1B2E&quot;,&quot;theme_color&quot;:&quot;%231C1B2E&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231C1B2E'/%3E%3Ctext y='.9em' font-size='80'%3E%E2%9C%8F%EF%B8%8F%3C/text%3E%3C/svg%3E&quot;,&quot;sizes&quot;:&quot;any&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}]}"/>
 </head>
 <body>
 
@@ -44,9 +44,9 @@
       <p style="color:#fff;font-weight:700;margin:12px 0 8px">Termini d'uso:</p>
       <p>• Devi avere almeno 13 anni<br>
       • Non pubblicare contenuti offensivi, violenti o illegali<br>
-      • DrawLearn si riserva il diritto di rimuovere contenuti inappropriati<br>
+      • DrawBound si riserva il diritto di rimuovere contenuti inappropriati<br>
       • I pagamenti PRO sono soggetti a rimborso entro 14 giorni</p>
-      <p style="margin-top:12px;font-size:10px;color:#635BFF">Versione 1.0 — Maggio 2026 — DrawLearn di Gianluca Scattarella</p>
+      <p style="margin-top:12px;font-size:10px;color:#635BFF">Versione 1.0 — Maggio 2026 — DrawBound di Gianluca Scattarella</p>
     </div>
     <div style="padding:16px 20px;display:flex;flex-direction:column;gap:8px">
       <button onclick="acceptPrivacy()" style="width:100%;padding:13px;background:linear-gradient(135deg,#8B5CF6,#6d28d9);border:none;border-radius:12px;color:#fff;font-weight:800;font-size:14px;cursor:pointer">
@@ -64,7 +64,7 @@
 <!-- SPLASH -->
 <div class="screen on" id="scr-splash" style="background:#1C1B2E;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;text-align:center">
   <div style="font-size:72px;margin-bottom:16px">✏️</div>
-  <h1 style="font-size:40px;font-weight:800;color:#fff;margin:0">DrawLearn</h1>
+  <h1 style="font-size:40px;font-weight:800;color:#fff;margin:0">DrawBound</h1>
   <p style="color:#9896B8;margin-top:8px">Impara a disegnare, un passo alla volta</p>
   <p id="splash-status" style="color:#9896B8;font-size:12px;margin-top:12px;min-height:18px"> </p>
   <div style="margin-top:8px;display:flex;gap:8px">
@@ -81,7 +81,7 @@
   <div style="width:100%;max-width:440px">
     <div style="text-align:center;margin-bottom:20px">
       <div style="font-size:50px;margin-bottom:5px">✏️</div>
-      <h1 style="font-weight:800;font-size:26px;color:#1C1B2E;margin-bottom:3px">DrawLearn</h1>
+      <h1 style="font-weight:800;font-size:26px;color:#1C1B2E;margin-bottom:3px">DrawBound</h1>
       <p style="color:#9896B8;font-size:12px">Il tuo percorso artistico ti aspetta</p>
     </div>
     <div style="display:flex;background:#eeecf8;border-radius:14px;padding:4px;margin-bottom:18px">
@@ -178,7 +178,7 @@
   <div style="background:#1C1B2E;padding:16px 20px 12px">
     <div style="max-width:700px;margin:0 auto;display:flex;align-items:center;justify-content:space-between">
       <div>
-        <div style="display:flex;align-items:center;gap:7px"><span style="font-size:20px">✏️</span><span style="font-weight:800;font-size:18px;color:#fff">DrawBound</span></div>
+        <div style="display:flex;align-items:center;gap:7px"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="37 160 522 522" width="28" height="28" style="display:inline-block;vertical-align:middle;flex-shrink:0"><defs><filter id="db-glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur result="blur" stdDeviation="15"/><feComposite in="SourceGraphic" in2="blur"/></filter><linearGradient id="db-grad" x1="-.13" y1="841.97" x2="1.06" y2="840.78" gradientTransform="translate(198.0067 254767.9623) scale(199.2601 -302.2884)" gradientUnits="userSpaceOnUse"><stop offset=".37" stop-color="#814393"/><stop offset="1" stop-color="#fbba00"/></linearGradient></defs><rect fill="#1c1b29" x="37.2" y="160.51" width="520.87" height="520.87" rx="127.89" ry="127.89"/><g style="filter:url(#db-glow);isolation:isolate;opacity:.3"><polygon points="297.64 262.82 406.93 460.47 297.64 588.37 188.35 460.47 297.64 262.82"/></g><path fill="url(#db-grad)" d="M297.64,240.93l116.32,207.71c4.25,6.35,2.55,14.96-3.8,19.21-.97.65-2.02,1.17-3.12,1.56l-109.4,131.55-109.4-131.55c-7.22-2.53-11.02-10.43-8.48-17.65.39-1.1.91-2.15,1.56-3.12l116.32-207.71Z"/><path fill="none" stroke="#1c1b29" stroke-linecap="round" stroke-miterlimit="4.65" stroke-width="16.28" d="M297.64,365.55v235.41"/><circle fill="#1c1b29" cx="297.64" cy="365.55" r="22.16"/></svg><span style="font-weight:800;font-size:18px;color:#fff;margin-left:6px">DrawBound</span></div>
         <div id="home-greeting" style="color:#9896B8;font-size:11px;margin-top:1px">Ciao!</div>
       </div>
       <div style="display:flex;align-items:center;gap:6px">
@@ -267,7 +267,7 @@
     <div style="background:rgba(255,255,255,.05);border-radius:20px;padding:22px;border:1px solid rgba(255,255,255,.1)">
       <div style="text-align:center;margin-bottom:18px">
         <div style="font-size:48px;margin-bottom:4px">👑</div>
-        <h2 style="font-weight:800;font-size:22px;color:#fff;margin-bottom:3px">DrawLearn PRO</h2>
+        <h2 style="font-weight:800;font-size:22px;color:#fff;margin-bottom:3px">DrawBound PRO</h2>
         <p style="color:#9896B8;font-size:11px">Sblocca tutte le lezioni avanzate</p>
       </div>
       <div style="margin-bottom:16px">
@@ -313,7 +313,7 @@
           <span style="margin-left:auto;font-size:10px;color:#9896B8">🔒 SSL</span>
         </div>
         <div id="checkout-plan-info" style="background:#f9f7ff;border-radius:10px;padding:10px;margin-bottom:14px;font-size:11px;display:flex;justify-content:space-between">
-          <span style="font-weight:700;color:#4A4868">DrawLearn PRO Mensile</span>
+          <span style="font-weight:700;color:#4A4868">DrawBound PRO Mensile</span>
           <span style="font-weight:800;color:#1C1B2E">€4,99/mese</span>
         </div>
         <div style="margin-bottom:9px">
@@ -346,45 +346,42 @@
 
 
 <!-- PROFILE -->
-<div class="screen" id="scr-profile" style="padding-bottom:30px">
-  <div style="background:#1C1B2E;padding:16px 20px 12px">
-    <div style="max-width:600px;margin:0 auto;display:flex;align-items:center;gap:10px">
-      <button onclick="renderHome();showScreen('home')" style="background:rgba(255,255,255,.1);border:none;border-radius:50px;padding:4px 12px;font-weight:700;font-size:11px;color:#9896B8;cursor:pointer">← Home</button>
-      <span style="font-weight:800;font-size:17px;color:#fff">Il mio profilo</span>
+<div class="screen" id="scr-profile" style="background:#0F0E1A;min-height:100vh;padding-bottom:80px">
+  <!-- Cover -->
+  <div style="position:relative;height:180px;overflow:hidden;background:#1C1B2E">
+    <div id="prof-cover-grad" style="position:absolute;inset:0;background:linear-gradient(135deg,#1a0a4a,#2d1b69,#1C1B2E)"></div>
+    <img id="prof-cover-img" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none"/>
+    <button onclick="navTo('home')" style="position:absolute;top:12px;left:12px;background:rgba(0,0,0,.5);border:none;border-radius:50%;width:34px;height:34px;color:#fff;font-size:16px;cursor:pointer;z-index:2">←</button>
+    <button id="change-cover-btn" onclick="changeCoverPhoto()" style="display:none;position:absolute;bottom:10px;right:12px;background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.2);border-radius:50px;padding:5px 12px;color:#fff;font-size:11px;font-weight:700;cursor:pointer;align-items:center;gap:6px;z-index:2">📷 Copertina</button>
+  </div>
+  <!-- Avatar overlapping -->
+  <div style="position:relative;padding:0 16px">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:-40px;margin-bottom:10px">
+      <div id="profile-avatar-display" onclick="setProfileTab('settings')" style="width:80px;height:80px;border-radius:50%;background:#2d2a4a;display:flex;align-items:center;justify-content:center;font-size:38px;border:4px solid #0F0E1A;cursor:pointer;flex-shrink:0"></div>
+      <button onclick="openBioEdit()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:50px;padding:7px 16px;color:#fff;font-size:12px;font-weight:700;cursor:pointer">✏️ Modifica profilo</button>
+    </div>
+    <div id="profile-name" style="font-weight:800;font-size:18px;color:#fff;line-height:1.2"></div>
+    <div id="profile-email" style="font-size:12px;color:#9896B8;margin-top:2px"></div>
+    <div id="profile-bio" style="font-size:13px;color:#e0ddf5;margin:8px 0 0;line-height:1.5;min-height:18px"></div>
+    <!-- Stats -->
+    <div style="display:flex;margin:14px 0 4px;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06);padding:10px 0">
+      <div style="flex:1;text-align:center"><div id="prof-stat-posts" style="font-weight:800;font-size:18px;color:#fff">0</div><div style="font-size:10px;color:#9896B8;font-weight:600">Post</div></div>
+      <div style="width:1px;background:rgba(255,255,255,.08)"></div>
+      <div style="flex:1;text-align:center"><div id="prof-stat-followers" style="font-weight:800;font-size:18px;color:#fff">0</div><div style="font-size:10px;color:#9896B8;font-weight:600">Follower</div></div>
+      <div style="width:1px;background:rgba(255,255,255,.08)"></div>
+      <div style="flex:1;text-align:center"><div id="prof-stat-following" style="font-weight:800;font-size:18px;color:#fff">0</div><div style="font-size:10px;color:#9896B8;font-weight:600">Seguiti</div></div>
+      <div style="width:1px;background:rgba(255,255,255,.08)"></div>
+      <div style="flex:1;text-align:center"><div id="prof-stat-lessons" style="font-weight:800;font-size:18px;color:#3DBE7A">0</div><div style="font-size:10px;color:#9896B8;font-weight:600">Lezioni</div></div>
     </div>
   </div>
-  <div style="max-width:600px;margin:0 auto;padding:20px 20px">
-    <!-- Avatar card -->
-    <div style="background:linear-gradient(135deg,#2d2a4a,#3d3a5a);border-radius:20px;padding:24px;text-align:center;margin-bottom:18px">
-      <div id="profile-avatar-display" style="width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:38px;margin:0 auto 12px;background:#3d3a5a"></div>
-      <div id="profile-name" style="font-weight:800;font-size:20px;color:#fff;margin-bottom:2px"></div>
-      <div id="profile-email" style="font-size:12px;color:#9896B8;margin-top:2px"></div><div id="profile-bio" style="font-size:12px;color:#e0ddf5;margin:6px 0 12px;min-height:16px;font-style:italic"></div><button onclick="openBioEdit()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:50px;padding:5px 16px;color:#9896B8;font-size:11px;font-weight:700;cursor:pointer;margin-bottom:12px">✏️ Modifica bio</button>
-      <div style="display:flex;justify-content:center;gap:20px">
-        <div style="text-align:center"><div id="prof-stat-lessons" style="font-weight:800;font-size:22px;color:#C8F5E0">0</div><div style="font-size:10px;color:#9896B8">Lezioni</div></div>
-        <div style="width:1px;background:rgba(255,255,255,.1)"></div>
-        <div style="text-align:center"><div id="prof-stat-cats" style="font-weight:800;font-size:22px;color:#FFD60A">0</div><div style="font-size:10px;color:#9896B8">Categorie</div></div>
-        <div style="width:1px;background:rgba(255,255,255,.1)"></div>
-        <div style="text-align:center"><div id="prof-stat-pct" style="font-weight:800;font-size:22px;color:#FF9500">0%</div><div style="font-size:10px;color:#9896B8">Completato</div></div>
-      </div>
-    </div>
-    <!-- Avatar selector -->
-    <div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 4px 14px rgba(28,27,46,.07)">
-      <div style="font-weight:800;font-size:14px;color:#1C1B2E;margin-bottom:12px">🎭 Scegli il tuo avatar</div>
-      <div id="avatar-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px"></div>
-    </div>
-    <!-- Border selector -->
-    <div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 4px 14px rgba(28,27,46,.07)">
-      <div style="font-weight:800;font-size:14px;color:#1C1B2E;margin-bottom:12px">✨ Stile cornice</div>
-      <div id="border-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px"></div>
-    </div>
-    <!-- Achievements -->
-    <div style="background:#fff;border-radius:16px;padding:16px;box-shadow:0 4px 14px rgba(28,27,46,.07)">
-      <div style="font-weight:800;font-size:14px;color:#1C1B2E;margin-bottom:12px">🏅 Achievement</div>
-      <div id="achievements-list"></div>
-    </div>
+  <!-- Tabs -->
+  <div style="display:flex;border-bottom:1px solid rgba(255,255,255,.08);background:#0F0E1A;position:sticky;top:0;z-index:5">
+    <button id="prof-tab-posts" onclick="setProfileTab('posts')" style="flex:1;padding:11px 0;background:none;border:none;border-bottom:2px solid #8B5CF6;color:#fff;font-weight:800;font-size:12px;cursor:pointer">📸 Post</button>
+    <button id="prof-tab-lessons" onclick="setProfileTab('lessons')" style="flex:1;padding:11px 0;background:none;border:none;border-bottom:2px solid transparent;color:#9896B8;font-weight:600;font-size:12px;cursor:pointer">🎨 Lezioni</button>
+    <button id="prof-tab-settings" onclick="setProfileTab('settings')" style="flex:1;padding:11px 0;background:none;border:none;border-bottom:2px solid transparent;color:#9896B8;font-weight:600;font-size:12px;cursor:pointer">⚙️ Impostazioni</button>
   </div>
+  <div id="prof-tab-content" style="min-height:200px"></div>
 </div>
-
 
 <!-- CAMERA INPUT (hidden) -->
 <input type="file" accept="image/*" capture="environment" id="camera-input" style="display:none" onchange="onPhotoSelected(event)"/>
@@ -405,7 +402,7 @@
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
         <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
           <input type="checkbox" id="watermark-toggle" checked onchange="redrawCanvas()" style="width:16px;height:16px;accent-color:#8B5CF6"/>
-          <span style="font-size:12px;color:#9896B8;font-weight:600">Watermark DrawLearn</span>
+          <span style="font-size:12px;color:#9896B8;font-weight:600">Watermark DrawBound</span>
         </label>
       </div>
       <!-- Caption -->
@@ -435,7 +432,7 @@
 <div class="screen" id="scr-feed" style="background:#0F0E1A;min-height:100vh;padding-bottom:70px">
   <!-- Feed top bar -->
   <div style="background:#161525;border-bottom:1px solid rgba(255,255,255,.08);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10">
-    <span style="font-weight:800;font-size:20px;color:#fff">✏️ DrawLearn</span>
+    <span style="font-weight:800;font-size:20px;color:#fff">✏️ DrawBound</span>
     <div style="display:flex;align-items:center;gap:8px">
       <button onclick="navTo('explore')" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;font-size:17px;cursor:pointer">🔍</button>
       <button onclick="navTo('chat')" style="position:relative;background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;font-size:17px;cursor:pointer">

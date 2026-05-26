@@ -280,7 +280,7 @@ function showScreen(name){
     var info=document.getElementById("checkout-plan-info");
     if(info){
       var monthly=A.payPlan==="monthly";
-      info.innerHTML="<span style='font-weight:700;color:#4A4868'>DrawLearn PRO "+(monthly?"Mensile":"Annuale")+"</span><span style='font-weight:800;color:#1C1B2E'>"+(monthly?"€4,99/mese":"€39,99/anno")+"</span>";
+      info.innerHTML="<span style='font-weight:700;color:#4A4868'>DrawBound PRO "+(monthly?"Mensile":"Annuale")+"</span><span style='font-weight:800;color:#1C1B2E'>"+(monthly?"€4,99/mese":"€39,99/anno")+"</span>";
     }
     setTimeout(initPayPal, 100); // init PayPal after DOM is visible
   }
@@ -850,7 +850,7 @@ function setPayPlan(plan){
   document.getElementById("plan-y").style.background=plan==="yearly"?"rgba(255,214,10,.1)":"rgba(255,255,255,.05)";
   document.getElementById("plan-y").querySelectorAll("div")[1].style.color=plan==="yearly"?"#FFD60A":"#9896B8";
   var info=document.getElementById("checkout-plan-info");
-  if(info)info.innerHTML='<span style="font-weight:700;color:#4A4868">DrawLearn PRO '+(plan==="monthly"?"Mensile":"Annuale")+'</span><span style="font-weight:800;color:#1C1B2E">'+(plan==="monthly"?"€4,99/mese":"€39,99/anno")+'</span>';
+  if(info)info.innerHTML='<span style="font-weight:700;color:#4A4868">DrawBound PRO '+(plan==="monthly"?"Mensile":"Annuale")+'</span><span style="font-weight:800;color:#1C1B2E">'+(plan==="monthly"?"€4,99/mese":"€39,99/anno")+'</span>';
   var pb=document.getElementById("pay-btn");if(pb)pb.textContent="🔒 Paga "+(plan==="monthly"?"€4,99":"€39,99");
 }
 async function doPay(){
@@ -942,7 +942,7 @@ var ACHIEVEMENTS = [
   {id:"shade",  icon:"🌗", name:"Maestro ombre",     desc:"Completa tutto il Chiaroscuro",           req:{t:"cat",id:"chiaroscuro"}},
   {id:"nature2",icon:"🌿", name:"Naturalista",       desc:"Completa tutte le lezioni Natura",       req:{t:"cat",id:"nature"}},
   {id:"food2",  icon:"🍰", name:"Foodie artista",    desc:"Completa tutte le lezioni Cibo",         req:{t:"cat",id:"food"}},
-  {id:"pro",    icon:"👑", name:"DrawLearn PRO",     desc:"Attiva l'abbonamento PRO",               req:{t:"pro"}},
+  {id:"pro",    icon:"👑", name:"DrawBound PRO",     desc:"Attiva l'abbonamento PRO",               req:{t:"pro"}},
 ];
 
 function isUnlocked(req){
@@ -987,66 +987,197 @@ function showProfile(){
 }
 
 function renderProfile(){
-  var prf=A.profile||{avatar:"def",border:"none"};
-  var done=Object.values(A.progress).filter(function(v){return v.completed;}).length;
-  var catsDone=CATS.filter(function(cat){return cat.levels.every(function(l){var k=pk(cat.id,l.id);return A.progress[k]&&A.progress[k].completed;});}).length;
-  // Stats
-  document.getElementById("profile-name").textContent=A.user.name;
-  document.getElementById("profile-email").textContent=A.user.email;
-  document.getElementById("prof-stat-lessons").textContent=done;
-  // Load social stats async
+  if(!A.user) return;
+  var prf = A.profile||{avatar:"def",border:"none"};
+  var done = Object.values(A.progress||{}).filter(function(v){return v.completed;}).length;
+
+  /* Cover photo */
+  var coverUrl = localGet("dl:cover_"+A.user.id)||"";
+  var coverEl = document.getElementById("prof-cover-img");
+  var coverGrad = document.getElementById("prof-cover-grad");
+  if(coverEl && coverUrl){ coverEl.src=coverUrl; coverEl.style.display="block"; if(coverGrad) coverGrad.style.display="none"; }
+  else { if(coverEl) coverEl.style.display="none"; if(coverGrad) coverGrad.style.display="block"; }
+  var changeCoverBtn = document.getElementById("change-cover-btn");
+  if(changeCoverBtn) changeCoverBtn.style.display = done>=5?"flex":"none";
+
+  /* Avatar */
+  var selAv = UNLOCKS.avatars.find(function(x){return x.id===prf.avatar;})||UNLOCKS.avatars[0];
+  var selBr = UNLOCKS.borders.find(function(x){return x.id===prf.border;})||UNLOCKS.borders[0];
+  var avEl = document.getElementById("profile-avatar-display");
+  if(avEl){
+    avEl.textContent = selAv.icon;
+    if(selBr.color && selBr.color!=="rainbow") avEl.style.border="4px solid "+selBr.color;
+    else if(selBr.color==="rainbow"){avEl.style.border="4px solid transparent";avEl.style.backgroundImage="linear-gradient(#0F0E1A,#0F0E1A),conic-gradient(#3DBE7A,#D4A200,#3B9FD4,#8B5CF6,#FF8C4B,#3DBE7A)";avEl.style.backgroundOrigin="border-box";avEl.style.backgroundClip="padding-box,border-box";}
+    else avEl.style.border="4px solid #0F0E1A";
+  }
+
+  /* Info */
+  var nameEl=document.getElementById("profile-name"); if(nameEl) nameEl.textContent=A.user.name;
+  var emailEl=document.getElementById("profile-email"); if(emailEl) emailEl.textContent="@"+(A.user.name||"").toLowerCase().replace(/\s+/g,"_");
+  var bioEl=document.getElementById("profile-bio"); if(bioEl) bioEl.textContent=A.profile&&A.profile.bio?A.profile.bio:"Nessuna bio ancora...";
+
+  /* Stats */
+  var lsEl=document.getElementById("prof-stat-lessons"); if(lsEl) lsEl.textContent=done;
   if(sbReady()&&A.user){
     sbFetch("GET","dl_users",{filters:"id=eq."+A.user.id,select:"followers_count,following_count"}).then(function(r){
-      if(r&&r[0]){
-        var fc=document.getElementById("prof-stat-followers"); if(fc) fc.textContent=r[0].followers_count||0;
-        var fg=document.getElementById("prof-stat-following"); if(fg) fg.textContent=r[0].following_count||0;
-      }
+      if(r&&r[0]){var fc=document.getElementById("prof-stat-followers");if(fc)fc.textContent=r[0].followers_count||0;var fg=document.getElementById("prof-stat-following");if(fg)fg.textContent=r[0].following_count||0;}
     });
     sbFetch("GET","dl_posts",{filters:"user_id=eq."+A.user.id,select:"id"}).then(function(r){
-      var pp=document.getElementById("prof-stat-posts"); if(pp) pp.textContent=(r&&r.length)||0;
+      var pp=document.getElementById("prof-stat-posts");if(pp)pp.textContent=(r&&r.length)||0;
     });
   }
-  // Avatar display
-  var selAv=UNLOCKS.avatars.find(function(x){return x.id===prf.avatar;})||UNLOCKS.avatars[0];
-  var selBr=UNLOCKS.borders.find(function(x){return x.id===prf.border;})||UNLOCKS.borders[0];
-  var avEl=document.getElementById("profile-avatar-display");
-  avEl.textContent=selAv.icon;
-  if(selBr.color&&selBr.color!=="rainbow"){avEl.style.border="4px solid "+selBr.color;avEl.style.boxShadow="0 0 20px "+selBr.color+"66";}
-  else if(selBr.color==="rainbow"){avEl.style.border="4px solid transparent";avEl.style.backgroundImage="linear-gradient(#3d3a5a,#3d3a5a),conic-gradient(#3DBE7A,#D4A200,#3B9FD4,#8B5CF6,#FF8C4B,#3DBE7A)";avEl.style.backgroundOrigin="border-box";avEl.style.backgroundClip="padding-box,border-box";}
-  else{avEl.style.border="4px solid #3d3a5a";avEl.style.boxShadow="";}
-  // Avatar grid
-  var ag=document.getElementById("avatar-grid");ag.innerHTML="";
-  UNLOCKS.avatars.forEach(function(av){
-    var ok=isUnlocked(av.req),sel=prf.avatar===av.id;
-    var d=document.createElement("div");
-    d.style.cssText="text-align:center;padding:8px 4px;border-radius:12px;cursor:"+(ok?"pointer":"default")+";border:2px solid "+(sel?"#8B5CF6":"transparent")+";background:"+(sel?"#f0eeff":(ok?"#fafafa":"#f5f5f5"))+";transition:all .2s;opacity:"+(ok?1:.4);
-    d.innerHTML='<div style="font-size:26px;margin-bottom:4px">'+av.icon+'</div><div style="font-size:9px;color:'+(ok?"#1C1B2E":"#9896B8")+';font-weight:'+(sel?"800":"600")+'">'+av.name+'</div>'+(ok?'':'<div style="font-size:8px;color:#9896B8">🔒</div>');
-    if(ok){(function(avid){d.onclick=function(){A.profile.avatar=avid;saveProfile();renderProfile();};})(av.id);}
-    ag.appendChild(d);
+
+  /* Default tab */
+  setProfileTab("posts");
+}
+
+function setProfileTab(tab){
+  ["posts","lessons","settings"].forEach(function(t){
+    var btn=document.getElementById("prof-tab-"+t);
+    if(!btn)return;
+    btn.style.borderBottomColor = t===tab?"#8B5CF6":"transparent";
+    btn.style.color = t===tab?"#fff":"#9896B8";
+    btn.style.fontWeight = t===tab?"800":"600";
   });
-  // Border grid
-  var bg=document.getElementById("border-grid");bg.innerHTML="";
-  UNLOCKS.borders.forEach(function(br){
-    var ok=isUnlocked(br.req),sel=prf.border===br.id;
+  var cont = document.getElementById("prof-tab-content");
+  if(!cont)return;
+  cont.innerHTML='<div style="text-align:center;padding:24px;color:#9896B8">Caricamento...</div>';
+  if(tab==="posts") loadProfilePosts(cont);
+  else if(tab==="lessons") loadProfileLessons(cont);
+  else renderProfileSettings(cont);
+}
+
+async function loadProfilePosts(cont){
+  if(!A.user){cont.innerHTML='<p style="color:#9896B8;text-align:center;padding:24px">Accedi per vedere i post</p>';return;}
+  var posts = await sbFetch("GET","dl_posts",{filters:"user_id=eq."+A.user.id,order:"created_at.desc",limit:30});
+  if(!posts||!posts.length){
+    cont.innerHTML='<div style="text-align:center;padding:48px 20px"><div style="font-size:48px;margin-bottom:12px">📸</div><div style="font-weight:800;color:#fff;margin-bottom:6px">Nessun post ancora</div><div style="color:#9896B8;font-size:13px">Pubblica il tuo primo disegno!</div></div>';
+    return;
+  }
+  cont.innerHTML="";
+  var grid=document.createElement("div");
+  grid.style.cssText="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px";
+  posts.forEach(function(p){
     var d=document.createElement("div");
-    d.style.cssText="text-align:center;padding:8px 4px;border-radius:12px;cursor:"+(ok?"pointer":"default")+";border:2px solid "+(sel?"#8B5CF6":"transparent")+";background:"+(sel?"#f0eeff":"#fafafa")+";transition:all .2s;opacity:"+(ok?1:.4);
-    var preview="";
-    if(!br.color) preview='<div style="width:28px;height:28px;border-radius:50%;border:2px dashed #ccc;margin:0 auto 4px"></div>';
-    else if(br.color==="rainbow") preview='<div style="width:28px;height:28px;border-radius:50%;background:conic-gradient(#3DBE7A,#D4A200,#3B9FD4,#8B5CF6,#FF8C4B,#3DBE7A);margin:0 auto 4px"></div>';
-    else preview='<div style="width:28px;height:28px;border-radius:50%;background:'+br.color+';margin:0 auto 4px"></div>';
-    d.innerHTML=preview+'<div style="font-size:9px;color:'+(ok?"#1C1B2E":"#9896B8")+';font-weight:'+(sel?"800":"600")+'">'+br.name+'</div>'+(ok?'':'<div style="font-size:8px;color:#9896B8">🔒</div>');
-    if(ok){(function(brid){d.onclick=function(){A.profile.border=brid;saveProfile();renderProfile();};})(br.id);}
-    bg.appendChild(d);
+    d.style.cssText="aspect-ratio:1;overflow:hidden;cursor:pointer;position:relative;background:#161525";
+    var img=document.createElement("img");
+    img.src=p.image_url; img.loading="lazy";
+    img.style.cssText="width:100%;height:100%;object-fit:cover;display:block";
+    var overlay=document.createElement("div");
+    overlay.style.cssText="position:absolute;inset:0;background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s";
+    overlay.innerHTML="<span style='color:#fff;font-size:12px;font-weight:700'>❤️ "+p.likes_count+"</span>";
+    d.appendChild(img); d.appendChild(overlay);
+    d.onmouseenter=function(){overlay.style.opacity="1";};
+    d.onmouseleave=function(){overlay.style.opacity="0";};
+    d.onclick=function(){openPostDetail(p.id);};
+    grid.appendChild(d);
   });
-  // Achievements
-  var al=document.getElementById("achievements-list");al.innerHTML="";
-  ACHIEVEMENTS.forEach(function(ach){
-    var ok=isUnlocked(ach.req);
-    var d=document.createElement("div");
-    d.style.cssText="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;margin-bottom:8px;background:"+(ok?"linear-gradient(135deg,#f9f7ff,#f0eeff)":"#f5f5f5")+";opacity:"+(ok?1:.5);
-    d.innerHTML='<div style="width:44px;height:44px;border-radius:12px;background:'+(ok?"#8B5CF6":"#ccc")+';display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">'+ach.icon+'</div><div style="flex:1"><div style="font-weight:800;font-size:13px;color:'+(ok?"#1C1B2E":"#9896B8")+'">'+ach.name+'</div><div style="font-size:11px;color:#9896B8;margin-top:1px">'+ach.desc+'</div></div>'+(ok?'<div style="font-size:18px">✅</div>':'<div style="font-size:14px;color:#ccc">🔒</div>');
-    al.appendChild(d);
+  cont.appendChild(grid);
+}
+
+function loadProfileLessons(cont){
+  cont.innerHTML="";
+  var done = Object.values(A.progress||{}).filter(function(v){return v.completed;}).length;
+  var total = 18;
+  // Header progress
+  var header=document.createElement("div");
+  header.style.cssText="background:linear-gradient(135deg,#2d2a4a,#3d3a5a);border-radius:14px;padding:14px;margin-bottom:14px";
+  var pct=Math.round(done/total*100);
+  header.innerHTML='<div style="font-weight:800;font-size:14px;color:#fff;margin-bottom:8px">📚 Progressione totale</div>'+
+    '<div style="background:rgba(255,255,255,.1);border-radius:50px;height:8px;overflow:hidden;margin-bottom:6px">'+
+    '<div style="width:'+pct+'%;background:linear-gradient(90deg,#3DBE7A,#C8F5E0);height:100%;border-radius:50px;transition:width .6s"></div></div>'+
+    '<div style="font-size:12px;color:#9896B8">'+done+' di '+total+' lezioni completate · '+pct+'%</div>';
+  cont.appendChild(header);
+  // Per category
+  CATS.forEach(function(cat){
+    var section=document.createElement("div");
+    section.style.cssText="background:#161525;border-radius:12px;padding:12px;margin-bottom:10px";
+    var catDone=cat.levels.filter(function(l){var k=pk(cat.id,l.id);return A.progress[k]&&A.progress[k].completed;}).length;
+    var catPct=cat.levels.length?Math.round(catDone/cat.levels.length*100):0;
+    var header2=document.createElement("div");
+    header2.style.cssText="display:flex;align-items:center;gap:10px;margin-bottom:10px";
+    header2.innerHTML='<div style="width:36px;height:36px;border-radius:10px;background:'+cat.color+'22;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">'+cat.icon+'</div>'+
+      '<div style="flex:1"><div style="font-weight:800;font-size:14px;color:#fff">'+cat.name+'</div>'+
+      '<div style="font-size:10px;color:#9896B8">'+catDone+'/'+cat.levels.length+' · '+catPct+'%</div></div>'+
+      (catDone===cat.levels.length?'<span style="font-size:18px">🏆</span>':'');
+    section.appendChild(header2);
+    // Progress bar categoria
+    var pb=document.createElement("div");
+    pb.style.cssText="background:rgba(255,255,255,.08);border-radius:50px;height:6px;overflow:hidden;margin-bottom:10px";
+    var pbFill=document.createElement("div");
+    pbFill.style.cssText="width:"+catPct+"%;height:100%;background:"+cat.color+";border-radius:50px;transition:width .6s";
+    pb.appendChild(pbFill); section.appendChild(pb);
+    // Lesson list
+    cat.levels.forEach(function(l){
+      var k=pk(cat.id,l.id);
+      var prog=A.progress[k]||{};
+      var isComp=prog.completed||false;
+      var row=document.createElement("div");
+      row.style.cssText="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid rgba(255,255,255,.05);cursor:"+(isComp?"default":"pointer");
+      var statusIcon=isComp?"✅":"⭕";
+      row.innerHTML='<span style="font-size:16px;flex-shrink:0">'+statusIcon+'</span>'+
+        '<span style="flex:1;font-size:13px;font-weight:'+(isComp?"700":"500")+';color:'+(isComp?"#fff":"#9896B8")+'">'+l.name+'</span>'+
+        (isComp?'<span style="font-size:10px;color:#3DBE7A;font-weight:700">Completata</span>':'<span style="font-size:10px;color:#9896B8">→</span>');
+      if(!isComp){ (function(catId,lId){row.onclick=function(){A.cat=CATS.find(function(c){return c.id===catId;});A.lesson=CATS.find(function(c){return c.id===catId;}).levels.find(function(x){return x.id===lId;});startLesson();};})(cat.id,l.id); }
+      section.appendChild(row);
+    });
+    cont.appendChild(section);
   });
+}
+
+function renderProfileSettings(cont){
+  cont.innerHTML="";
+  // Avatar selector
+  var avSec=document.createElement("div");
+  avSec.style.cssText="background:#161525;border-radius:12px;padding:14px;margin-bottom:10px";
+  avSec.innerHTML='<div style="font-weight:800;font-size:13px;color:#fff;margin-bottom:10px">🎭 Avatar</div><div id="avatar-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"></div>';
+  cont.appendChild(avSec);
+  var brSec=document.createElement("div");
+  brSec.style.cssText="background:#161525;border-radius:12px;padding:14px;margin-bottom:10px";
+  brSec.innerHTML='<div style="font-weight:800;font-size:13px;color:#fff;margin-bottom:10px">✨ Cornice</div><div id="border-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"></div>';
+  cont.appendChild(brSec);
+  var achSec=document.createElement("div");
+  achSec.style.cssText="background:#161525;border-radius:12px;padding:14px;margin-bottom:10px";
+  achSec.innerHTML='<div style="font-weight:800;font-size:13px;color:#fff;margin-bottom:10px">🏅 Achievement</div><div id="achievements-list"></div>';
+  cont.appendChild(achSec);
+  // Bio edit
+  var bioSec=document.createElement("div");
+  bioSec.style.cssText="background:#161525;border-radius:12px;padding:14px;margin-bottom:10px";
+  bioSec.innerHTML='<div style="font-weight:800;font-size:13px;color:#fff;margin-bottom:10px">📝 Bio</div><div id="profile-bio-edit" style="display:none"></div>';
+  var bioBtn=document.createElement("button");
+  bioBtn.style.cssText="width:100%;padding:10px;background:rgba(139,92,246,.2);border:1px solid rgba(139,92,246,.4);border-radius:10px;color:#8B5CF6;font-weight:700;font-size:13px;cursor:pointer";
+  bioBtn.textContent="✏️ Modifica bio";
+  bioBtn.onclick=openBioEdit;
+  bioSec.appendChild(bioBtn);
+  cont.appendChild(bioSec);
+  // Re-render grids (reuse existing functions)
+  var prf=A.profile||{avatar:"def",border:"none"};
+  var ag=document.getElementById("avatar-grid");
+  if(ag){ ag.innerHTML="";
+    UNLOCKS.avatars.forEach(function(av){var ok=isUnlocked(av.req),sel=prf.avatar===av.id;var d=document.createElement("div");d.style.cssText="text-align:center;padding:8px 4px;border-radius:10px;cursor:"+(ok?"pointer":"default")+";border:2px solid "+(sel?"#8B5CF6":"transparent")+";background:"+(sel?"rgba(139,92,246,.2)":"rgba(255,255,255,.04)")+";opacity:"+(ok?1:.4);d.innerHTML='<div style="font-size:24px;margin-bottom:3px">'+av.icon+'</div><div style="font-size:9px;color:'+(ok?"#fff":"#9896B8")+';font-weight:'+(sel?"800":"600")+'">'+av.name+'</div>'+(ok?'':'<div style="font-size:8px;color:#9896B8">🔒</div>');if(ok){(function(id){d.onclick=function(){A.profile.avatar=id;saveProfile();renderProfile();};})(av.id);}ag.appendChild(d);});
+  }
+  var bg=document.getElementById("border-grid");
+  if(bg){ bg.innerHTML="";
+    UNLOCKS.borders.forEach(function(br){var ok=isUnlocked(br.req),sel=prf.border===br.id;var d=document.createElement("div");d.style.cssText="text-align:center;padding:8px 4px;border-radius:10px;cursor:"+(ok?"pointer":"default")+";border:2px solid "+(sel?"#8B5CF6":"transparent")+";background:"+(sel?"rgba(139,92,246,.2)":"rgba(255,255,255,.04)")+";opacity:"+(ok?1:.4);var preview=br.color?br.color==="rainbow"?'<div style="width:26px;height:26px;border-radius:50%;background:conic-gradient(#3DBE7A,#D4A200,#3B9FD4,#8B5CF6,#FF8C4B,#3DBE7A);margin:0 auto 3px"></div>':'<div style="width:26px;height:26px;border-radius:50%;background:'+br.color+';margin:0 auto 3px"></div>':'<div style="width:26px;height:26px;border-radius:50%;border:2px dashed #555;margin:0 auto 3px"></div>';d.innerHTML=preview+'<div style="font-size:9px;color:'+(ok?"#fff":"#9896B8")+';font-weight:'+(sel?"800":"600")+'">'+br.name+'</div>'+(ok?'':'<div style="font-size:8px;color:#9896B8">🔒</div>');if(ok){(function(id){d.onclick=function(){A.profile.border=id;saveProfile();renderProfile();};})(br.id);}bg.appendChild(d);});
+  }
+  var al=document.getElementById("achievements-list");
+  if(al){ al.innerHTML="";ACHIEVEMENTS.forEach(function(ach){var ok=isUnlocked(ach.req);var d=document.createElement("div");d.style.cssText="display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;margin-bottom:6px;background:"+(ok?"rgba(139,92,246,.12)":"rgba(255,255,255,.03)")+";opacity:"+(ok?1:.5);d.innerHTML='<div style="width:40px;height:40px;border-radius:10px;background:'+(ok?"#8B5CF6":"#333")+';display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">'+ach.icon+'</div><div style="flex:1"><div style="font-weight:800;font-size:13px;color:'+(ok?"#fff":"#9896B8")+'">'+ach.name+'</div><div style="font-size:11px;color:#9896B8;margin-top:1px">'+ach.desc+'</div></div>'+(ok?'<span style="font-size:18px">✅</span>':'<span style="color:#555">🔒</span>');al.appendChild(d);});}
+}
+
+function changeCoverPhoto(){
+  var inp=document.createElement("input");
+  inp.type="file"; inp.accept="image/*";
+  inp.onchange=function(e){
+    var file=e.target.files[0]; if(!file)return;
+    var reader=new FileReader();
+    reader.onload=function(ev){
+      localSet("dl:cover_"+A.user.id, ev.target.result);
+      renderProfile();
+      showToast("Copertina aggiornata!","");
+    };
+    reader.readAsDataURL(file);
+  };
+  inp.click();
 }
 
 function checkNewUnlocks(prevDone){
@@ -1159,37 +1290,114 @@ async function renderFeed(){
 
 function buildPostCard(post, liked){
   var timeAgo = getTimeAgo(new Date(post.created_at));
-  var div = document.createElement("div");
-  div.style.cssText = "background:#161525;margin-bottom:2px;border-bottom:1px solid rgba(255,255,255,.05)";
-  div.innerHTML =
-    // Header
-    '<div style="display:flex;align-items:center;gap:10px;padding:12px 16px 8px">'+
-      '<div onclick="openPubProfile(\"'+post.user_id+'\",\"'+post.user_name+'\")" style="width:38px;height:38px;border-radius:50%;background:#2d2a4a;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;cursor:pointer">'+post.user_avatar+'</div>'+
-      '<div style="flex:1">'+
-        '<div onclick="openPubProfile(\"'+post.user_id+'\",\"'+post.user_name+'\")" style="font-weight:800;font-size:13px;color:#fff;cursor:pointer">'+post.user_name+'</div>'+
-        '<div style="font-size:10px;color:#9896B8">'+timeAgo+(post.location?' · 📍'+post.location:'')+(post.lesson_id?' · 🎨 lezione':'')+'</div>'+
-      '</div>'+
-      (A.user&&post.user_id===A.user.id?'<button onclick="deletePost(\"'+post.id+'\")" style="background:none;border:none;color:#9896B8;font-size:18px;cursor:pointer">⋯</button>':'' )+
-    '</div>'+
-    // Image
-    '<div style="cursor:pointer" onclick="openPostDetail(\"'+post.id+'\")">'+
-      '<img src="'+post.image_url+'" style="width:100%;display:block;max-height:480px;object-fit:cover" loading="lazy"/>'+
-    '</div>'+
-    // Actions
-    '<div style="padding:10px 16px">'+
-      '<div style="display:flex;align-items:center;gap:16px;margin-bottom:8px">'+
-        '<button id="like-btn-'+post.id+'" data-liked="'+(liked?'1':'0')+'" onclick="toggleLike(\"'+post.id+'\")" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;color:'+( liked?'#e74c3c':'#9896B8')+';font-weight:700;font-size:13px">'+
-          '<span style="font-size:20px">'+( liked?'❤️':'🤍')+'</span> <span id="likes-'+post.id+'">'+post.likes_count+'</span>'+
-        '</button>'+
-        '<button onclick="openPostDetail(\"'+post.id+'\")" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;color:#9896B8;font-weight:700;font-size:13px">'+
-          '<span style="font-size:20px">💬</span> <span>'+post.comments_count+'</span>'+
-        '</button>'+
-        '<button onclick="sharePostNative(\"'+post.image_url+'\",\"'+( post.caption||'')+'\")" style="background:none;border:none;cursor:pointer;color:#9896B8;font-size:20px;margin-left:auto">↗️</button>'+
-      '</div>'+
-      (post.caption?'<div style="font-size:13px;color:#fff;line-height:1.5;margin-bottom:4px"><span style="font-weight:800">'+post.user_name+'</span> '+post.caption+'</div>':'')+
-      (post.tags?'<div style="font-size:12px;color:#8B5CF6;margin-top:3px">'+post.tags+'</div>':'')+
-    '</div>';
-  return div;
+  var card = document.createElement("div");
+  card.style.cssText = "background:#161525;margin-bottom:2px;border-bottom:1px solid rgba(255,255,255,.05)";
+
+  /* ── Header ── */
+  var header = document.createElement("div");
+  header.style.cssText = "display:flex;align-items:center;gap:10px;padding:12px 16px 8px";
+  var avatar = document.createElement("div");
+  avatar.style.cssText = "width:38px;height:38px;border-radius:50%;background:#2d2a4a;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;cursor:pointer";
+  avatar.textContent = post.user_avatar||"👤";
+  avatar.onclick = function(){ openPubProfile(post.user_id, post.user_name); };
+  var userInfo = document.createElement("div"); userInfo.style.flex = "1";
+  var userName = document.createElement("div");
+  userName.style.cssText = "font-weight:800;font-size:13px;color:#fff;cursor:pointer";
+  userName.textContent = post.user_name;
+  userName.onclick = function(){ openPubProfile(post.user_id, post.user_name); };
+  var userMeta = document.createElement("div");
+  userMeta.style.cssText = "font-size:10px;color:#9896B8;font-weight:500";
+  userMeta.textContent = timeAgo+(post.location?" · 📍"+post.location:"");
+  userInfo.appendChild(userName); userInfo.appendChild(userMeta);
+  header.appendChild(avatar); header.appendChild(userInfo);
+  if(A.user && post.user_id===A.user.id){
+    var delBtn = document.createElement("button");
+    delBtn.style.cssText = "background:none;border:none;color:#9896B8;font-size:18px;cursor:pointer;padding:0";
+    delBtn.textContent = "⋯";
+    delBtn.onclick = function(){ deletePost(post.id); };
+    header.appendChild(delBtn);
+  }
+  card.appendChild(header);
+
+  /* ── Image ── */
+  var imgWrap = document.createElement("div");
+  imgWrap.style.cursor = "pointer";
+  imgWrap.onclick = function(){ openPostDetail(post.id); };
+  var img = document.createElement("img");
+  img.src = post.image_url; img.loading = "lazy";
+  img.style.cssText = "width:100%;display:block;max-height:480px;object-fit:cover";
+  imgWrap.appendChild(img); card.appendChild(imgWrap);
+
+  /* ── Actions ── */
+  var actions = document.createElement("div");
+  actions.style.cssText = "padding:10px 16px";
+  var btnRow = document.createElement("div");
+  btnRow.style.cssText = "display:flex;align-items:center;gap:12px;margin-bottom:8px";
+
+  // Like
+  var likeBtn = document.createElement("button");
+  likeBtn.id = "like-btn-"+post.id;
+  likeBtn.setAttribute("data-liked", liked?"1":"0");
+  likeBtn.style.cssText = "background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;color:"+(liked?"#e74c3c":"#9896B8")+";font-weight:700;font-size:13px;padding:0";
+  var likeIcon = document.createElement("span"); likeIcon.style.fontSize = "20px"; likeIcon.textContent = liked?"❤️":"🤍";
+  var likeCount = document.createElement("span"); likeCount.id = "likes-"+post.id; likeCount.textContent = post.likes_count||0;
+  likeBtn.appendChild(likeIcon); likeBtn.appendChild(likeCount);
+  likeBtn.onclick = function(){ toggleLike(post.id); };
+  btnRow.appendChild(likeBtn);
+
+  // Comment
+  var cmtBtn = document.createElement("button");
+  cmtBtn.style.cssText = "background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:5px;color:#9896B8;font-weight:700;font-size:13px;padding:0";
+  var cmtIcon = document.createElement("span"); cmtIcon.style.fontSize = "20px"; cmtIcon.textContent = "💬";
+  var cmtCount = document.createElement("span"); cmtCount.textContent = post.comments_count||0;
+  cmtBtn.appendChild(cmtIcon); cmtBtn.appendChild(cmtCount);
+  cmtBtn.onclick = function(){ openPostDetail(post.id); };
+  btnRow.appendChild(cmtBtn);
+
+  // Redline (per utenti con 3+ lezioni, non proprio post)
+  var done = Object.values(A.progress||{}).filter(function(v){return v.completed;}).length;
+  if(done>=3 && A.user && post.user_id!==A.user.id){
+    var rlBtn = document.createElement("button");
+    rlBtn.style.cssText = "background:rgba(231,76,60,.12);border:1px solid rgba(231,76,60,.3);border-radius:50px;padding:4px 10px;color:#e74c3c;font-size:11px;font-weight:700;cursor:pointer";
+    rlBtn.textContent = "✏️ Redline";
+    rlBtn.title = "Disegna correzioni sopra questo post (richiede 3+ lezioni)";
+    rlBtn.onclick = function(){ openRedline(post.id, post.image_url); };
+    btnRow.appendChild(rlBtn);
+  }
+
+  // Share (destra)
+  var rightBtns = document.createElement("div");
+  rightBtns.style.cssText = "margin-left:auto;display:flex;align-items:center;gap:8px";
+  var shareBtn = document.createElement("button");
+  shareBtn.style.cssText = "background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;justify-content:center";
+  shareBtn.title = "Condividi";
+  shareBtn.innerHTML = "<svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='#9896B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='18' cy='5' r='3'/><circle cx='6' cy='12' r='3'/><circle cx='18' cy='19' r='3'/><line x1='8.59' y1='13.51' x2='15.42' y2='17.49'/><line x1='15.41' y1='6.51' x2='8.59' y2='10.49'/></svg>";
+  shareBtn.onclick = function(){ sharePostNative(post.image_url, post.caption||""); };
+  rightBtns.appendChild(shareBtn);
+  var storyBtn = document.createElement("button");
+  storyBtn.style.cssText = "background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.3);border-radius:50px;padding:4px 10px;color:#8B5CF6;font-size:11px;font-weight:700;cursor:pointer";
+  storyBtn.textContent = "📲 Story";
+  storyBtn.title = "Genera card 9:16 con watermark per TikTok/Instagram";
+  storyBtn.onclick = function(){ shareResult(post.image_url, post.caption||""); };
+  rightBtns.appendChild(storyBtn);
+  btnRow.appendChild(rightBtns);
+  actions.appendChild(btnRow);
+
+  // Caption + tags
+  if(post.caption){
+    var cap = document.createElement("div");
+    cap.style.cssText = "font-size:13px;color:#fff;line-height:1.5;margin-bottom:3px";
+    cap.innerHTML = "<span style='font-weight:800'>"+post.user_name+"</span> "+post.caption;
+    actions.appendChild(cap);
+  }
+  if(post.tags){
+    var tags = document.createElement("div");
+    tags.style.cssText = "font-size:12px;color:#8B5CF6;margin-top:2px;font-weight:500";
+    tags.textContent = post.tags;
+    actions.appendChild(tags);
+  }
+  card.appendChild(actions);
+  return card;
 }
 
 function getTimeAgo(date){
@@ -1230,7 +1438,7 @@ async function toggleLike(postId){
 
 async function sharePostNative(imageUrl, caption){
   if(navigator.share){
-    try{ await navigator.share({title:"DrawLearn",text:caption||"Guarda il mio disegno!",url:imageUrl}); }
+    try{ await navigator.share({title:"DrawBound",text:caption||"Guarda il mio disegno!",url:imageUrl}); }
     catch(e){}
   } else {
     var a=document.createElement("a");a.href=imageUrl;a.target="_blank";a.click();
@@ -2260,7 +2468,7 @@ var HOME_REWARDS_FREE = [
 var HOME_REWARDS_PREMIUM = [
   {id:"rp_tok_10", icon:"🪙", name:"10 DrawToken",  desc:"Starter Pack",   price:"1,99", tokens:3},
   {id:"rp_tok_25", icon:"🪙", name:"25 DrawToken",  desc:"Explorer Pack",  price:"4,99", tokens:10},
-  {id:"rp_pro",    icon:"👑", name:"DrawLearn PRO", desc:"Accesso totale", price:"4,99/mese", pro:true},
+  {id:"rp_pro",    icon:"👑", name:"DrawBound PRO", desc:"Accesso totale", price:"4,99/mese", pro:true},
 ];
 
 function toggleRewards(){
@@ -2623,8 +2831,8 @@ function initPayPal(){
     createOrder: function(data, actions){
       var amount = A.payPlan === "yearly" ? "39.99" : "4.99";
       var desc = A.payPlan === "yearly"
-        ? "DrawLearn PRO - Abbonamento Annuale"
-        : "DrawLearn PRO - Abbonamento Mensile";
+        ? "DrawBound PRO - Abbonamento Annuale"
+        : "DrawBound PRO - Abbonamento Mensile";
       return actions.order.create({
         purchase_units: [{
           description: desc,
@@ -2632,7 +2840,7 @@ function initPayPal(){
         }],
         application_context: {
           shipping_preference: "NO_SHIPPING",
-          brand_name: "DrawLearn"
+          brand_name: "DrawBound"
         }
       });
     },
@@ -2703,7 +2911,7 @@ function showPhotoModal(dataUrl){
   var cap=document.getElementById("photo-caption");
   if(cap){
     var tutName=A.lesson?A.lesson.title:"il mio disegno";
-    cap.value="Ho imparato a disegnare "+tutName+" con DrawLearn! #DrawLearn #Arte #Tutorial";
+    cap.value="Ho imparato a disegnare "+tutName+" con DrawBound! #DrawBound #Arte #Tutorial";
   }
   document.getElementById("modal-photo").style.display="flex";
   // Draw after modal is visible
@@ -2730,7 +2938,7 @@ function redrawCanvas(){
       var fs=Math.round(barH*0.55);
       ctx.font="bold "+fs+"px 'Arial', sans-serif";
       ctx.fillStyle="#fff";
-      ctx.fillText("✏️ DrawLearn",8,canvas.height-Math.round(barH*0.22));
+      ctx.fillText("✏️ DrawBound",8,canvas.height-Math.round(barH*0.22));
       if(A.lesson){
         ctx.font=Math.round(fs*0.8)+"px 'Arial', sans-serif";
         ctx.fillStyle="rgba(255,255,255,0.75)";
@@ -2751,12 +2959,12 @@ function getCanvasBlob(cb){
 
 async function sharePhoto(){
   var cap=document.getElementById("photo-caption");
-  var text=(cap?cap.value:"DrawLearn")+("\n\nhttps://gianluca85vt.github.io/drawlearn");
+  var text=(cap?cap.value:"DrawBound")+("\n\nhttps://gianluca85vt.github.io/drawlearn");
   getCanvasBlob(async function(blob){
     var file=new File([blob],"drawlearn-disegno.jpg",{type:"image/jpeg"});
     if(navigator.share){
       try{
-        var sd={title:"DrawLearn - "+( A.lesson?A.lesson.title:"Il mio disegno"),text:text};
+        var sd={title:"DrawBound - "+( A.lesson?A.lesson.title:"Il mio disegno"),text:text};
         if(navigator.canShare&&navigator.canShare({files:[file]})) sd.files=[file];
         else sd.url="https://gianluca85vt.github.io/drawlearn";
         await navigator.share(sd);
