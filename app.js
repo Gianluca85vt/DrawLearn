@@ -422,7 +422,204 @@ function foodSvg(lid,p,a){
   return W(s);
 }
 
-var SVG_FNS = {"animals-1":function(s,a){return animalSvg(1,s,a);},"animals-2":function(s,a){return animalSvg(2,s,a);},"animals-3":function(s,a){return animalSvg(3,s,a);},"faces-1":function(s,a){return faceSvg(1,s,a);},"faces-2":function(s,a){return faceSvg(2,s,a);},"faces-3":function(s,a){return faceSvg(3,s,a);},"architecture-1":function(s,a){return archSvg(1,s,a);},"architecture-2":function(s,a){return archSvg(2,s,a);},"architecture-3":function(s,a){return archSvg(3,s,a);},"chiaroscuro-1":function(s,a){return shadeSvg(1,s,a);},"chiaroscuro-2":function(s,a){return shadeSvg(2,s,a);},"chiaroscuro-3":function(s,a){return shadeSvg(3,s,a);},"nature-1":function(s,a){return natureSvg(1,s,a);},"nature-2":function(s,a){return natureSvg(2,s,a);},"nature-3":function(s,a){return natureSvg(3,s,a);},"food-1":function(s,a){return foodSvg(1,s,a);},"food-2":function(s,a){return foodSvg(2,s,a);},"food-3":function(s,a){return foodSvg(3,s,a);}};
+var SVG_FNS = {"animals-1":function(s,a){return animalSvg(1,s,a);},"animals-2":function(s,a){return animalSvg(2,s,a);},"animals-3":function(s,a){return animalSvg(3,s,a);},"faces-1":function(s,a){return faceSvg(1,s,a);},"faces-2":function(s,a){return faceSvg(2,s,a);},"faces-3":function(s,a){return faceSvg(3,s,a);},"architecture-1":function(s,a){return archSvg(1,s,a);},"architecture-2":function(s,a){return archSvg(2,s,a);},"architecture-3":function(s,a){return archSvg(3,s,a);},"chiaroscuro-1":function(s,a){return shadeSvg(1,s,a);},"chiaroscuro-2":function(s,a){return shadeSvg(2,s,a);},"chiaroscuro-3":function(s,a){return shadeSvg(3,s,a);},"nature-1":function(s,a){return natureSvg(1,s,a);},"nature-2":function(s,a){return natureSvg(2,s,a);},"nature-3":function(s,a){return natureSvg(3,s,a);},"food-1":function(s,a){return foodSvg(1,s,a);},"food-2":function(s,a){return foodSvg(2,s,a);},"food-3":function(s,a){return foodSvg(3,s,a);},
+  "fondamentali-1":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">📐</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "fondamentali-2":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">🔲</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "fondamentali-3":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">↔️</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "fondamentali-4":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">📏</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "fondamentali-5":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">🌑</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "fondamentali-6":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">🎨</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "fondamentali-7":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">🦴</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "fondamentali-8":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">✋</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "fondamentali-9":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">😊</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "character-1":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">🧍</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "character-2":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">😤</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "character-3":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">👕</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "character-4":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">📋</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "character-5":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">🐺</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "character-6":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">🐉</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "character-7":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">💀</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "environment-1":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">🌄</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "environment-2":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">🏙️</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "environment-3":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">🏰</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "environment-4":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">🕳️</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "environment-5":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">🚀</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "environment-6":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">🌋</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "prop-1":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">🗡️</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "prop-2":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">🔫</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "prop-3":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">🛡️</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "prop-4":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">✨</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "prop-5":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">🚗</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+},
+  "prop-6":function(s,ac){
+  return '<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;background:'+ac+'11">'+
+    '<rect width="400" height="300" fill="'+ac+'08"/>'+
+    '<text x="200" y="130" text-anchor="middle" font-size="72">🎒</text>'+
+    '<text x="200" y="185" text-anchor="middle" font-size="13" fill="'+ac+'" font-weight="bold" font-family="sans-serif">Passo '+(s+1)+'</text>'+
+    '</svg>';
+}
+};
 
 /* ═══════════════ DATA ═══════════════ */
 function S(n,t,d,tip){return {n:n,title:t,desc:d,tip:tip||null};}
@@ -806,8 +1003,7 @@ function renderCategory(){
     var k=pk(cat.id,les.id),pg=A.progress[k]||{completed:false,step:0};
     var locked=!les.free&&!A.pro;
     var pct=les.steps.length>0?Math.round(pg.step/les.steps.length*100):0;
-    var stars=[0,1,2].map(function(i){return'<span style="color:'+(i<=idx?BG.faces.replace("C8","D4"):"#ddd")+';font-size:12px">★</span>';}).join("").replace(/C8/g,"D4");
-    stars=[0,1,2].map(function(i){return'<span style="color:'+(i<=idx?"#D4A200":"#ddd")+';font-size:12px">★</span>';}).join("");
+    var stars=[0,1,2].map(function(i){return'<span style="color:'+(i<=idx?"#D4A200":"#ddd")+';font-size:12px">★</span>';}).join("");
     var prog="";
     if(!locked&&pg.step>0&&!pg.completed)prog='<div style="margin-top:5px"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:9px;color:#9896B8">In corso</span><span style="font-size:9px;color:'+ac+';font-weight:700">'+pct+'%</span></div><div style="background:'+bg+';border-radius:50px;height:4px"><div style="width:'+pct+'%;background:'+ac+';height:100%;border-radius:50px"></div></div></div>';
     if(pg.completed)prog='<div style="font-size:10px;color:'+ac+';font-weight:800;margin-top:3px">✓ Completata!</div>';
@@ -3085,14 +3281,16 @@ function closePhoto(){
 
 
 function goBackFromLesson(){
-  if(A.cat && A.lesson){
-    localSet("dl:last", JSON.stringify({
-      catId:A.cat.id, lesId:A.lesson.id, step:A.step,
-      title:A.lesson.title, icon:A.lesson.icon||"", catIcon:A.cat.icon
-    }));
-  }
-  renderCategory();
-  showScreen("category");
+  try{
+    if(A.cat && A.lesson){
+      localSet("dl:last", JSON.stringify({
+        catId:A.cat.id, lesId:A.lesson.id, step:A.step,
+        title:A.lesson.title, icon:A.lesson.icon||"", catIcon:A.cat.icon
+      }));
+    }
+    if(A.cat){ renderCategory(); showScreen("category"); }
+    else { renderHome(); showScreen("home"); }
+  }catch(e){ renderHome(); showScreen("home"); }
 }
 
 function continueLastLesson(){
