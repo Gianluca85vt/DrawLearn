@@ -633,7 +633,7 @@ function renderHome(){
   
   // Progress & Level
   var tot=27;
-  var done=Object.values(A.progress).filter(function(v){return v.completed;}).length;
+  var done=Object.values(A.progress||{}).filter(function(v){return v&&v.completed;}).length;
   var pct=Math.round(done/tot*100);
   var lv=getLevel(done);
   var nextLv=done<27?LEVELS[LEVELS.indexOf(lv)+1]:null;
@@ -860,7 +860,8 @@ async function nextStep(){
   try{
     if(!A.lesson||!A.cat){showToast("Errore: nessuna lezione attiva","");return;}
     var les=A.lesson,cat=A.cat,p=A.step,tot=les.steps?les.steps.length:0;
-    if(!tot){showToast("Errore: nessun passo","");return;}
+    if(!tot){showToast("Errore: nessun passo nella lezione (tot=0)","⚠️");return;}
+    showToast("Passo "+(p+1)+"/"+tot+(p===tot-1?" → COMPLETA!":""),"✏️");
     var key=cat.id+"-"+les.id;
     var pv=A.progress[key]||{completed:false,step:0};
     var ns=Math.max(pv.step||0,p+1);
