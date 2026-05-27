@@ -806,6 +806,7 @@ function startLesson(cat,les){
   A.cat=cat;A.lesson=les;
   var sv=A.progress[pk(cat.id,les.id)];
   A.step=sv&&sv.completed?0:Math.min(sv&&sv.step||0,les.steps.length-1);
+  hideBottomNav();
   renderLesson();showScreen("lesson");
 }
 function renderLesson(){
@@ -861,7 +862,6 @@ async function nextStep(){
     if(!A.lesson||!A.cat){showToast("Errore: nessuna lezione attiva","");return;}
     var les=A.lesson,cat=A.cat,p=A.step,tot=les.steps?les.steps.length:0;
     if(!tot){showToast("Errore: nessun passo nella lezione (tot=0)","⚠️");return;}
-    showToast("Passo "+(p+1)+"/"+tot+(p===tot-1?" → COMPLETA!":""),"✏️");
     var key=cat.id+"-"+les.id;
     var pv=A.progress[key]||{completed:false,step:0};
     var ns=Math.max(pv.step||0,p+1);
@@ -888,7 +888,7 @@ function showLessonComplete(les,cat,prevDone){
   var cb=document.createElement("button");cb.style.cssText="padding:13px;background:linear-gradient(135deg,"+ac+","+ac+"cc);border:none;border-radius:12px;color:#fff;font-weight:800;font-size:15px;cursor:pointer";cb.textContent="→ Prossima lezione";
   cb.onclick=function(){overlay.remove();var idx=cat.levels.findIndex(function(l){return l.id===les.id;});var next=cat.levels[idx+1];if(next&&(next.free||A.pro)){startLesson(cat,next);}else{goBackFromLesson();}};
   var bb=document.createElement("button");bb.style.cssText="padding:13px;background:rgba(255,255,255,.08);border:none;border-radius:12px;color:#9896B8;font-weight:700;font-size:14px;cursor:pointer";bb.textContent="↩ Torna al percorso";
-  bb.onclick=function(){overlay.remove();goBackFromLesson();};
+  bb.onclick=function(){overlay.remove();showBottomNav();goBackFromLesson();};
   row.appendChild(cb);row.appendChild(bb);
   setTimeout(function(){checkNewUnlocks(prevDone);var pb=document.getElementById("progress-bar"),pt=document.getElementById("progress-text");if(pb)pb.style.width=Math.round(done/27*100)+"%";if(pt)pt.textContent=done+" di 27 lezioni completate";},300);
 }
@@ -3047,9 +3047,10 @@ function closePhoto(){
 function goBackFromLesson(){
   try{
     if(A.cat&&A.lesson){localSet("dl:last",JSON.stringify({catId:A.cat.id,lesId:A.lesson.id,step:A.step,title:A.lesson.title,icon:A.lesson.icon||"",catIcon:A.cat.icon}));}
+    showBottomNav();
     if(A.cat){renderCategory();showScreen("category");}
     else{renderHome();showScreen("home");}
-  }catch(e){renderHome();showScreen("home");}
+  }catch(e){showBottomNav();renderHome();showScreen("home");}
 }
 
 function continueLastLesson(){
