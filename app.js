@@ -164,8 +164,25 @@ try{var _bl=(navigator.language||"").split("-")[0];if(_bl==="it")_currentLang="i
 function t(key){ return (LANG_STRINGS[_currentLang]&&LANG_STRINGS[_currentLang][key])||(LANG_STRINGS["it"]&&LANG_STRINGS["it"][key])||key; }
 function setLang(code){ if(LANG_STRINGS[code]){_currentLang=code;localStorage.setItem("dl:lang",code);} }
 
-var APP_VERSION="2.2.0";
-console.log("%c DrawBound v2.2.0 ✓","color:#8B5CF6;font-weight:bold;font-size:14px");
+var APP_VERSION="3.0.0";
+console.log("%c DrawBound v3.0.0 ✓ — Founder Masters + 7 lingue","color:#8B5CF6;font-weight:bold;font-size:14px");
+
+// ═══ STARTUP VERSION BANNER (visible proof the new code is loaded) ═══
+(function(){
+  function showBanner(){
+    if(document.getElementById("v3-banner"))return;
+    var b=document.createElement("div");
+    b.id="v3-banner";
+    b.style.cssText="position:fixed;top:0;left:0;right:0;z-index:9999;background:linear-gradient(90deg,#FFD700,#FF8C00,#FFD700);color:#000;text-align:center;padding:8px 12px;font-weight:900;font-size:12px;font-family:sans-serif;box-shadow:0 2px 12px rgba(255,140,0,.5);letter-spacing:.5px;cursor:pointer";
+    b.innerHTML="⭐ DrawBound v3.0 LOADED · 7 lingue + Founder Masters · tap per chiudere";
+    b.onclick=function(){b.style.transition="opacity .3s";b.style.opacity="0";setTimeout(function(){b.remove();},300);};
+    document.body.appendChild(b);
+    // Auto-hide after 5 seconds
+    setTimeout(function(){if(b.parentElement){b.style.transition="opacity .5s";b.style.opacity="0";setTimeout(function(){if(b.parentElement)b.remove();},500);}},5000);
+  }
+  if(document.body) showBanner();
+  else document.addEventListener("DOMContentLoaded",showBanner);
+})();
 /* DrawBound — app.js */
 
 
