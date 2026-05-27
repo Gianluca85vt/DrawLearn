@@ -1029,7 +1029,6 @@ function renderCategory(){
 
 /* ═══════════════ LESSON ═══════════════ */
 function startLesson(cat,les){
-  showToast("▶ Avvio: "+les.title,"");
   try{
   localSet("dl:last",JSON.stringify({catId:cat.id,lesId:les.id,step:A.progress[pk(cat.id,les.id)]&&A.progress[pk(cat.id,les.id)].step||0,title:les.title,icon:les.icon||"📝",catIcon:cat.icon}));
   if(!les.free&&!A.pro&&!isLessonUnlockedByToken(cat.id,les.id)){
@@ -1113,13 +1112,77 @@ async function nextStep(){
   // Save only this lesson's progress
   var uid_s=localGet("dl:uid");
   if(uid_s&&sbReady()){
-    sbFetch("POST","dl_progress",{body:{user_id:uid_s,lesson_key:key,step:ns,completed:done,updated_at:new Date().toISOString()}}).catch(function(e){console.error("Progress save error:",e);});
+    // Upsert: POST with merge-duplicates (already set in sbFetch)
+    sbFetch("POST","dl_progress",{body:{user_id:uid_s,lesson_key:key,step:ns,completed:done,updated_at:new Date().toISOString()}})
+    .then(function(r){ if(!r||r.error) console.warn("Progress save issue:",r); })
+    .catch(function(e){
+      // Fallback: try PATCH
+      sbFetch("PATCH","dl_progress?user_id=eq."+uid_s+"&lesson_key=eq."+encodeURIComponent(key),{body:{step:ns,completed:done,updated_at:new Date().toISOString()}}).catch(function(e2){console.error("Progress save error:",e2);});
+    });
   }
   // Also track last lesson for "Continua" card
   localSet("dl:last",JSON.stringify({catId:cat.id,lesId:les.id,step:ns,title:les.title,icon:les.icon||"📝",catIcon:cat.icon}));
-  if(done&&!pv.completed){showToast("Lezione completata! 🎉","🏆");setTimeout(function(){checkNewUnlocks(prevDone);},1500);}
-  if(!done||p<tot-1){A.step++;if(A.step>=tot)A.step=tot-1;renderLesson();}
-  else renderLesson();
+  if(done&&!pv.completed){
+    // Mostra schermata di completamento
+    showLessonComplete(les, cat, prevDone);
+  } else if(!done){
+    A.step++;
+    if(A.step>=tot) A.step=tot-1;
+    renderLesson();
+  } else {
+    // Già completata — torna alla categoria
+    goBackFromLesson();
+  }
+}
+
+function showLessonComplete(les, cat, prevDone){
+  var ac=AC[cat.id]||"#8B5CF6";
+  var overlay=document.createElement("div");
+  overlay.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px";
+  var panel=document.createElement("div");
+  panel.style.cssText="background:#1e1b3a;border-radius:24px;width:100%;max-width:380px;padding:32px 24px;text-align:center";
+  var done=Object.values(A.progress).filter(function(v){return v.completed;}).length;
+  panel.innerHTML=
+    '<div style="font-size:64px;margin-bottom:12px">🎉</div>'+
+    '<div style="font-weight:800;font-size:22px;color:#fff;margin-bottom:8px">Lezione completata!</div>'+
+    '<div style="font-size:15px;color:'+ac+';font-weight:700;margin-bottom:6px">'+les.icon+' '+les.title+'</div>'+
+    '<div style="font-size:13px;color:#9896B8;margin-bottom:20px">+'+les.mins+' XP guadagnati · '+done+'/27 lezioni totali</div>'+
+    '<div style="background:rgba(255,255,255,.06);border-radius:12px;height:8px;overflow:hidden;margin-bottom:20px">'+
+      '<div style="width:'+Math.round(done/27*100)+'%;height:100%;background:linear-gradient(90deg,'+ac+',#3DBE7A);border-radius:12px;transition:width .6s"></div>'+
+    '</div>'+
+    '<div id="les-complete-btns" style="display:flex;flex-direction:column;gap:10px"></div>';
+  overlay.appendChild(panel);
+  document.body.appendChild(overlay);
+  // Buttons
+  var row=document.getElementById("les-complete-btns");
+  var continueBtn=document.createElement("button");
+  continueBtn.style.cssText="padding:13px;background:linear-gradient(135deg,"+ac+","+ac+"cc);border:none;border-radius:12px;color:#fff;font-weight:800;font-size:15px;cursor:pointer";
+  continueBtn.textContent="→ Prossima lezione";
+  continueBtn.onclick=function(){
+    overlay.remove();
+    // Find next lesson in category
+    var idx=cat.levels.findIndex(function(l){return l.id===les.id;});
+    var next=cat.levels[idx+1];
+    if(next&&(next.free||A.pro)){
+      startLesson(cat,next);
+    } else {
+      goBackFromLesson();
+    }
+  };
+  var backBtn=document.createElement("button");
+  backBtn.style.cssText="padding:13px;background:rgba(255,255,255,.08);border:none;border-radius:12px;color:#9896B8;font-weight:700;font-size:14px;cursor:pointer";
+  backBtn.textContent="↩ Torna al percorso";
+  backBtn.onclick=function(){ overlay.remove(); goBackFromLesson(); };
+  row.appendChild(continueBtn);
+  row.appendChild(backBtn);
+  // Update home progress too
+  setTimeout(function(){
+    checkNewUnlocks(prevDone);
+    var pb=document.getElementById("progress-bar");
+    var pt=document.getElementById("progress-text");
+    if(pb) pb.style.width=Math.round(done/27*100)+"%";
+    if(pt) pt.textContent=done+" di 27 lezioni completate";
+  }, 300);
 }
 
 /* ═══════════════ PAYWALL ═══════════════ */
