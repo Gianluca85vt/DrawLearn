@@ -592,9 +592,16 @@ async function onLogin(){
       ]);
       var pr=results[0].value, pgRows=results[1].value, prfRow=results[2].value;
       A.pro=!!(pr&&pr[0]&&pr[0].active);
+      // Load localStorage first (always reliable)
       var pg={};
-      if(pgRows) pgRows.forEach(function(r){pg[r.lesson_key]={step:r.step,completed:r.completed};});
+      try{var _lp=localStorage.getItem("dl:progress_all");if(_lp)pg=JSON.parse(_lp);}catch(e){}
+      // Merge Supabase on top (Supabase wins only if more advanced)
+      if(pgRows)pgRows.forEach(function(r){
+        var ex=pg[r.lesson_key];
+        if(!ex||r.completed||(r.step>(ex.step||0)))pg[r.lesson_key]={step:r.step,completed:r.completed};
+      });
       A.progress=pg;
+      try{localStorage.setItem("dl:progress_all",JSON.stringify(pg));}catch(e){}
       A.profile=(prfRow&&prfRow[0])?{avatar:prfRow[0].avatar_id,border:prfRow[0].border_id}:{avatar:"def",border:"none"};
     // Load tokens: Supabase wins over localStorage
     var sbTokens = prfRow&&prfRow[0]&&prfRow[0].tokens;
@@ -806,7 +813,6 @@ function startLesson(cat,les){
   A.cat=cat;A.lesson=les;
   var sv=A.progress[pk(cat.id,les.id)];
   A.step=sv&&sv.completed?0:Math.min(sv&&sv.step||0,les.steps.length-1);
-  hideBottomNav();
   renderLesson();showScreen("lesson");
 }
 function renderLesson(){
@@ -849,6 +855,13 @@ function renderLesson(){
     (function(idx){d.onclick=function(){A.step=idx;renderLesson();};})(i);
     inner.appendChild(d);
   });
+  // ✓ COMPLETA / → Avanti button inline (next to steps list)
+  var cbtnRow=document.createElement("button");
+  cbtnRow.style.cssText="width:100%;margin-top:10px;padding:11px;border:none;border-radius:12px;font-weight:800;font-size:14px;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;background:"+(p===tot-1?"linear-gradient(135deg,#3DBE7A,#2D9B5E)":"linear-gradient(135deg,"+ac+","+ac+"cc)");
+  cbtnRow.innerHTML=(p===tot-1?"✓ COMPLETA":"→ Avanti (passo "+(p+2)+"/"+tot+")");
+  cbtnRow.onclick=nextStep;
+  inner.appendChild(cbtnRow);
+
   // Nav buttons
   var prev=document.getElementById("btn-prev");prev.style.display=p>0?"block":"none";
   var next=document.getElementById("btn-next");
@@ -890,7 +903,17 @@ function showLessonComplete(les,cat,prevDone){
   var bb=document.createElement("button");bb.style.cssText="padding:13px;background:rgba(255,255,255,.08);border:none;border-radius:12px;color:#9896B8;font-weight:700;font-size:14px;cursor:pointer";bb.textContent="↩ Torna al percorso";
   bb.onclick=function(){overlay.remove();showBottomNav();goBackFromLesson();};
   row.appendChild(cb);row.appendChild(bb);
-  setTimeout(function(){checkNewUnlocks(prevDone);var pb=document.getElementById("progress-bar"),pt=document.getElementById("progress-text");if(pb)pb.style.width=Math.round(done/27*100)+"%";if(pt)pt.textContent=done+" di 27 lezioni completate";},300);
+  // Update home progress bar immediately (even while category screen is shown)
+  setTimeout(function(){
+    checkNewUnlocks(prevDone);
+    var newDone=Object.values(A.progress||{}).filter(function(v){return v&&v.completed;}).length;
+    var pb=document.getElementById("progress-bar"),pt=document.getElementById("progress-text");
+    if(pb)pb.style.width=Math.round(newDone/27*100)+"%";
+    if(pt)pt.textContent=newDone+" di 27 lezioni completate";
+    // Update category cards lock state
+    var grid=document.getElementById("home-cat-grid");
+    if(grid&&grid.children.length){renderHome();}
+  },400);
 }
 
 /* ═══════════════ PAYWALL ═══════════════ */
