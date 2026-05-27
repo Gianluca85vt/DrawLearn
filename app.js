@@ -894,7 +894,13 @@ async function nextStep(){
     var ns=Math.max(pv.step||0,p+1);
     var done=(ns>=tot);
     var prevDone=Object.values(A.progress||{}).filter(function(v){return v&&v.completed;}).length;
-    console.log("nextStep BEFORE save: key="+key+" done="+done+" ns="+ns+" A.progress keys="+Object.keys(A.progress||{}).join(","));
+    // Ensure A.progress is a valid object
+    if(typeof A.progress!=="object"||A.progress===null||Array.isArray(A.progress)){
+      console.warn("A.progress was corrupted (type="+typeof A.progress+"), resetting");
+      try{var _rp=localStorage.getItem("dl:progress_all");A.progress=_rp?JSON.parse(_rp):{};}catch(e){A.progress={};}
+      if(typeof A.progress!=="object"||A.progress===null||Array.isArray(A.progress))A.progress={};
+    }
+    console.log("nextStep: key="+key+" done="+done+" ns="+ns);
     A.progress[key]={completed:done,step:ns};
     console.log("nextStep AFTER save: A.progress["+key+"]="+JSON.stringify(A.progress[key]));
     try{
@@ -912,18 +918,18 @@ async function nextStep(){
 
 function showLessonComplete(les,cat,prevDone){
   var ac=AC[cat.id]||"#8B5CF6";
-  // Debug: count completed with for-in loop (most compatible)
-  var done=0;var _dbgKeys=[];
-  for(var _k in A.progress){
-    if(A.progress.hasOwnProperty(_k)){
-      _dbgKeys.push(_k+":"+(A.progress[_k]?JSON.stringify(A.progress[_k]):"null"));
-      if(A.progress[_k]&&A.progress[_k].completed===true)done++;
-    }
-  }
-  console.log("showLessonComplete DEBUG: done="+done+" keys="+_dbgKeys.join(", "));
+  // Read from localStorage directly (bypass A.progress which might be corrupted)
+  var _raw=localStorage.getItem("dl:progress_all")||"{}";
+  var _prog={};
+  try{_prog=JSON.parse(_raw);if(typeof _prog!=="object"||_prog===null||Array.isArray(_prog))_prog={};}catch(e){_prog={};}
+  // Also fix A.progress
+  A.progress=_prog;
+  var done=0;
+  for(var _k in _prog){if(_prog.hasOwnProperty(_k)&&_prog[_k]&&_prog[_k].completed===true)done++;}
+  var _dbg="tipo:"+typeof A.progress+" keys:"+Object.keys(_prog).slice(0,5).join(",")+" raw:"+_raw.substring(0,80);
   var overlay=document.createElement("div");overlay.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px";
   var panel=document.createElement("div");panel.style.cssText="background:#1e1b3a;border-radius:24px;width:100%;max-width:380px;padding:32px 24px;text-align:center";
-  panel.innerHTML='<div style="font-size:64px;margin-bottom:12px">🎉</div><div style="font-weight:800;font-size:22px;color:#fff;margin-bottom:8px">Lezione completata!</div><div style="font-size:15px;color:'+ac+';font-weight:700;margin-bottom:6px">'+les.icon+' '+les.title+'</div><div style="font-size:13px;color:#9896B8;margin-bottom:20px">+'+les.mins+' XP · '+done+'/27 lezioni</div><div style="font-size:9px;color:#ff0;word-break:break-all;max-height:80px;overflow:auto;margin:6px 0;text-align:left;padding:6px;background:rgba(255,255,0,.1);border-radius:6px;border:1px solid rgba(255,255,0,.3)">DBG: '+_dbgKeys.join(' | ')+'</div><div style="background:rgba(255,255,255,.06);border-radius:12px;height:8px;overflow:hidden;margin-bottom:20px"><div style="width:'+Math.round(done/27*100)+'%;height:100%;background:linear-gradient(90deg,'+ac+',#3DBE7A);border-radius:12px"></div></div><div id="les-complete-btns" style="display:flex;flex-direction:column;gap:10px"></div>';
+  panel.innerHTML='<div style="font-size:64px;margin-bottom:12px">🎉</div><div style="font-weight:800;font-size:22px;color:#fff;margin-bottom:8px">Lezione completata!</div><div style="font-size:15px;color:'+ac+';font-weight:700;margin-bottom:6px">'+les.icon+' '+les.title+'</div><div style="font-size:13px;color:#9896B8;margin-bottom:6px">+'+les.mins+' XP · '+done+'/27 lezioni</div><div style="font-size:12px;color:#ff0;word-break:break-all;max-height:100px;overflow:auto;margin:8px 0;text-align:left;padding:8px;background:rgba(255,255,0,.12);border-radius:8px;border:1px solid rgba(255,255,0,.4);line-height:1.5">'+_dbg+'</div><div style="background:rgba(255,255,255,.06);border-radius:12px;height:8px;overflow:hidden;margin-bottom:20px"><div style="width:'+Math.round(done/27*100)+'%;height:100%;background:linear-gradient(90deg,'+ac+',#3DBE7A);border-radius:12px"></div></div><div id="les-complete-btns" style="display:flex;flex-direction:column;gap:10px"></div>';
   overlay.appendChild(panel);document.body.appendChild(overlay);
   var row=document.getElementById("les-complete-btns");
   var cb=document.createElement("button");cb.style.cssText="padding:13px;background:linear-gradient(135deg,"+ac+","+ac+"cc);border:none;border-radius:12px;color:#fff;font-weight:800;font-size:15px;cursor:pointer";cb.textContent="→ Prossima lezione";
@@ -931,16 +937,12 @@ function showLessonComplete(les,cat,prevDone){
   var bb=document.createElement("button");bb.style.cssText="padding:13px;background:rgba(255,255,255,.08);border:none;border-radius:12px;color:#9896B8;font-weight:700;font-size:14px;cursor:pointer";bb.textContent="↩ Torna al percorso";
   bb.onclick=function(){overlay.remove();showBottomNav();if(A.cat){renderCategory();}goBackFromLesson();};
   row.appendChild(cb);row.appendChild(bb);
-  // Update home progress bar immediately (even while category screen is shown)
   setTimeout(function(){
     checkNewUnlocks(prevDone);
-    var newDone=Object.values(A.progress||{}).filter(function(v){return v&&v.completed;}).length;
+    var newDone=0;for(var _k2 in A.progress){if(A.progress.hasOwnProperty(_k2)&&A.progress[_k2]&&A.progress[_k2].completed===true)newDone++;}
     var pb=document.getElementById("progress-bar"),pt=document.getElementById("progress-text");
     if(pb)pb.style.width=Math.round(newDone/27*100)+"%";
     if(pt)pt.textContent=newDone+" di 27 lezioni completate";
-    // Update category cards lock state
-    var grid=document.getElementById("home-cat-grid");
-    if(grid&&grid.children.length){renderHome();}
   },400);
 }
 
