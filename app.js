@@ -5,6 +5,9 @@
 const BG={fondamentali:"#C8F5E0",character:"#E0D4F5",environment:"#C8E8F5",prop:"#FFE0C8"};
 const AC={fondamentali:"#3DBE7A",character:"#8B5CF6",environment:"#3B9FD4",prop:"#FF8C4B"};
 
+
+var APP_VERSION="2.1.4";
+console.log("%c DrawBound v2.1.4 caricato ✓","color:#8B5CF6;font-weight:bold");
 /* ═══════════════ STATE ═══════════════ */
 const A = {screen:'splash',user:null,pro:false,progress:{},cat:null,lesson:null,step:0,payPlan:'monthly',allUsers:[]};
 
@@ -866,6 +869,8 @@ async function doLogout(){
 
 /* ═══════════════ HOME ═══════════════ */
 function renderHome(){
+  // Reload progress from localStorage
+  try{var _p=localGet("dl:progress_all");if(_p)A.progress=JSON.parse(_p);}catch(e){}
   // Greeting
   document.getElementById("home-greeting").textContent="Ciao, "+A.user.avatar+" "+A.user.name.split(" ")[0]+"!";
   
@@ -1127,16 +1132,12 @@ async function nextStep(){
   }
   // Also track last lesson for "Continua" card
   localSet("dl:last",JSON.stringify({catId:cat.id,lesId:les.id,step:ns,title:les.title,icon:les.icon||"📝",catIcon:cat.icon}));
-  if(done&&!pv.completed){
-    // Mostra schermata di completamento
+  if(done){
     showLessonComplete(les, cat, prevDone);
-  } else if(!done){
+  } else {
     A.step++;
     if(A.step>=tot) A.step=tot-1;
     renderLesson();
-  } else {
-    // Già completata — torna alla categoria
-    goBackFromLesson();
   }
 }
 
@@ -1428,7 +1429,7 @@ async function loadProfilePosts(cont){
 function loadProfileLessons(cont){
   cont.innerHTML="";
   var done = Object.values(A.progress||{}).filter(function(v){return v.completed;}).length;
-  var total = 18;
+  var total = 27;
   // Header progress
   var header=document.createElement("div");
   header.style.cssText="background:linear-gradient(135deg,#2d2a4a,#3d3a5a);border-radius:14px;padding:14px;margin-bottom:14px";
@@ -1446,7 +1447,7 @@ function loadProfileLessons(cont){
     var catPct=cat.levels.length?Math.round(catDone/cat.levels.length*100):0;
     var header2=document.createElement("div");
     header2.style.cssText="display:flex;align-items:center;gap:10px;margin-bottom:10px";
-    header2.innerHTML='<div style="width:36px;height:36px;border-radius:10px;background:'+cat.color+'22;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">'+cat.icon+'</div>'+
+    header2.innerHTML='<div style="width:36px;height:36px;border-radius:10px;background:'+(BG[cat.id]||'#C8F5E0')+'22;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">'+cat.icon+'</div>'+
       '<div style="flex:1"><div style="font-weight:800;font-size:14px;color:#fff">'+cat.name+'</div>'+
       '<div style="font-size:10px;color:#9896B8">'+catDone+'/'+cat.levels.length+' · '+catPct+'%</div></div>'+
       (catDone===cat.levels.length?'<span style="font-size:18px">🏆</span>':'');
@@ -1455,7 +1456,7 @@ function loadProfileLessons(cont){
     var pb=document.createElement("div");
     pb.style.cssText="background:rgba(255,255,255,.08);border-radius:50px;height:6px;overflow:hidden;margin-bottom:10px";
     var pbFill=document.createElement("div");
-    pbFill.style.cssText="width:"+catPct+"%;height:100%;background:"+cat.color+";border-radius:50px;transition:width .6s";
+    pbFill.style.cssText="width:"+catPct+"%;height:100%;background:"+(AC[cat.id]||"#3DBE7A")+";border-radius:50px;transition:width .6s";
     pb.appendChild(pbFill); section.appendChild(pb);
     // Lesson list
     cat.levels.forEach(function(l){
@@ -1468,7 +1469,7 @@ function loadProfileLessons(cont){
       row.innerHTML='<span style="font-size:16px;flex-shrink:0">'+statusIcon+'</span>'+
         '<span style="flex:1;font-size:13px;font-weight:'+(isComp?"700":"500")+';color:'+(isComp?"#fff":"#9896B8")+'">'+l.name+'</span>'+
         (isComp?'<span style="font-size:10px;color:#3DBE7A;font-weight:700">Completata</span>':'<span style="font-size:10px;color:#9896B8">→</span>');
-      if(!isComp){ (function(catId,lId){row.onclick=function(){A.cat=CATS.find(function(c){return c.id===catId;});A.lesson=CATS.find(function(c){return c.id===catId;}).levels.find(function(x){return x.id===lId;});startLesson();};})(cat.id,l.id); }
+      if(!isComp){ (function(catId,lId){row.onclick=function(){var _c=CATS.find(function(c){return c.id===catId;});var _l=_c&&_c.levels.find(function(x){return x.id===lId;});if(_c&&_l)startLesson(_c,_l);};})(cat.id,l.id); }
       section.appendChild(row);
     });
     cont.appendChild(section);
