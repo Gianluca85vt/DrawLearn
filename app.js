@@ -790,6 +790,9 @@ function renderHome(){
   } else {
     if(skillContainer) skillContainer.style.display="none";
     if(catGrid) catGrid.style.display="";
+    // Hide the skill-tree-view div created by renderSkillTree
+    var stv=document.getElementById("skill-tree-view");
+    if(stv) stv.style.display="none";
   }
   updateTokenUI();
 }
@@ -827,6 +830,7 @@ function renderCategory(){
 
 /* ═══════════════ LESSON ═══════════════ */
 function startLesson(cat,les){
+  try{
   localSet("dl:last",JSON.stringify({catId:cat.id,lesId:les.id,step:A.progress[pk(cat.id,les.id)]&&A.progress[pk(cat.id,les.id)].step||0,title:les.title,icon:les.icon||"📝",catIcon:cat.icon}));
   if(!les.free&&!A.pro&&!isLessonUnlockedByToken(cat.id,les.id)){
     // Show token unlock option
@@ -848,6 +852,7 @@ function startLesson(cat,les){
   var sv=A.progress[pk(cat.id,les.id)];
   A.step=sv&&sv.completed?0:Math.min(sv&&sv.step||0,les.steps.length-1);
   renderLesson();showScreen("lesson");
+  }catch(e){showToast("Errore apertura lezione: "+e.message,"");console.error("startLesson error:",e);}
 }
 function renderLesson(){
   var cat=A.cat,les=A.lesson,p=A.step,tot=les.steps.length;
@@ -3540,14 +3545,14 @@ function showCatInfo(cat){
     '<div style="width:52px;height:52px;background:'+ac+'22;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px">'+cat.icon+'</div>'+
     '<div><div style="font-weight:800;font-size:18px;color:#fff">'+cat.label+'</div>'+
     '<div style="font-size:12px;color:'+ac+';font-weight:600">'+cat.levels.length+' lezioni</div></div></div>'+
-    '<div style="font-size:14px;color:#e0ddf5;line-height:1.7;margin-bottom:16px">'+cat.info+'</div>'+
+    '<div style="font-size:13px;color:#e0ddf5;line-height:1.7;margin-bottom:14px">'+cat.info+'</div>'+'<div style="font-size:11px;font-weight:800;color:'+ac+';letter-spacing:1px;margin-bottom:8px">LEZIONI IN QUESTO PERCORSO</div>'+cat.levels.map(function(l,i){return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid rgba(255,255,255,.06)"><span style="font-size:14px">'+l.icon+'</span><span style="font-size:12px;color:#fff;font-weight:600">'+l.title+'</span><span style="font-size:9px;color:'+ac+';background:'+ac+'22;border-radius:50px;padding:2px 7px;margin-left:auto;font-weight:700">'+l.diff+'</span>'+(!l.free?'<span style="font-size:9px;background:linear-gradient(135deg,#FFD60A,#FF9500);color:#fff;border-radius:50px;padding:2px 6px;font-weight:800">PRO</span>':'')+'</div>';}).join("")+
     (cat.unlocks?'<div style="background:'+ac+'18;border:1px solid '+ac+'33;border-radius:10px;padding:10px 14px;font-size:12px;color:'+ac+';font-weight:700">✨ Sblocchi: '+cat.unlocks+'</div>':'')+
     '<button onclick="closeCatInfo()" style="width:100%;margin-top:16px;padding:12px;background:rgba(255,255,255,.08);border:none;border-radius:12px;color:#9896B8;font-weight:700;font-size:14px;cursor:pointer">Chiudi</button>'
   o.appendChild(p); document.body.appendChild(o);
 }
 
 function maybeShowLearnWelcome(){
-  if(localGet("dl:learn_welcome_seen"))return;
+  if(localGet("dl:learn_welcome_v2"))return;
   var old=document.getElementById("learn-welcome");if(old)old.remove();
   var banner=document.createElement("div");banner.id="learn-welcome";
   banner.style.cssText="background:linear-gradient(135deg,rgba(139,92,246,.18),rgba(61,190,122,.12));border:1px solid rgba(139,92,246,.3);border-radius:16px;padding:16px;margin-bottom:16px;position:relative";
@@ -3559,7 +3564,7 @@ function maybeShowLearnWelcome(){
   if(grid&&grid.parentElement)grid.parentElement.insertBefore(banner,grid);
 }
 function dismissLearnWelcome(){
-  localSet("dl:learn_welcome_seen","1");
+  localSet("dl:learn_welcome_v2","1");
   var el=document.getElementById("learn-welcome");
   if(el){el.style.transition="opacity .3s";el.style.opacity="0";setTimeout(function(){el.remove();},300);}
 }
