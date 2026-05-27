@@ -2,8 +2,8 @@
 
 
 /* ═══════════════ CONSTANTS ═══════════════ */
-const BG = {animals:"#C8F5E0",faces:"#FFF3C8",architecture:"#C8E8F5",chiaroscuro:"#E0D4F5",nature:"#D0F0E4",food:"#FFE0C8"};
-const AC = {animals:"#3DBE7A",faces:"#D4A200",architecture:"#3B9FD4",chiaroscuro:"#8B5CF6",nature:"#2E9E6B",food:"#FF8C4B"};
+const BG={fondamentali:"#C8F5E0",character:"#E0D4F5",environment:"#C8E8F5",prop:"#FFE0C8"};
+const AC={fondamentali:"#3DBE7A",character:"#8B5CF6",environment:"#3B9FD4",prop:"#FF8C4B"};
 
 /* ═══════════════ STATE ═══════════════ */
 const A = {screen:'splash',user:null,pro:false,progress:{},cat:null,lesson:null,step:0,payPlan:'monthly',allUsers:[]};
@@ -428,37 +428,47 @@ var SVG_FNS = {"animals-1":function(s,a){return animalSvg(1,s,a);},"animals-2":f
 function S(n,t,d,tip){return {n:n,title:t,desc:d,tip:tip||null};}
 function LL(id,free,icon,title,diff,mins,intro,steps){return {id:id,free:free,icon:icon,title:title,diff:diff,mins:mins,intro:intro,steps:steps};}
 var CATS=[
-  {id:"animals",label:"Animali",icon:"🐾",levels:[
-    LL(1,true,"🐱","Gatto Kawaii","Principiante",10,"Un gatto kawaii passo passo.",[S(1,"Testa","Cerchio grande - le imperfezioni sono kawaii!",null),S(2,"Orecchie","Triangoli con triangolino rosa.",null),S(3,"Occhi","Ovali grandi con riflesso.","Grandi = kawaii!"),S(4,"Naso/bocca","Y rovesciata e curva.",null),S(5,"Baffi","3 linee per lato.",null),S(6,"Corpo","Ovale collegato.",null),S(7,"Zampe/coda","Rettangoli e curva S.",null),S(8,"Dettagli","Strisce e guance rosa.",null)]),
-    LL(2,true,"🐶","Cagnolino","Base",15,"Un cucciolo con orecchie cadenti.",[S(1,"Testa ovale","Ovale più largo che alto.",null),S(2,"Musetto","Ellisse che sporge in avanti.",null),S(3,"Naso/sorriso","Rettangolo scuro e Y rovesciata.",null),S(4,"Occhi","Cerchi grandi con riflesso.",null),S(5,"Orecchie","Gocce grandi cadenti.",null),S(6,"Corpo","Ellisse orizzontale.",null),S(7,"Zampe","4 rettangoli arrotondati.",null),S(8,"Coda","Riccia verso l'alto.",null)]),
-    LL(3,false,"🦊","Volpe","Avanzato",40,"Volpe semi-realistica.",[S(1,"Cranio","Cerchio con muso allungato.",null),S(2,"Orecchie","Triangoli con interno arancione.",null),S(3,"Occhi","Ellissi con pupilla verticale.",null),S(4,"Maschera","Zona crema e naso triangolare.",null),S(5,"Corpo","Seduto con schiena arcuata.",null),S(6,"Zampe","Anteriori e posteriori.",null),S(7,"Coda","Spessa con punta bianca.","La firma visiva della volpe!"),S(8,"Texture","Linee brevi del pelo.",null)])
-  ]},
-  {id:"faces",label:"Visi",icon:"🎨",levels:[
-    LL(1,true,"⛩️","Manga – Naruto","Principiante",18,"Viso manga shōnen.",[S(1,"Testa","Zigomi larghi, mento piccolo.",null),S(2,"Guide","Verticale + orizzontali.","Si cancelleranno!"),S(3,"Occhi","1/4 dell'altezza del viso.",null),S(4,"Iride","Pupilla grande + riflessi.",null),S(5,"Naso/bocca","Naso = una linea.",null),S(6,"Orecchie","Tra occhi e naso.",null),S(7,"Capelli","Ciocche a punte gialle.",null),S(8,"Segni","3 strisce + fascia.",null)]),
-    LL(2,true,"📐","Metodo Loomis","Base",25,"Il sistema di Andrew Loomis.",[S(1,"Sfera","Grande sfera per il cranio.",null),S(2,"Piano laterale","Taglia la sfera.",null),S(3,"Sopracciglio","Orizzontale curva.",null),S(4,"Mento","Estendi il viso sotto.",null),S(5,"I terzi","Occhi a METÀ della testa!",null),S(6,"Occhi","Sulla linea con spazio.",null),S(7,"Naso/bocca","Allineati sui terzi.",null),S(8,"Capelli","Iniziano sopra l'attaccatura.",null)]),
-    LL(3,false,"🎭","Ritratto","Avanzato",60,"Tecniche accademiche.",[S(1,"Impalcatura","Costruzione Loomis leggera.",null),S(2,"Contorno","Il viso reale non è simmetrico.",null),S(3,"Orbite","Piani prima degli occhi.",null),S(4,"Occhi","Le palpebre seguono il globo.",null),S(5,"Naso","Solo le OMBRE.",null),S(6,"Bocca","Labbro superiore in ombra.",null),S(7,"Capelli","5-7 gruppi di ciocche.",null),S(8,"Valori","5 valori tonali.",null)])
-  ]},
-  {id:"architecture",label:"Architettura",icon:"🏛️",levels:[
-    LL(1,true,"📐","1 Punto","Principiante",15,"Un VP per strade e stanze.",[S(1,"Orizzonte+VP","Linea + VP su di essa.",null),S(2,"Proiezioni","4 diagonali dal VP.",null),S(3,"Faccia frontale","Rettangolo tra le linee.",null),S(4,"Dagli angoli","Dagli spigoli al VP.",null),S(5,"Chiudi","Spigoli posteriori.",null),S(6,"Stanza","Tutto converge al VP.",null)]),
-    LL(2,true,"📏","2 Punti","Base",20,"Due VP per edifici.",[S(1,"Orizzonte+2VP","Due VP agli estremi.",null),S(2,"Spigolo vert.","Lo spigolo frontale.",null),S(3,"Linee dal top","Verso VP1 e VP2.",null),S(4,"Linee dal basso","Stessa cosa.",null),S(5,"Muri laterali","Uno chiaro, uno scuro.",null),S(6,"Finestre","Puntano ai VP.",null)]),
-    LL(3,false,"🏙️","3 Punti","Avanzato",35,"Tre VP per grattacieli.",[S(1,"Tre VP","VP1+VP2 orizzonte, VP3 basso.",null),S(2,"Spigoli","NO verticali pure!",null),S(3,"Verso VP1","Dal lato sinistro.",null),S(4,"Verso VP2","Dal lato destro.",null),S(5,"Massa","La forma 3D emerge.",null),S(6,"Finestre","Le fasce convergono.",null)])
-  ]},
-  {id:"chiaroscuro",label:"Chiaroscuro",icon:"🌗",levels:[
-    LL(1,true,"☁️","Sfumato","Base",20,"La tecnica di Leonardo.",[S(1,"Contorno","Solo il contorno.",null),S(2,"Luce","Il terminatore separa luce/ombra.",null),S(3,"Gradiente","Dal buio verso la luce.",null),S(4,"Highlight","La zona più chiara.","La gomma è uno strumento!"),S(5,"Luce riflessa","Sul bordo ombra.",null),S(6,"Ombra portata","Più scura vicino all'oggetto.",null)]),
-    LL(2,true,"✏️","Tratteggio","Base",25,"Tono con linee parallele.",[S(1,"Contorno","Cilindro: ellissi sopra/sotto.",null),S(2,"Zona luce","Linee rade.",null),S(3,"Mezzatinta","Linee più ravvicinate.",null),S(4,"Ombra","Linee dense + incrocio.",null),S(5,"Scuro max","Terzo strato.",null),S(6,"Ombra portata","Orizzontali che si diradano.",null)]),
-    LL(3,false,"·","Puntinismo","Avanzato",35,"Solo punti per il tono.",[S(1,"Contorno","Solo il contorno.",null),S(2,"Zona luce","Punti sparsi.","Sparsità = luce."),S(3,"Mezzatinta","Punti più vicini.",null),S(4,"Ombra","Punti grossi.",null),S(5,"Scuro max","Punti contigui.",null),S(6,"Ombra portata","Densi→sparsi.",null)])
-  ]},
-  {id:"nature",label:"Natura",icon:"🌿",levels:[
-    LL(1,true,"🌸","Fiore 6 Petali","Principiante",8,"Simmetria radiale.",[S(1,"Centro","Cerchietto.",null),S(2,"6 petali","Uno ogni 60°.","60° = simmetria!"),S(3,"Stelo","Curva verso il basso.",null),S(4,"Foglie","Due a lancia.",null),S(5,"Pistillo","Ridisegna il centro.",null),S(6,"Nervature","Linee sui petali.",null)]),
-    LL(2,true,"🌳","Quercia","Base",20,"Un albero con personalità.",[S(1,"Tronco","Curve, più largo alla base.",null),S(2,"Radici","3-4 radici a dita.",null),S(3,"Rami primari","4 rami asimmetrici.",null),S(4,"Rami sec.","2-3 per ogni ramo.",null),S(5,"Chioma","Gruppi irregolari.",null),S(6,"Texture","Venature e nodi.",null),S(7,"Terreno","Linea + ombra ellittica.",null)]),
-    LL(3,false,"🏔️","Paesaggio","Avanzato",50,"Composizione con profondità.",[S(1,"Regola terzi","Orizzonte a 1/3 o 2/3.",null),S(2,"Montagne","Silhouette sfumate.",null),S(3,"Colline","Più scure e definite.",null),S(4,"Lago","Forma ellittica.",null),S(5,"Alberi","Grandi e dettagliati.",null),S(6,"Nuvole","Cavolfiore sopra, piatto sotto.",null),S(7,"Dettagli","Sfuma e firma!",null)])
-  ]},
-  {id:"food",label:"Cibo",icon:"🍰",levels:[
-    LL(1,true,"🍕","Pizza Cartoon","Principiante",8,"Una pizza in stile cartoon.",[S(1,"Pizza","Cerchio grande + piccolo.",null),S(2,"Spicchi","8 linee dal centro.",null),S(3,"Salsa","Macchie rosse irregolari.",null),S(4,"Mozzarella","Chiazze bianche/gialle.",null),S(5,"Topping","Funghi, olive, peperoni.",null)]),
-    LL(2,true,"🎂","Torta","Base",20,"Una torta scenografica.",[S(1,"Piano base","Rettangolo + ellisse.",null),S(2,"2°/3° piano","Più stretti.",null),S(3,"Glassa/deco","Gocce + roselline.",null),S(4,"Candeline","Cilindri con fiamma.",null),S(5,"Ombra","Piano + ombra.",null)]),
-    LL(3,false,"🍱","Still Life","Avanzato",55,"Luce, ombre, riflessi.",[S(1,"Piano","Linea orizzontale.",null),S(2,"Forme guida","Cerchio e cilindro.","Cézanne vedeva solidi!"),S(3,"Oggetti","Ammaccature e forme.",null),S(4,"Ombre","Ellissi opposte alla luce.",null),S(5,"Sfondo","Tono neutro.",null),S(6,"Riflessi","Highlight + riflessi vetro.",null),S(7,"Texture","Buccia, vetro.",null)])
-  ]}
-];
+{id:"fondamentali",label:"Fondamentali",icon:"🌱",required:true,free:true,
+ info:"Il punto di partenza per ogni artista. Basi di prospettiva, chiaroscuro e anatomia. Completare i Fondamentali sblocca tutti gli altri percorsi.",
+ unlocks:"Character Design, Environment Design e Prop Design",
+ levels:[
+  LL(1,true,"📐","Linee e proporzioni","Principiante",10,"La linea è il tuo primo strumento.",[S(1,"Il segno","Traccia linee dritte e curve a mano libera.","Prova 20 linee rette poi 20 curve."),S(2,"Proporzioni","Confronta dimensioni usando la matita come misuratore.","Chiudi un occhio, allinea la matita."),S(3,"Esercizio","Disegna 5 oggetti semplici confrontando le proporzioni.",null)]),
+  LL(2,true,"🔲","Forme geometriche base","Principiante",10,"Cubi, sfere e cilindri: qualsiasi oggetto si scompone in forme semplici.",[S(1,"Il cubo","Disegna un cubo 2D poi aggiungi spessore.","Quale faccia è in luce?"),S(2,"La sfera","Cerchio + ombra curva = sfera.","Osserva una palla: dove è più scura?"),S(3,"Il cilindro","Base ellittica + lati + ellisse. Disegna una lattina.",null)]),
+  LL(3,true,"↔️","Prospettiva 1 punto","Base",15,"La linea dell'orizzonte e il punto di fuga.",[S(1,"Linea orizzonte","È sempre all'altezza dei tuoi occhi.","Guarda fuori: dove sembra toccare il cielo?"),S(2,"Punto di fuga","Tutte le linee parallele convergono lì.","Usa il righello per verificare."),S(3,"Stanza in 1PP","Pavimento, soffitto, due pareti con 1 punto di fuga.","Inizia dalla parete frontale.")]),
+  LL(4,true,"📏","Prospettiva 2 punti","Base",15,"Due punti di fuga per oggetti visti in angolo.",[S(1,"Due punti","Posiziona 2 punti sulle estremità dell'orizzonte.","Più distanti = meno distorsione."),S(2,"Edificio base","Linea verticale + diagonali verso i 2 punti.","Aggiungi finestre rispettando la prospettiva."),S(3,"Strada urbana","Via con edifici su entrambi i lati.",null)]),
+  LL(5,true,"🌑","Luci e ombre — base","Base",15,"Il chiaroscuro: dove cade la luce per dare volume.",[S(1,"Fonte di luce","Identifica sempre la fonte prima di disegnare le ombre.","Lato illuminato = chiaro, opposto = scuro."),S(2,"Sfera illuminata","Luce, mezzatinta, ombra propria, ombra portata.","Il punto di luce non è mai bianco puro."),S(3,"Cubo illuminato","Tre valori per tre facce: chiaro, medio, scuro.",null)]),
+  LL(6,true,"🎨","Tecniche di ombreggiatura","Intermedio",15,"Hatching, cross-hatching, sfumatura.",[S(1,"Hatching","Linee parallele = ombre. Più fitte = più scure.","Varia la pressione."),S(2,"Cross-hatching","Incrocia le linee per ombre dense.","Cambia angolazione per textures diverse."),S(3,"Sfumatura","Strofina per transizioni morbide.","Non esagerare!"),S(4,"Mix","Disegna una sfera con tutte e 3 le tecniche.",null)]),
+  LL(7,true,"🦴","Anatomia — proporzioni","Base",15,"Il canone delle proporzioni umane.",[S(1,"Le 8 teste","Il corpo adulto misura ~7,5-8 teste in altezza.","I fumetti usano 9-10 per renderli più eroici."),S(2,"Punti di riferimento","Spalle, vita, fianchi, ginocchia.","Usa una figura di legno come riferimento."),S(3,"Scheletro stilizzato","Disegna lo stick figure articolato prima del corpo.",null)]),
+  LL(8,true,"✋","Mani e piedi","Intermedio",15,"Le parti più difficili del corpo umano.",[S(1,"La mano a blocchi","Palmo (trapezio) + dita (cilindri).","Studia la tua mano non dominante."),S(2,"Le dita","Tre falangi per dito. Il pollice ne ha due.","Le nocche formano un arco."),S(3,"Il piede","Tallone + collo + dita. Vedi il piede come architettura.",null)]),
+  LL(9,true,"😊","Il viso — proporzioni","Base",15,"Dove vanno occhi, naso, orecchie e bocca.",[S(1,"L'ovale","Dividi a metà orizzontalmente: lì vanno gli occhi.","La distanza tra gli occhi è circa un occhio."),S(2,"Naso e bocca","Naso a 3/4, bocca a 2/3 dal mento.","Orecchie: dall'occhio alla base del naso."),S(3,"Espressioni","Lo stesso viso con 3 emozioni: felice, triste, sorpreso.","Le sopracciglia fanno il 60% dell'espressione.")])
+]},
+{id:"character",label:"Character Design",icon:"🦸",required:false,free:false,
+ info:"Crea personaggi memorabili. Silhouette, espressioni, costumi e caratterizzazione visiva. Richiede i Fondamentali.",
+ unlocks:"Tecniche avanzate di Prop Design",
+ levels:[
+  LL(1,false,"🧍","Silhouette e pose","Base",20,"La silhouette deve essere riconoscibile anche tutta nera.",[S(1,"La silhouette","Disegna il personaggio tutto nero: si capisce chi è?","I personaggi forti hanno sagome uniche."),S(2,"Linguaggio del corpo","La posa racconta la personalità prima che parli.","Eroe dritto, cattivo piegato, timido chiuso."),S(3,"Contrapposto","Peso su una gamba — base della statuaria classica.",null)]),
+  LL(2,false,"😤","Espressioni e mimica","Base",20,"Le 7 emozioni base e come disegnarle.",[S(1,"7 emozioni base","Gioia, tristezza, rabbia, paura, disgusto, sorpresa, disprezzo.","Studia le espressioni allo specchio."),S(2,"Emozioni miste","Un personaggio può sentire due cose insieme.",null),S(3,"Coerenza col personaggio","Un villain che sorride è diverso da un eroe.",null)]),
+  LL(3,false,"👕","Abbigliamento e costume","Intermedio",25,"Il costume racconta epoca, classe e personalità.",[S(1,"Pieghe e drappeggi","Il tessuto segue gravità e tensione.","Studia le pieghe da foto."),S(2,"Coerenza","Il costume deve appartenere al personaggio.",null),S(3,"Design originale","Crea un costume per un personaggio già disegnato.",null)]),
+  LL(4,false,"📋","Character sheet","Avanzato",30,"Il turnaround professionale: fronte, profilo, retro.",[S(1,"Viste multiple","Fronte, 3/4, profilo, retro identici.","Definisci prima altezza e proporzioni."),S(2,"Dettagli","Armi, accessori, espressioni chiave.",null),S(3,"Palette colori","Principale, secondaria, accenti.",null)])
+]},
+{id:"environment",label:"Environment Design",icon:"🏔️",required:false,free:false,
+ info:"Costruisci mondi credibili. Paesaggi, città, interni fantasy o sci-fi. Richiede i Fondamentali.",
+ unlocks:"Concept Art completo",
+ levels:[
+  LL(1,false,"🌄","Composizione del paesaggio","Base",20,"Regola dei terzi, piani di profondità, thumbnail.",[S(1,"Regola dei terzi","Dividi il foglio in 9: elementi importanti sulle intersezioni.","Non è assoluta — rompila consapevolmente."),S(2,"Piani di profondità","Primo piano, medio, sfondo: tre piani = profondità.",null),S(3,"Thumbnail","5 miniature della stessa scena. Scegli la migliore.",null)]),
+  LL(2,false,"🏙️","Ambienti urbani","Intermedio",25,"Strade, edifici, città con prospettiva.",[S(1,"Skyline","Silhouette di edifici diversi sull'orizzonte.","Varia altezze e forme."),S(2,"Strada in prospettiva","Via con marciapiedi e lampioni in PP2.",null),S(3,"Dettaglio architettonico","Un portone, un balcone — il dettaglio racconta la storia.",null)]),
+  LL(3,false,"🌿","Natura e vegetazione","Intermedio",25,"Alberi, rocce, acqua senza impazzire.",[S(1,"Alberi","Non disegnare ogni foglia — usa masse di tono.","Qual è la forma generale? Sfera, cilindro, cono?"),S(2,"Rocce","Piani definiti. Trova gli spigoli.",null),S(3,"Acqua","Riflette il cielo. In movimento crea forme ripetute.",null)]),
+  LL(4,false,"💡","Lighting ambientale","Avanzato",30,"Golden hour, notturna, controluce: la luce crea l'atmosfera.",[S(1,"Golden hour","Luce calda, ombre lunghe, colori saturi.","Studia foto al tramonto."),S(2,"Notturna","Fonti artificiali, ombre profonde.",null),S(3,"Controluce","Soggetto scuro, sfondo illuminato. Silhouette forti.",null)])
+]},
+{id:"prop",label:"Prop Design",icon:"⚔️",required:false,free:false,
+ info:"Ogni oggetto ha una storia. Armi, strumenti, gadget: stile coerente col mondo del personaggio. Richiede i Fondamentali.",
+ unlocks:"Concept Art completo",
+ levels:[
+  LL(1,false,"🗡️","Armi da mischia","Base",20,"Spade, asce, martelli convincenti e bilanciati.",[S(1,"Proporzioni","Un'arma deve sembrare usabile.","Impugna mentalmente: il baricentro è giusto?"),S(2,"Dettaglio","Guardia, impugnatura, lama — funzione + decorazione.",null),S(3,"Design originale","Arma originale coerente con un personaggio.",null)]),
+  LL(2,false,"🏹","Armi a distanza","Base",20,"Archi, pistole, fucili fantasy.",[S(1,"Meccanismi semplificati","Non devi essere ingegnere — ma deve sembrare funzionale.",null),S(2,"Stile e setting","Steampunk vs laser sci-fi: il contesto conta.",null),S(3,"Concept sheet","L'arma da 3 angoli: fronte, laterale, 3/4.",null)]),
+  LL(3,false,"🛡️","Armature e scudi","Intermedio",25,"Protezioni che seguano il corpo senza sembrare gusci rigidi.",[S(1,"Anatomia sotto","Prima il corpo, poi l'armatura sopra.","L'armatura esalta le forme muscolari."),S(2,"Materiali","Metallo, cuoio, magia: texture e riflessi diversi.",null),S(3,"Set completo","Elmo, pettorale, gambali, guanti.",null)]),
+  LL(4,false,"🎒","Props quotidiani","Intermedio",25,"Oggetti stilizzati: prop design nel mondo reale.",[S(1,"Semplificazione","Oggetto reale → versione stilizzata leggibile.",null),S(2,"Props narrativi","L'oggetto racconta: usurato, nuovo, magico, rotto.",null),S(3,"Prop sheet","6 props coerenti per un mondo (fantasy, sci-fi o contemporaneo).",null)])
+]}];
 
 var MOCK={google:{id:"social-google",name:"Marco Rossi",email:"marco@gmail.com",avatar:"👨",provider:"google",r:new Date().toISOString()},microsoft:{id:"social-microsoft",name:"Laura Bianchi",email:"laura@outlook.com",avatar:"👩",provider:"microsoft",r:new Date().toISOString()},apple:{id:"social-apple",name:"Luca Ferrari",email:"luca@icloud.com",avatar:"🧑",provider:"apple",r:new Date().toISOString()},facebook:{id:"social-facebook",name:"Gianluca Rossi",email:"gianluca@facebook.com",avatar:"👤",provider:"facebook",r:new Date().toISOString()}};
 
@@ -585,11 +595,11 @@ function renderHome(){
   document.getElementById("home-greeting").textContent="Ciao, "+A.user.avatar+" "+A.user.name.split(" ")[0]+"!";
   
   // Progress & Level
-  var tot=18;
+  var tot=21;
   var done=Object.values(A.progress).filter(function(v){return v.completed;}).length;
   var pct=Math.round(done/tot*100);
   var lv=getLevel(done);
-  var nextLv=done<18?LEVELS[LEVELS.indexOf(lv)+1]:null;
+  var nextLv=done<21?LEVELS[LEVELS.indexOf(lv)+1]:null;
 
   document.getElementById("progress-bar").style.width=pct+"%";
   document.getElementById("progress-text").textContent=done+" di "+tot+" lezioni completate";
@@ -660,43 +670,31 @@ function renderHome(){
   grid.innerHTML="";
   CATS.forEach(function(cat,idx){
     var bg=BG[cat.id]||"#f5f5f5", ac=AC[cat.id]||"#555";
-    var d=cat.levels.filter(function(l){var k=pk(cat.id,l.id);return A.progress[k]&&A.progress[k].completed;}).length;
-    var isFirst=idx===0;
+    var doneCat=cat.levels.filter(function(l){var k=pk(cat.id,l.id);return A.progress[k]&&A.progress[k].completed;}).length;
+    var fondaDone=CATS[0].levels.every(function(l){var k=pk("fondamentali",l.id);return A.progress[k]&&A.progress[k].completed;});
+    var isLocked=idx!==0&&!fondaDone;
+    var pctCat=cat.levels.length>0?Math.round(doneCat/cat.levels.length*100):0;
+    var wrapper=document.createElement("div");
+    if(idx===0) wrapper.style.gridColumn="1/-1";
     var div=document.createElement("div");
-    // First category gets full width
-    if(isFirst) div.style.gridColumn="1/-1";
-    div.style.cssText="background:linear-gradient(135deg,"+bg+"33,"+bg+"18);border-radius:16px;padding:16px;cursor:pointer;transition:transform .2s;position:relative;overflow:hidden";
-    div.style.border="1.5px solid "+bg+"66";
-    // Progress bar background
-    var pctCat=cat.levels.length>0?Math.round(d/cat.levels.length*100):0;
-    var bars=cat.levels.map(function(l){var k=pk(cat.id,l.id);var done=A.progress[k]&&A.progress[k].completed;return'<div style="flex:1;height:3px;border-radius:3px;background:'+(done?ac:"rgba(0,0,0,.08)")+'"></div>';}).join("");
-    div.innerHTML=
-      '<div style="position:absolute;right:-10px;top:-10px;width:70px;height:70px;background:'+ac+'18;border-radius:50%"></div>'+
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'+
-        '<div style="width:44px;height:44px;background:'+ac+'22;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px">'+cat.icon+'</div>'+
-        '<div style="flex:1">'+
-          '<div style="font-weight:800;font-size:'+(isFirst?'15':"13")+'px;color:#1C1B2E">'+cat.label+'</div>'+
-          '<div style="font-size:10px;color:#9896B8;margin-top:1px">'+cat.levels.length+' lezioni'+
-          (d>0?' &bull; <span style="color:'+ac+'">'+d+' completate</span>':"")+'</div>'+
-        '</div>'+
-        (d===cat.levels.length&&d>0?'<span style="font-size:18px">🏆</span>':'')+
-      '</div>'+
-      '<div style="display:flex;gap:3px">'+bars+'</div>';
-    div.onmouseenter=function(){this.style.transform="translateY(-2px)";};
-    div.onmouseleave=function(){this.style.transform="translateY(0)";};
-    div.onclick=function(){
-      A.cat=cat;
-      loadTutorialsFromDB().then(function(){
-        var fresh=CATS.find(function(c){return c.id===cat.id;});
-        if(fresh) A.cat=fresh;
-        renderCategory();
-        showScreen("category");
-      }).catch(function(){
-        renderCategory();
-        showScreen("category");
-      });
-    };
-    grid.appendChild(div);
+    div.style.cssText="background:linear-gradient(135deg,"+bg+"33,"+bg+"18);border-radius:16px;padding:16px;cursor:"+(isLocked?"default":"pointer")+";position:relative;border:1.5px solid "+(isLocked?"rgba(0,0,0,.06)":bg+"66")+";opacity:"+(isLocked?.55:1);
+    var headerRow=document.createElement("div"); headerRow.style.cssText="display:flex;align-items:center;gap:10px;margin-bottom:10px";
+    var iconBox=document.createElement("div"); iconBox.style.cssText="width:44px;height:44px;background:"+ac+"22;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0"; iconBox.textContent=isLocked?"🔒":cat.icon;
+    var nameBlock=document.createElement("div"); nameBlock.style.flex="1";
+    var nameEl=document.createElement("div"); nameEl.style.cssText="font-weight:800;font-size:"+(idx===0?"15":"13")+"px;color:#1C1B2E"; nameEl.textContent=cat.label;
+    var subEl=document.createElement("div"); subEl.style.cssText="font-size:11px;color:"+ac+";font-weight:600;margin-top:1px"; subEl.textContent=doneCat+"/"+cat.levels.length+" lezioni"+(doneCat===cat.levels.length?" · ✅ Completata":"");
+    nameBlock.appendChild(nameEl); nameBlock.appendChild(subEl);
+    var infoBtn=document.createElement("button"); infoBtn.style.cssText="width:28px;height:28px;border-radius:50%;background:"+ac+"22;border:1px solid "+ac+"44;color:"+ac+";font-weight:800;font-size:13px;cursor:pointer;flex-shrink:0"; infoBtn.textContent="i"; infoBtn.title="Info percorso";
+    (function(c){infoBtn.onclick=function(e){e.stopPropagation();showCatInfo(c);};})(cat);
+    headerRow.appendChild(iconBox); headerRow.appendChild(nameBlock); headerRow.appendChild(infoBtn);
+    div.appendChild(headerRow);
+    var barsRow=document.createElement("div"); barsRow.style.cssText="display:flex;gap:3px;margin-bottom:10px";
+    cat.levels.forEach(function(l){var k=pk(cat.id,l.id);var d=A.progress[k]&&A.progress[k].completed;var b=document.createElement("div");b.style.cssText="flex:1;height:4px;border-radius:4px;background:"+(d?ac:"rgba(0,0,0,.1)");barsRow.appendChild(b);});
+    div.appendChild(barsRow);
+    if(isLocked){var lm=document.createElement("div");lm.style.cssText="font-size:11px;color:#9896B8;font-style:italic";lm.textContent="🔒 Completa i Fondamentali per sbloccare";div.appendChild(lm);}
+    else{div.onclick=function(){A.cat=cat;renderCategory();showScreen("category");};}
+    if(cat.unlocks){var hint=document.createElement("div");hint.style.cssText="font-size:10px;color:"+ac+";opacity:.7;margin-top:8px;font-style:italic;border-top:1px solid rgba(0,0,0,.06);padding-top:6px";hint.textContent="Completando sblocchi: "+cat.unlocks;div.appendChild(hint);}
+    wrapper.appendChild(div); grid.appendChild(wrapper);
   });
 
 
@@ -705,6 +703,7 @@ function renderHome(){
   if(sbtn) sbtn.textContent = _skillView==="list"?"🌳 Skill Tree":"📋 Lista";
 
   // Se skill tree attivo, mostra albero invece della griglia
+  setTimeout(maybeShowLearnWelcome,100);
   var skillContainer = document.getElementById("skill-tree-container");
   var catGrid = document.getElementById("home-cat-grid");
   if(_skillView === "tree"){
@@ -3446,6 +3445,45 @@ async function submitRedline(){
       renderFeed();
     } else { showToast("Errore upload",""); }
   },"image/jpeg",0.92);
+}
+
+
+    '<button onclick="closeCatInfo()" style="width:100%;margin-top:16px;padding:12px;background:rgba(255,255,255,.08);border:none;border-radius:12px;color:#9896B8;font-weight:700;font-size:14px;cursor:pointer">Chiudi</button>'
+function showCatInfo(cat){
+  var old=document.getElementById("cat-info-overlay");if(old)old.remove();
+  var ac=AC[cat.id]||"#8B5CF6";
+  var o=document.createElement("div");o.id="cat-info-overlay";
+  o.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:950;display:flex;align-items:flex-end;justify-content:center";
+  o.onclick=function(e){if(e.target===o)o.remove();};
+  var p=document.createElement("div");
+  p.style.cssText="background:#1e1b3a;border-radius:24px 24px 0 0;width:100%;max-width:540px;padding:24px 20px 36px";
+  p.innerHTML='<div style="width:36px;height:4px;background:rgba(255,255,255,.2);border-radius:2px;margin:0 auto 20px"></div>'+
+    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'+
+    '<div style="width:52px;height:52px;background:'+ac+'22;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px">'+cat.icon+'</div>'+
+    '<div><div style="font-weight:800;font-size:18px;color:#fff">'+cat.label+'</div>'+
+    '<div style="font-size:12px;color:'+ac+';font-weight:600">'+cat.levels.length+' lezioni</div></div></div>'+
+    '<div style="font-size:14px;color:#e0ddf5;line-height:1.7;margin-bottom:16px">'+cat.info+'</div>'+
+    (cat.unlocks?'<div style="background:'+ac+'18;border:1px solid '+ac+'33;border-radius:10px;padding:10px 14px;font-size:12px;color:'+ac+';font-weight:700">✨ Sblocchi: '+cat.unlocks+'</div>':'')+
+    '<button onclick="closeCatInfo()" style="width:100%;margin-top:16px;padding:12px;background:rgba(255,255,255,.08);border:none;border-radius:12px;color:#9896B8;font-weight:700;font-size:14px;cursor:pointer">Chiudi</button>'
+  o.appendChild(p); document.body.appendChild(o);
+}
+
+function maybeShowLearnWelcome(){
+  if(localGet("dl:learn_welcome_seen"))return;
+  var old=document.getElementById("learn-welcome");if(old)old.remove();
+  var banner=document.createElement("div");banner.id="learn-welcome";
+  banner.style.cssText="background:linear-gradient(135deg,rgba(139,92,246,.18),rgba(61,190,122,.12));border:1px solid rgba(139,92,246,.3);border-radius:16px;padding:16px;margin-bottom:16px;position:relative";
+  banner.innerHTML='<button onclick="dismissLearnWelcome()" style="position:absolute;top:10px;right:10px;background:rgba(255,255,255,.12);border:none;border-radius:50%;width:24px;height:24px;color:#9896B8;font-size:14px;cursor:pointer">×</button>'+
+    '<div style="font-size:20px;margin-bottom:8px">👋</div>'+
+    '<div style="font-weight:800;font-size:14px;color:#fff;margin-bottom:8px">Benvenutə nel tuo percorso!</div>'+
+    '<div style="font-size:13px;color:#e0ddf5;line-height:1.6">Qui troverai tutte le lezioni che abbiamo pensato possano aiutarti a sviluppare la tua arte. Comincia da quella che è più vicina ai tuoi gusti, vedrai che man mano che andrai avanti, scoprirai che la puoi sviluppare in modi decisamente creativi! <span style="font-weight:700">Buono studio! 🎨</span></div>';
+  var grid=document.getElementById("home-cat-grid");
+  if(grid&&grid.parentElement)grid.parentElement.insertBefore(banner,grid);
+}
+function dismissLearnWelcome(){
+  localSet("dl:learn_welcome_seen","1");
+  var el=document.getElementById("learn-welcome");
+  if(el){el.style.transition="opacity .3s";el.style.opacity="0";setTimeout(function(){el.remove();},300);}
 }
 
 function init(){
