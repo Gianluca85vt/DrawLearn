@@ -1,3 +1,169 @@
+
+/* ═══════════════ i18n TRANSLATIONS ═══════════════ */
+var LANG_STRINGS={
+  it:{
+    // Nav
+    gallery:"Galleria",learn:"Impara",post:"Post",chat:"Chat",profile:"Profilo",
+    // Auth
+    login:"Accedi",register:"Registrati",logout:"Esci",email:"Email",password:"Password",
+    loginWith:"Accedi con",orContinueWith:"Oppure continua con",
+    // Learn
+    yourPath:"Il tuo percorso",chooseCategory:"Scegli una categoria",skillTree:"Skill Tree",list:"Lista",
+    lessons:"lezioni",lessonCompleted:"Lezione completata!",
+    nextLesson:"→ Prossima lezione",backToPath:"↩ Torna al percorso",
+    completa:"✓ COMPLETA",avanti:"→ Avanti",tip:"CONSIGLIO",allSteps:"Tutti i passi",
+    completedLessons:"lezioni completate",unlocks:"Sblocchi",
+    completeFondamentali:"Completa i Fondamentali per sbloccare",
+    // Profile
+    bio:"Bio",editBio:"Modifica bio",saveBio:"Salva",cancelBio:"Annulla",
+    followers:"Follower",following:"Seguiti",follow:"+ Segui",following_btn:"✓ Segui già",
+    settings:"Impostazioni",darkMode:"Modalità scura",language:"Lingua",
+    // Feed
+    like:"Mi piace",comment:"Commenta",share:"Condividi",
+    addComment:"Aggiungi un commento...",publish:"Pubblica",
+    noComments:"Nessun commento ancora",
+    // Generic
+    loading:"Caricamento...",error:"Errore",save:"Salva",cancel:"Annulla",close:"Chiudi",
+    // Founders
+    founderMasters:"Founder Masters",founderSub:"Lezioni esclusive dai maestri fondatori",
+    founderBadge:"⭐ MASTER",exclusive:"ESCLUSIVO",
+  },
+  en:{
+    gallery:"Gallery",learn:"Learn",post:"Post",chat:"Chat",profile:"Profile",
+    login:"Log in",register:"Sign up",logout:"Log out",email:"Email",password:"Password",
+    loginWith:"Log in with",orContinueWith:"Or continue with",
+    yourPath:"Your path",chooseCategory:"Choose a category",skillTree:"Skill Tree",list:"List",
+    lessons:"lessons",lessonCompleted:"Lesson complete!",
+    nextLesson:"→ Next lesson",backToPath:"↩ Back to path",
+    completa:"✓ COMPLETE",avanti:"→ Next",tip:"TIP",allSteps:"All steps",
+    completedLessons:"lessons completed",unlocks:"Unlocks",
+    completeFondamentali:"Complete Fundamentals to unlock",
+    bio:"Bio",editBio:"Edit bio",saveBio:"Save",cancelBio:"Cancel",
+    followers:"Followers",following:"Following",follow:"+ Follow",following_btn:"✓ Following",
+    settings:"Settings",darkMode:"Dark mode",language:"Language",
+    like:"Like",comment:"Comment",share:"Share",
+    addComment:"Add a comment...",publish:"Publish",
+    noComments:"No comments yet",
+    loading:"Loading...",error:"Error",save:"Save",cancel:"Cancel",close:"Close",
+    founderMasters:"Founder Masters",founderSub:"Exclusive lessons from founding masters",
+    founderBadge:"⭐ MASTER",exclusive:"EXCLUSIVE",
+  },
+  es:{
+    gallery:"Galería",learn:"Aprende",post:"Publicar",chat:"Chat",profile:"Perfil",
+    login:"Iniciar sesión",register:"Registrarse",logout:"Cerrar sesión",email:"Correo",password:"Contraseña",
+    loginWith:"Entrar con",orContinueWith:"O continuar con",
+    yourPath:"Tu camino",chooseCategory:"Elige categoría",skillTree:"Árbol",list:"Lista",
+    lessons:"lecciones",lessonCompleted:"¡Lección completada!",
+    nextLesson:"→ Siguiente lección",backToPath:"↩ Volver",
+    completa:"✓ COMPLETAR",avanti:"→ Siguiente",tip:"CONSEJO",allSteps:"Todos los pasos",
+    completedLessons:"lecciones completadas",unlocks:"Desbloquea",
+    completeFondamentali:"Completa Fundamentos para desbloquear",
+    bio:"Bio",editBio:"Editar bio",saveBio:"Guardar",cancelBio:"Cancelar",
+    followers:"Seguidores",following:"Siguiendo",follow:"+ Seguir",following_btn:"✓ Siguiendo",
+    settings:"Ajustes",darkMode:"Modo oscuro",language:"Idioma",
+    like:"Me gusta",comment:"Comentar",share:"Compartir",
+    addComment:"Añade un comentario...",publish:"Publicar",
+    noComments:"Sin comentarios aún",
+    loading:"Cargando...",error:"Error",save:"Guardar",cancel:"Cancelar",close:"Cerrar",
+    founderMasters:"Founder Masters",founderSub:"Lecciones exclusivas de los maestros fundadores",
+    founderBadge:"⭐ MASTER",exclusive:"EXCLUSIVO",
+  },
+  fr:{
+    gallery:"Galerie",learn:"Apprendre",post:"Publier",chat:"Chat",profile:"Profil",
+    login:"Connexion",register:"S'inscrire",logout:"Déconnexion",email:"Email",password:"Mot de passe",
+    loginWith:"Connexion avec",orContinueWith:"Ou continuer avec",
+    yourPath:"Votre parcours",chooseCategory:"Choisir une catégorie",skillTree:"Arbre",list:"Liste",
+    lessons:"leçons",lessonCompleted:"Leçon terminée !",
+    nextLesson:"→ Leçon suivante",backToPath:"↩ Retour",
+    completa:"✓ TERMINER",avanti:"→ Suivant",tip:"CONSEIL",allSteps:"Toutes les étapes",
+    completedLessons:"leçons complétées",unlocks:"Débloque",
+    completeFondamentali:"Terminer les Fondamentaux pour débloquer",
+    bio:"Bio",editBio:"Modifier bio",saveBio:"Enregistrer",cancelBio:"Annuler",
+    followers:"Abonnés",following:"Abonnements",follow:"+ Suivre",following_btn:"✓ Abonné",
+    settings:"Paramètres",darkMode:"Mode sombre",language:"Langue",
+    like:"J'aime",comment:"Commenter",share:"Partager",
+    addComment:"Ajouter un commentaire...",publish:"Publier",
+    noComments:"Pas encore de commentaires",
+    loading:"Chargement...",error:"Erreur",save:"Enregistrer",cancel:"Annuler",close:"Fermer",
+    founderMasters:"Founder Masters",founderSub:"Leçons exclusives des maîtres fondateurs",
+    founderBadge:"⭐ MASTER",exclusive:"EXCLUSIF",
+  },
+  de:{
+    gallery:"Galerie",learn:"Lernen",post:"Beitrag",chat:"Chat",profile:"Profil",
+    login:"Anmelden",register:"Registrieren",logout:"Abmelden",email:"E-Mail",password:"Passwort",
+    loginWith:"Anmelden mit",orContinueWith:"Oder weiter mit",
+    yourPath:"Dein Weg",chooseCategory:"Kategorie wählen",skillTree:"Fähigkeitsbaum",list:"Liste",
+    lessons:"Lektionen",lessonCompleted:"Lektion abgeschlossen!",
+    nextLesson:"→ Nächste Lektion",backToPath:"↩ Zurück",
+    completa:"✓ ABSCHLIESSEN",avanti:"→ Weiter",tip:"TIPP",allSteps:"Alle Schritte",
+    completedLessons:"Lektionen abgeschlossen",unlocks:"Freischaltet",
+    completeFondamentali:"Grundlagen abschließen zum Freischalten",
+    bio:"Bio",editBio:"Bio bearbeiten",saveBio:"Speichern",cancelBio:"Abbrechen",
+    followers:"Follower",following:"Folge ich",follow:"+ Folgen",following_btn:"✓ Folge ich",
+    settings:"Einstellungen",darkMode:"Dunkelmodus",language:"Sprache",
+    like:"Gefällt mir",comment:"Kommentieren",share:"Teilen",
+    addComment:"Kommentar hinzufügen...",publish:"Veröffentlichen",
+    noComments:"Noch keine Kommentare",
+    loading:"Laden...",error:"Fehler",save:"Speichern",cancel:"Abbrechen",close:"Schließen",
+    founderMasters:"Founder Masters",founderSub:"Exklusive Lektionen von Gründungsmeistern",
+    founderBadge:"⭐ MASTER",exclusive:"EXKLUSIV",
+  },
+  zh:{
+    gallery:"画廊",learn:"学习",post:"发布",chat:"聊天",profile:"我的",
+    login:"登录",register:"注册",logout:"退出",email:"邮箱",password:"密码",
+    loginWith:"使用...登录",orContinueWith:"或继续使用",
+    yourPath:"你的课程",chooseCategory:"选择类别",skillTree:"技能树",list:"列表",
+    lessons:"课程",lessonCompleted:"课程完成！",
+    nextLesson:"→ 下一课",backToPath:"↩ 返回",
+    completa:"✓ 完成",avanti:"→ 下一步",tip:"提示",allSteps:"所有步骤",
+    completedLessons:"课程已完成",unlocks:"解锁",
+    completeFondamentali:"完成基础课程以解锁",
+    bio:"简介",editBio:"编辑简介",saveBio:"保存",cancelBio:"取消",
+    followers:"粉丝",following:"关注",follow:"+ 关注",following_btn:"✓ 已关注",
+    settings:"设置",darkMode:"深色模式",language:"语言",
+    like:"喜欢",comment:"评论",share:"分享",
+    addComment:"添加评论...",publish:"发布",
+    noComments:"暂无评论",
+    loading:"加载中...",error:"错误",save:"保存",cancel:"取消",close:"关闭",
+    founderMasters:"创始大师",founderSub:"来自创始大师的独家课程",
+    founderBadge:"⭐ 大师",exclusive:"独家",
+  },
+  ja:{
+    gallery:"ギャラリー",learn:"学ぶ",post:"投稿",chat:"チャット",profile:"プロフィール",
+    login:"ログイン",register:"登録",logout:"ログアウト",email:"メール",password:"パスワード",
+    loginWith:"でログイン",orContinueWith:"または続ける",
+    yourPath:"あなたの学習",chooseCategory:"カテゴリを選ぶ",skillTree:"スキルツリー",list:"リスト",
+    lessons:"レッスン",lessonCompleted:"レッスン完了！",
+    nextLesson:"→ 次のレッスン",backToPath:"↩ 戻る",
+    completa:"✓ 完了",avanti:"→ 次へ",tip:"ヒント",allSteps:"全ステップ",
+    completedLessons:"レッスン完了",unlocks:"解除",
+    completeFondamentali:"基礎を完了してアンロック",
+    bio:"自己紹介",editBio:"自己紹介を編集",saveBio:"保存",cancelBio:"キャンセル",
+    followers:"フォロワー",following:"フォロー中",follow:"+ フォロー",following_btn:"✓ フォロー中",
+    settings:"設定",darkMode:"ダークモード",language:"言語",
+    like:"いいね",comment:"コメント",share:"シェア",
+    addComment:"コメントを追加...",publish:"投稿",
+    noComments:"まだコメントなし",
+    loading:"読み込み中...",error:"エラー",save:"保存",cancel:"キャンセル",close:"閉じる",
+    founderMasters:"ファウンダーマスター",founderSub:"創設マスターによる独占レッスン",
+    founderBadge:"⭐ マスター",exclusive:"限定",
+  }
+};
+
+var _currentLang=(function(){
+  var saved=localStorage.getItem("dl:lang");
+  if(saved&&LANG_STRINGS[saved])return saved;
+  var br=(navigator.language||navigator.userLanguage||"en").split("-")[0].toLowerCase();
+  return LANG_STRINGS[br]?br:"en";
+})();
+
+// Default to Italian for Italian language browsers
+if(_currentLang==="it" || !LANG_STRINGS[_currentLang]) _currentLang="it";
+try{var _bl=(navigator.language||"").split("-")[0];if(_bl==="it")_currentLang="it";}catch(e){}
+
+function t(key){ return (LANG_STRINGS[_currentLang]&&LANG_STRINGS[_currentLang][key])||(LANG_STRINGS["it"]&&LANG_STRINGS["it"][key])||key; }
+function setLang(code){ if(LANG_STRINGS[code]){_currentLang=code;localStorage.setItem("dl:lang",code);} }
+
 var APP_VERSION="2.2.0";
 console.log("%c DrawBound v2.2.0 ✓","color:#8B5CF6;font-weight:bold;font-size:14px");
 /* DrawBound — app.js */
@@ -602,6 +768,9 @@ async function onLogin(){
       });
       A.progress=pg;
       try{localStorage.setItem("dl:progress_all",JSON.stringify(pg));}catch(e){}
+      // Load bio from localStorage fallback
+      var _savedBio=localGet("dl:bio_"+(uid||"local"));
+      if(_savedBio){if(!A.user)A.user={};A.user.bio=_savedBio;if(!A.profile)A.profile={};A.profile.bio=_savedBio;}
       A.profile=(prfRow&&prfRow[0])?{avatar:prfRow[0].avatar_id,border:prfRow[0].border_id}:{avatar:"def",border:"none"};
     // Load tokens: Supabase wins over localStorage
     var sbTokens = prfRow&&prfRow[0]&&prfRow[0].tokens;
@@ -763,6 +932,8 @@ function renderHome(){
     if(catGrid) catGrid.style.display="";
   }
   setTimeout(maybeShowLearnWelcome,100);
+  // Founder Masters section
+  setTimeout(renderFounderMasters,50);
   updateTokenUI();
 }
 
@@ -1128,7 +1299,7 @@ function renderProfile(){
   /* Info */
   var nameEl=document.getElementById("profile-name"); if(nameEl) nameEl.textContent=A.user.name;
   var emailEl=document.getElementById("profile-email"); if(emailEl) emailEl.textContent="@"+(A.user.name||"").toLowerCase().replace(/\s+/g,"_");
-  var bioEl=document.getElementById("profile-bio"); if(bioEl) bioEl.textContent=A.profile&&A.profile.bio?A.profile.bio:"Nessuna bio ancora...";
+  var _bio=(A.user&&A.user.bio)||(A.profile&&A.profile.bio)||localGet("dl:bio_"+(A.user&&A.user.id?A.user.id:"local"))||""; var bioEl=document.getElementById("profile-bio"); if(bioEl) bioEl.textContent=_bio||"Aggiungi una bio...";
 
   /* Stats */
   var lsEl=document.getElementById("prof-stat-lessons"); if(lsEl) lsEl.textContent=done;
@@ -1705,7 +1876,7 @@ async function submitComment(postId){
   var input = document.getElementById("new-comment");
   var text = input.value.trim();
   if(!text) return;
-  input.value=""; input.disabled=true;
+  input.value=""; input.disabled=true; input.placeholder="Pubblicazione...";
   try {
     await sbFetch("POST","dl_comments",{body:{post_id:postId,user_id:A.user.id,user_name:A.user.name,user_avatar:A.user.avatar||"👤",text:text}});
     var post = await sbFetch("GET","dl_posts",{filters:"id=eq."+postId,select:"comments_count,user_id,image_url"});
@@ -1713,7 +1884,7 @@ async function submitComment(postId){
       await sbFetch("PATCH","dl_posts?id=eq."+postId,{body:{comments_count:(post[0].comments_count||0)+1}});
       sendNotification(post[0].user_id,"comment","ha commentato: "+text.substring(0,40),postId,post[0].image_url);
     }
-    openPostDetail(postId);
+    openPostDetail(postId); input.disabled=false; input.placeholder="Aggiungi un commento...";
   } catch(e){ showToast("Errore invio commento",""); }
   input.disabled=false;
 }
@@ -1993,14 +2164,20 @@ async function saveBio(){
   var input = document.getElementById("bio-input");
   var bio = input ? input.value.trim() : "";
   if(A.user) A.user.bio = bio;
+  if(!A.profile) A.profile = {};
+  A.profile.bio = bio;
+  // Save to localStorage immediately
+  localSet("dl:bio_"+( A.user&&A.user.id?A.user.id:"local"), bio);
   // Save to Supabase
   if(sbReady()&&A.user){
-    try { await sbFetch("PATCH","dl_users?id=eq."+A.user.id,{body:{bio:bio}}); } catch(e){}
+    try {
+      await sbFetch("PATCH","dl_users?id=eq."+A.user.id,{body:{bio:bio}});
+      await sbFetch("PATCH","dl_profiles?user_id=eq."+A.user.id,{body:{bio:bio}}).catch(function(){});
+    } catch(e){}
   }
-  localSet("dl:uid", A.user.id); // refresh
   closeBioEdit();
   renderProfile();
-  showToast("Bio aggiornata!","✅");
+  showToast("Bio aggiornata! ✅","");
 }
 
 
@@ -3608,6 +3785,211 @@ function dismissLearnWelcome(){
   localStorage.setItem("dl:learn_welcome_v2","1");
   var el=document.getElementById("learn-welcome");
   if(el){el.style.transition="opacity .3s";el.style.opacity="0";setTimeout(function(){el.remove();},300);}
+}
+
+/* ═══════════════ FOUNDER MASTERS ═══════════════ */
+var MASTERS=[
+{
+  id:"master_sofia",
+  name:"Sofia Ricci",
+  title:"Concept Artist",
+  subtitle:"Riot Games · Ubisoft",
+  avatar:"🎨",
+  bio:"15 anni di esperienza nel concept art per videogiochi AAA. Ha lavorato per Riot Games e Ubisoft.",
+  specialty:"Concept Art · Character Design",
+  badge:"⭐ FOUNDER",
+  color:"#FFD700",
+  accent:"#FF8C00",
+  bg:"linear-gradient(135deg,#1a0a00,#2d1a00)",
+  headerBg:"linear-gradient(135deg,#FF8C00,#FFD700,#FF8C00)",
+  free_lessons:2,
+  lessons:[
+    LL(1,true,"🖌️","Dal concetto al personaggio","Intermedio",30,"Come trasformare un'idea in un personaggio giocabile.",[
+      S(1,"Il brief creativo","Ogni progetto inizia da un brief. Impara a leggerlo e interpretarlo.","Cerca 3 brief reali di studi game."),
+      S(2,"Thumbnail sketching","20 schizzi veloci per trovare la silhouette giusta.","Meno di 30 secondi per sketch."),
+      S(3,"Selezione e sviluppo","Sceglie il migliore e lo sviluppa in 3 varianti di colore.",null)
+    ]),
+    LL(2,true,"🌍","World-building visivo","Avanzato",35,"Come costruire un universo visivo coerente.",[
+      S(1,"Mood board professionale","Costruisci un mood board come fanno gli art director.","Pinterest + referenze reali."),
+      S(2,"Palette cromatica del mondo","Ogni regno/fazione ha i suoi colori.","Studia League of Legends: ogni regione ha un'identità cromatica precisa."),
+      S(3,"Design bible","Documento di riferimento per tutto il team artistico.",null)
+    ]),
+    LL(3,false,"⚡","Character design per giochi","Avanzato",40,"Le regole non dette del character design nel game dev.",[
+      S(1,"Leggibilità in-game","Un personaggio deve essere riconoscibile a 50px.",null),
+      S(2,"Gerarchie visive","Come comunicare forza, velocità, magia attraverso le forme.",null),
+      S(3,"Turnaround sheet","Il documento finale che vai in produzione.",null)
+    ]),
+    LL(4,false,"🎭","Villain design psychology","Avanzato",45,"I villain più memorabili non sono solo cattivi — sono specchi.",[
+      S(1,"Psicologia del villain","Cosa rende un antagonista davvero efficace?",null),
+      S(2,"Visual storytelling","Ogni dettaglio del design racconta la storia del personaggio.",null),
+      S(3,"Il tuo villain originale","Crea il villain del tuo mondo con backstory completa.",null)
+    ])
+  ]
+},
+{
+  id:"master_luca",
+  name:"Luca Ferretti",
+  title:"Environment Artist",
+  subtitle:"CD Projekt RED · Guerrilla",
+  avatar:"🏔️",
+  bio:"Senior environment artist con The Witcher 3 e Horizon Zero Dawn nel portfolio.",
+  specialty:"Environment Art · Lighting",
+  badge:"⭐ FOUNDER",
+  color:"#00D4FF",
+  accent:"#0088CC",
+  bg:"linear-gradient(135deg,#000a1a,#001a2d)",
+  headerBg:"linear-gradient(135deg,#0088CC,#00D4FF,#0088CC)",
+  free_lessons:2,
+  lessons:[
+    LL(1,true,"🌅","Composizione per ambienti cinematografici","Avanzato",35,"Come i migliori environment artist pensano in inquadrature.",[
+      S(1,"Rule of thirds nel 3D","Applicare la composizione fotografica agli ambienti digitali.",null),
+      S(2,"Leading lines","Come guidare l'occhio del giocatore attraverso lo spazio.",null),
+      S(3,"Micro e macro dettaglio","Cosa si vede da lontano vs cosa si scopre avvicinandosi.",null)
+    ]),
+    LL(2,true,"💡","Lighting mastery","Avanzato",40,"La luce trasforma un ambiente mediocre in uno iconico.",[
+      S(1,"Three-point lighting","Classico cinema, applicato agli ambienti di gioco.",null),
+      S(2,"Color temperature","Caldo vs freddo: come usarlo narrativamente.",null),
+      S(3,"Atmosfera e fog","Come creare profondità e mistero con il volume.",null)
+    ]),
+    LL(3,false,"🏚️","Lived-in environments","Avanzato",45,"Ambienti che sembrano vissuti, non costruiti.",[
+      S(1,"Storytelling attraverso oggetti","Ogni oggetto racconta cosa è successo prima.",null),
+      S(2,"Weathering e aging","Come invecchiare superfici in modo credibile.",null),
+      S(3,"Il tuo ambiente narrativo","Crea una location con una storia silenziosa.",null)
+    ])
+  ]
+}
+];
+
+function renderFounderMasters(){
+  var container=document.getElementById("founders-section");
+  if(!container)return;
+  container.innerHTML="";
+
+  // Header
+  var header=document.createElement("div");
+  header.style.cssText="padding:0 0 12px;display:flex;align-items:center;justify-content:space-between";
+  header.innerHTML='<div>'+
+    '<div style="font-weight:900;font-size:15px;color:#1C1B2E;display:flex;align-items:center;gap:8px">'+
+      '<span style="font-size:20px">⭐</span>'+t("founderMasters")+
+    '</div>'+
+    '<div style="font-size:11px;color:#9896B8;margin-top:2px">'+t("founderSub")+'</div>'+
+  '</div>';
+  container.appendChild(header);
+
+  // Master cards
+  MASTERS.forEach(function(master){
+    var card=document.createElement("div");
+    card.style.cssText="border-radius:20px;overflow:hidden;margin-bottom:14px;cursor:pointer;box-shadow:0 8px 32px rgba(0,0,0,.15);border:1px solid rgba(255,255,255,.06)";
+    card.onclick=function(){openMasterDetail(master);};
+
+    // Header gradient strip
+    var strip=document.createElement("div");
+    strip.style.cssText="height:6px;background:"+master.headerBg;
+    card.appendChild(strip);
+
+    // Body
+    var body=document.createElement("div");
+    body.style.cssText="background:#1e1b3a;padding:16px";
+
+    // Top row: avatar + name + badge
+    var topRow=document.createElement("div");
+    topRow.style.cssText="display:flex;align-items:center;gap:12px;margin-bottom:12px";
+    var avatarBox=document.createElement("div");
+    avatarBox.style.cssText="width:52px;height:52px;border-radius:50%;background:"+master.bg+";border:2px solid "+master.color+";display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0";
+    avatarBox.textContent=master.avatar;
+    var nameBlock=document.createElement("div");nameBlock.style.flex="1";
+    var masterName=document.createElement("div");masterName.style.cssText="font-weight:900;font-size:15px;color:#fff";masterName.textContent=master.name;
+    var masterTitle=document.createElement("div");masterTitle.style.cssText="font-size:11px;color:"+master.color+";font-weight:700;margin-top:1px";masterTitle.textContent=master.title+" · "+master.subtitle;
+    nameBlock.appendChild(masterName);nameBlock.appendChild(masterTitle);
+    var badge=document.createElement("div");
+    badge.style.cssText="background:linear-gradient(135deg,"+master.color+","+master.accent+");border-radius:50px;padding:4px 10px;font-size:10px;font-weight:900;color:#000;letter-spacing:.5px";
+    badge.textContent=t("founderBadge");
+    topRow.appendChild(avatarBox);topRow.appendChild(nameBlock);topRow.appendChild(badge);
+    body.appendChild(topRow);
+
+    // Bio
+    var bioEl=document.createElement("div");
+    bioEl.style.cssText="font-size:12px;color:#c8c5e8;line-height:1.5;margin-bottom:12px";
+    bioEl.textContent=master.bio;
+    body.appendChild(bioEl);
+
+    // Lesson count + free badge
+    var infoRow=document.createElement("div");
+    infoRow.style.cssText="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid rgba(255,255,255,.06)";
+    var lesCount=document.createElement("div");lesCount.style.cssText="font-size:12px;color:#9896B8";
+    lesCount.textContent=master.lessons.length+" "+t("lessons")+" · "+master.free_lessons+" gratuite";
+    var freeTag=document.createElement("div");
+    freeTag.style.cssText="background:linear-gradient(135deg,"+master.color+","+master.accent+");border-radius:50px;padding:3px 10px;font-size:10px;font-weight:900;color:#000";
+    freeTag.textContent="FREEMIUM ✨";
+    infoRow.appendChild(lesCount);infoRow.appendChild(freeTag);
+    body.appendChild(infoRow);
+
+    card.appendChild(body);
+    container.appendChild(card);
+  });
+}
+
+function openMasterDetail(master){
+  // Reuse category screen with master data
+  A.cat={
+    id:"master_"+master.id,
+    label:master.name,
+    icon:master.avatar,
+    levels:master.lessons,
+    info:master.bio,
+    color:master.color,
+    accent:master.accent,
+    isMaster:true,
+    master:master
+  };
+  // Override BG/AC for this master
+  BG["master_"+master.id]=master.bg.replace("linear-gradient(135deg,","").split(",")[0];
+  AC["master_"+master.id]=master.accent;
+  renderMasterCategory(master);
+  showScreen("category");
+}
+
+function renderMasterCategory(master){
+  var cont=document.getElementById("cat-lessons-list");
+  if(!cont)return;
+  var cat=A.cat;
+  document.getElementById("cat-title").textContent=master.name;
+  document.getElementById("cat-subtitle").textContent=master.title+" · "+master.subtitle;
+
+  // Header gradient
+  var catScreen=document.getElementById("scr-category");
+  if(catScreen) catScreen.style.background=master.bg;
+
+  cont.innerHTML="";
+  master.lessons.forEach(function(les){
+    var k=pk("master_"+master.id,les.id);
+    var pv=A.progress[k]||{};
+    var isDone=pv.completed===true;
+    var isLocked=!les.free&&!A.pro;
+
+    var div=document.createElement("div");
+    div.style.cssText="background:rgba(255,255,255,.05);border:1px solid "+(isDone?"#FFD700":"rgba(255,255,255,.08)")+";border-radius:16px;padding:14px 16px;margin-bottom:10px;cursor:"+(isLocked?"default":"pointer")+";position:relative;overflow:hidden";
+
+    if(isDone){
+      var doneStrip=document.createElement("div");
+      doneStrip.style.cssText="position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,"+master.color+","+master.accent+")";
+      div.appendChild(doneStrip);
+    }
+    div.innerHTML+='<div style="display:flex;align-items:center;gap:10px">'+
+      '<div style="width:40px;height:40px;border-radius:12px;background:'+master.accent+'22;display:flex;align-items:center;justify-content:center;font-size:20px">'+
+        (isLocked?"🔒":isDone?"✅":les.icon)+
+      '</div>'+
+      '<div style="flex:1">'+
+        '<div style="font-weight:800;font-size:14px;color:#fff">'+les.title+'</div>'+
+        '<div style="font-size:11px;color:'+master.color+';margin-top:2px">'+les.diff+' · '+les.mins+' min'+(isLocked?' · <span style="background:linear-gradient(135deg,'+master.color+','+master.accent+');color:#000;border-radius:50px;padding:1px 6px;font-size:10px;font-weight:900">PRO</span>':isDone?' · ✓ Completata':'')+
+        '</div>'+
+      '</div>'+
+    '</div>';
+    if(!isLocked){
+      (function(c,l){div.addEventListener("click",function(){startLesson(c,l);});})(A.cat,les);
+    }
+    cont.appendChild(div);
+  });
 }
 
 function init(){

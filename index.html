@@ -218,7 +218,10 @@
       <button id="skill-view-btn" onclick="toggleSkillView()" style="background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.3);border-radius:50px;padding:5px 12px;color:#8B5CF6;font-size:11px;font-weight:800;cursor:pointer">🌳 Skill Tree</button>
     </div>
     <div id="home-cat-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
-    <div id="skill-tree-container" style="display:none;padding-bottom:20px"></div>
+    <div id="skill-tree-container" style="display:none;padding-bottom:20px">
+
+  <!-- FOUNDER MASTERS -->
+  <div id="founders-section" style="padding:0 16px 80px"></div></div>
   </div>
 </div>
 
@@ -818,5 +821,15 @@
 <input type="file" id="post-img-camera" accept="image/*" capture="environment" style="display:none" onchange="onPostImageSelected(event)"/>
 <input type="file" id="post-img-gallery" accept="image/*" style="display:none" onchange="onPostImageSelected(event)"/>
 
+<script>
+// Set language selector to current language on load
+window.addEventListener("load", function(){
+  var sel = document.getElementById("lang-select");
+  if(sel){
+    var saved = localStorage.getItem("dl:lang")||"it";
+    sel.value = saved;
+  }
+});
+</script>
 </body>
 </html>
