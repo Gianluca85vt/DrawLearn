@@ -855,7 +855,7 @@ function setPayPlan(plan){
 }
 async function doPay(){
   // Legacy fallback - now handled by PayPal SDK
-  await db.set("dl:pr",{active:true,plan:A.payPlan,paidAt:new Date().toISOString()});
+  localSet("dl:pr",JSON.stringify({active:true,plan:A.payPlan,paidAt:new Date().toISOString()}));
   A.pro=true;
   document.getElementById("checkout-form").style.display="none";
   document.getElementById("checkout-success").style.display="block";
