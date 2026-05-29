@@ -2015,7 +2015,7 @@ function navTo(screen){
     if(activeKey && typeof setActiveNav==="function") setActiveNav(activeKey);
   }catch(e){}
 
-  var allScreens = ["feed","home","category","lesson","profile","drawpass","notif","search","pubprofile","explore","chat","dm","dashboard","challenges"];
+  var allScreens = ["feed","home","category","lesson","profile","drawpass","notif","search","pubprofile","explore","chat","dm","dashboard","challenges","botteghe","bottega","badges"];
   allScreens.forEach(function(s){ var el=document.getElementById("scr-"+s); if(el) el.style.display="none"; });
   // Special renders
   if(screen==="feed"){ renderFeed(); showScreen("feed"); if(typeof setActiveNav==="function")setActiveNav("feed"); }
@@ -2023,6 +2023,17 @@ function navTo(screen){
     renderBadgesPage();
     showScreen("badges");
     showBottomNav();
+    return;
+  }
+  if(screen==="botteghe"){
+    loadMyBotteghe().then(function(){ renderBotteghePage(); });
+    showScreen("botteghe");
+    showBottomNav();
+    return;
+  }
+  if(screen==="bottega"){
+    showScreen("bottega");
+    hideBottomNav();
     return;
   }
   if(screen==="dashboard"){
@@ -2054,7 +2065,7 @@ function navTo(screen){
   var ni=document.getElementById("nav-avatar-icon");
   if(ni) ni.textContent=getAvatarIcon();
   // Hide bottom nav for full-screen contexts (chat conversation, lesson player)
-  if(screen==="dm" || screen==="lesson" || screen==="pubprofile"){
+  if(screen==="dm" || screen==="lesson" || screen==="pubprofile" || screen==="bottega"){
     hideBottomNav();
   } else {
     showBottomNav();
@@ -5325,6 +5336,57 @@ function renderDashboard(){
       }
     }
   }catch(e){}
+
+  // Botteghe preview card on dashboard
+  try{
+    if(typeof BOTTEGHE_CATALOG !== "undefined"){
+      var existingB = document.getElementById("dash-botteghe-card");
+      if(existingB) existingB.remove();
+      var unlockedB = BOTTEGHE_CATALOG.filter(function(b){return isBottegaUnlocked(b);}).length;
+      var myB = (_myBotteghe||[]).length;
+      var nextB = BOTTEGHE_CATALOG.find(function(b){return !isBottegaUnlocked(b);});
+      
+      var bCard = document.createElement("div");
+      bCard.id = "dash-botteghe-card";
+      bCard.onclick = function(){ navTo("botteghe"); };
+      bCard.style.cssText = "margin:0 16px 18px;background:linear-gradient(135deg,rgba(184,114,224,0.10),rgba(251,186,0,0.06));border:1px solid rgba(184,114,224,0.20);border-radius:18px;padding:14px;cursor:pointer;display:flex;align-items:center;gap:12px";
+      
+      var iconHTML = '<div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#814393,#FBBA00);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">TEMPLE</div>';
+      iconHTML = iconHTML.replace("TEMPLE", "🏛️");
+      
+      var middleHTML;
+      if(myB > 0){
+        middleHTML = '<div style="flex:1;min-width:0"><div style="font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:1.5px;color:#B872E0;font-weight:700;margin-bottom:3px">LE TUE BOTTEGHE</div>' +
+          '<div style="font-weight:800;font-size:14px;color:#F5F1E8">Sei in '+myB+' '+(myB===1?"bottega":"botteghe")+'</div>' +
+          '<div style="font-size:11px;color:#8a82a8;margin-top:2px">'+unlockedB+' sbloccate in totale</div></div>';
+      } else if(unlockedB > 0){
+        middleHTML = '<div style="flex:1;min-width:0"><div style="font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:1.5px;color:#FBBA00;font-weight:700;margin-bottom:3px">NUOVO</div>' +
+          '<div style="font-weight:800;font-size:14px;color:#F5F1E8">'+unlockedB+' '+(unlockedB===1?"bottega disponibile":"botteghe disponibili")+'</div>' +
+          '<div style="font-size:11px;color:#8a82a8;margin-top:2px">Entra nella gilda dei tuoi simili</div></div>';
+      } else if(nextB){
+        var pctNext = Math.round(getBottegaProgress(nextB)*100);
+        middleHTML = '<div style="flex:1;min-width:0"><div style="font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:1.5px;color:#FBBA00;font-weight:700;margin-bottom:3px">PROSSIMA BOTTEGA</div>' +
+          '<div style="font-weight:800;font-size:14px;color:#F5F1E8">'+nextB.name+'</div>' +
+          '<div style="font-size:11px;color:#8a82a8;margin-top:2px">'+pctNext+'% verso lo sblocco</div></div>';
+      } else {
+        middleHTML = '<div style="flex:1"><div style="font-weight:800;font-size:14px;color:#F5F1E8">Le Botteghe</div><div style="font-size:11px;color:#8a82a8">Scopri le gilde</div></div>';
+      }
+      
+      bCard.innerHTML = iconHTML + middleHTML + '<div style="color:#8a82a8;font-size:18px;flex-shrink:0">→</div>';
+      
+      var challengeCard = document.getElementById("dash-challenge-card");
+      if(challengeCard){
+        var challengeContainer = challengeCard.parentNode;
+        if(challengeContainer.nextSibling){
+          challengeContainer.parentNode.insertBefore(bCard, challengeContainer.nextSibling);
+        } else {
+          challengeContainer.parentNode.appendChild(bCard);
+        }
+      }
+      
+      loadMyBotteghe();
+    }
+  }catch(e){console.warn("dash botteghe error:",e);}
 }
 
 function openSettings(){
@@ -5963,6 +6025,367 @@ function renderBadgesPage(){
     sec.appendChild(grid);
     container.appendChild(sec);
   });
+}
+
+/* BOTTEGHE (gilde) */
+var BOTTEGHE_CATALOG = [
+  {
+    id: "atelier_volti",
+    name: "Atelier dei Volti",
+    description: "Per chi ama ritrarre l'anima nel viso. Studi di proporzione, espressione, anatomia facciale.",
+    color: "#B872E0",
+    icon: "🎭",
+    coverGradient: "linear-gradient(135deg, #814393 0%, #B872E0 100%)",
+    gate: { type: "category", category: "character", progress: 0.5 },
+    gateLabel: "50% di Character Design",
+    maxMembers: 30,
+    mentor: { name: "Sofia Ricci", role: "Concept Artist", avatar: "👩‍🎨", id: "founder_sofia" }
+  },
+  {
+    id: "officina_anatomica",
+    name: "Officina Anatomica",
+    description: "Lo studio del corpo umano. Muscoli, ossa, dinamica del movimento e gesture.",
+    color: "#FF8C4B",
+    icon: "💪",
+    coverGradient: "linear-gradient(135deg, #FF6B35 0%, #FFB44A 100%)",
+    gate: { type: "category", category: "character", progress: 0.7 },
+    gateLabel: "70% di Character Design",
+    maxMembers: 30,
+    mentor: { name: "Sofia Ricci", role: "Concept Artist", avatar: "👩‍🎨", id: "founder_sofia" }
+  },
+  {
+    id: "studio_paesaggio",
+    name: "Studio del Paesaggio",
+    description: "Dove i mondi prendono forma. Composizione, atmosfera, prospettiva ambientale.",
+    color: "#3B9FD4",
+    icon: "🌄",
+    coverGradient: "linear-gradient(135deg, #1d6fa5 0%, #3B9FD4 100%)",
+    gate: { type: "category", category: "environment", progress: 0.5 },
+    gateLabel: "50% di Environment",
+    maxMembers: 50,
+    mentor: { name: "Luca Ferretti", role: "Environment Artist", avatar: "👨‍🎨", id: "founder_luca" }
+  },
+  {
+    id: "caverna_concept",
+    name: "Caverna del Concept",
+    description: "Per i creatori di mondi visivi. Concept design avanzato e progetti complessi.",
+    color: "#FBBA00",
+    icon: "🏛️",
+    coverGradient: "linear-gradient(135deg, #B872E0 0%, #FBBA00 100%)",
+    gate: { type: "total_completed", count: 15 },
+    gateLabel: "15 lezioni totali complete",
+    maxMembers: 50,
+    mentor: { name: "Luca Ferretti", role: "Environment Artist", avatar: "👨‍🎨", id: "founder_luca" }
+  }
+];
+
+var _bottegheMembers = {};
+var _myBotteghe = [];
+
+function getBottega(id){
+  return BOTTEGHE_CATALOG.find(function(b){return b.id===id;});
+}
+
+function isBottegaUnlocked(bottega){
+  if(!bottega || !bottega.gate) return true;
+  try{
+    if(bottega.gate.type === "category"){
+      var cat = CATS.find(function(c){return c.id===bottega.gate.category;});
+      if(!cat) return false;
+      var done = cat.levels.filter(function(l){
+        var k = pk(cat.id, l.id);
+        return A.progress[k] && A.progress[k].completed;
+      }).length;
+      return (done / cat.levels.length) >= bottega.gate.progress;
+    }
+    if(bottega.gate.type === "total_completed"){
+      return getCompletedCount() >= bottega.gate.count;
+    }
+    if(bottega.gate.type === "all_categories"){
+      return CATS.every(function(c){
+        return c.levels.filter(function(l){
+          var k = pk(c.id, l.id);
+          return A.progress[k] && A.progress[k].completed;
+        }).length === c.levels.length;
+      });
+    }
+  }catch(e){console.warn("isBottegaUnlocked error:", e);}
+  return false;
+}
+
+function getBottegaProgress(bottega){
+  if(!bottega || !bottega.gate) return 1;
+  try{
+    if(bottega.gate.type === "category"){
+      var cat = CATS.find(function(c){return c.id===bottega.gate.category;});
+      if(!cat) return 0;
+      var done = cat.levels.filter(function(l){
+        var k = pk(cat.id, l.id);
+        return A.progress[k] && A.progress[k].completed;
+      }).length;
+      return Math.min(1, (done / cat.levels.length) / bottega.gate.progress);
+    }
+    if(bottega.gate.type === "total_completed"){
+      return Math.min(1, getCompletedCount() / bottega.gate.count);
+    }
+  }catch(e){}
+  return 0;
+}
+
+function isMemberOf(bottegaId){
+  return _myBotteghe.indexOf(bottegaId) >= 0;
+}
+
+async function loadMyBotteghe(){
+  if(!A.user) return;
+  if(sbReady()){
+    try{
+      var rows = await sbFetch("GET","dl_bottega_members",{filters:"user_id=eq."+A.user.id,select:"bottega_id"});
+      _myBotteghe = (rows||[]).map(function(r){return r.bottega_id;});
+      localStorage.setItem("dl:my_botteghe", JSON.stringify(_myBotteghe));
+    }catch(e){
+      console.warn("loadMyBotteghe SB failed:", e);
+      try{_myBotteghe = JSON.parse(localStorage.getItem("dl:my_botteghe")||"[]");}catch(e){_myBotteghe=[];}
+    }
+  } else {
+    try{_myBotteghe = JSON.parse(localStorage.getItem("dl:my_botteghe")||"[]");}catch(e){_myBotteghe=[];}
+  }
+}
+
+async function loadBottegaMembers(bottegaId){
+  if(sbReady()){
+    try{
+      var rows = await sbFetch("GET","dl_bottega_members",{filters:"bottega_id=eq."+bottegaId});
+      _bottegheMembers[bottegaId] = rows || [];
+      return rows || [];
+    }catch(e){ return []; }
+  }
+  return [];
+}
+
+async function joinBottega(bottegaId){
+  if(!A.user){ showToast("Accedi prima",""); return; }
+  var bottega = getBottega(bottegaId);
+  if(!bottega){ return; }
+  if(!isBottegaUnlocked(bottega)){
+    showToast("Non hai ancora i requisiti","");
+    return;
+  }
+  if(isMemberOf(bottegaId)){
+    showToast("Sei gia membro","");
+    return;
+  }
+  
+  if(sbReady()){
+    try{
+      var members = await loadBottegaMembers(bottegaId);
+      if(members.length >= bottega.maxMembers){
+        showToast("Bottega piena!","");
+        return;
+      }
+      await sbFetch("POST","dl_bottega_members",{
+        body:{ bottega_id: bottegaId, user_id: A.user.id, joined_at: new Date().toISOString(), role: "member" }
+      });
+      _myBotteghe.push(bottegaId);
+      localStorage.setItem("dl:my_botteghe", JSON.stringify(_myBotteghe));
+      showToast("Benvenuto in " + bottega.name + "!", "");
+      try{ if(typeof track==="function") track("bottega_joined", {bottega_id: bottegaId}); }catch(e){}
+      if(typeof renderBotteghePage === "function") renderBotteghePage();
+    }catch(e){
+      console.error("joinBottega error:", e);
+      showToast("Errore: " + (e.message||"sconosciuto"), "");
+    }
+  } else {
+    _myBotteghe.push(bottegaId);
+    localStorage.setItem("dl:my_botteghe", JSON.stringify(_myBotteghe));
+    showToast("Iscritto a " + bottega.name + " (offline)", "");
+    if(typeof renderBotteghePage === "function") renderBotteghePage();
+  }
+}
+
+async function leaveBottega(bottegaId){
+  if(!A.user) return;
+  if(!confirm("Sei sicuro di voler lasciare la bottega?")) return;
+  var bottega = getBottega(bottegaId);
+  if(sbReady()){
+    try{
+      await sbFetch("DELETE","dl_bottega_members?bottega_id=eq."+bottegaId+"&user_id=eq."+A.user.id, {});
+    }catch(e){}
+  }
+  _myBotteghe = _myBotteghe.filter(function(id){return id !== bottegaId;});
+  localStorage.setItem("dl:my_botteghe", JSON.stringify(_myBotteghe));
+  showToast("Hai lasciato " + (bottega?bottega.name:"la bottega"), "");
+  navTo("botteghe");
+}
+
+function renderBotteghePage(){
+  var container = document.getElementById("botteghe-content");
+  if(!container) return;
+  container.innerHTML = "";
+  
+  try{var _p=localStorage.getItem("dl:progress_all");if(_p){var _pp=JSON.parse(_p);if(typeof _pp==="object"&&_pp!==null&&!Array.isArray(_pp))A.progress=_pp;}}catch(e){}
+  
+  // Header
+  var header = document.createElement("div");
+  header.style.cssText = "padding:8px 0 20px";
+  header.innerHTML = '<h1 style="font-family:Bricolage Grotesque,sans-serif;font-size:26px;font-weight:800;color:#F5F1E8;margin:0 0 6px;letter-spacing:-0.02em">Le Botteghe</h1>' +
+    '<p style="font-size:13px;color:#a8a2c8;margin:0;line-height:1.4">Gilde private per chi ha raggiunto un livello di maestria. Entra, condividi, cresci.</p>';
+  container.appendChild(header);
+  
+  // Stats
+  var myCount = _myBotteghe.length;
+  var unlockedCount = BOTTEGHE_CATALOG.filter(function(b){return isBottegaUnlocked(b);}).length;
+  var stats = document.createElement("div");
+  stats.style.cssText = "background:linear-gradient(135deg,rgba(184,114,224,0.10),rgba(251,186,0,0.08));border:1px solid rgba(184,114,224,0.20);border-radius:18px;padding:14px;margin-bottom:20px;display:flex;align-items:center;gap:12px";
+  stats.innerHTML = '<div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#B872E0,#FBBA00);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🏛️</div>' +
+    '<div style="flex:1"><div style="font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:2px;color:#FBBA00;font-weight:700;margin-bottom:3px">MEMBERSHIP</div>' +
+    '<div style="font-weight:800;font-size:14px;color:#F5F1E8">Sei in ' + myCount + ' ' + (myCount===1?"bottega":"botteghe") + ' di ' + unlockedCount + ' sbloccate</div></div>';
+  container.appendChild(stats);
+  
+  BOTTEGHE_CATALOG.forEach(function(b){
+    var unlocked = isBottegaUnlocked(b);
+    var isMember = isMemberOf(b.id);
+    var progress = getBottegaProgress(b);
+    var pct = Math.round(progress * 100);
+    
+    var card = document.createElement("div");
+    card.style.cssText = "background:rgba(255,255,255,0.03);border:1px solid " + (isMember?"rgba(184,114,224,0.40)":"rgba(255,255,255,0.06)") + ";border-radius:18px;overflow:hidden;margin-bottom:14px;transition:transform .12s,border-color .12s;opacity:" + (unlocked?"1":"0.65");
+    
+    var coverDiv = document.createElement("div");
+    coverDiv.style.cssText = "height:90px;background:" + b.coverGradient + ";position:relative;display:flex;align-items:center;justify-content:center";
+    
+    var iconEl = document.createElement("div");
+    iconEl.style.cssText = "font-size:54px;line-height:1;text-shadow:0 4px 12px rgba(0,0,0,0.3)";
+    iconEl.textContent = b.icon;
+    coverDiv.appendChild(iconEl);
+    
+    if(isMember){
+      var memberBadge = document.createElement("div");
+      memberBadge.style.cssText = "position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.2);border-radius:50px;padding:4px 10px;font-size:10px;font-weight:800;color:#fff;letter-spacing:0.5px";
+      memberBadge.textContent = "MEMBRO";
+      coverDiv.appendChild(memberBadge);
+    } else if(!unlocked){
+      var lockBadge = document.createElement("div");
+      lockBadge.style.cssText = "position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);border-radius:50px;padding:4px 10px;font-size:10px;font-weight:800;color:#FF8C4B;letter-spacing:0.5px";
+      lockBadge.textContent = "🔒 BLOCCATA";
+      coverDiv.appendChild(lockBadge);
+    }
+    
+    card.appendChild(coverDiv);
+    
+    var body = document.createElement("div");
+    body.style.cssText = "padding:14px";
+    
+    var titleEl = document.createElement("div");
+    titleEl.style.cssText = "font-family:Bricolage Grotesque,sans-serif;font-weight:800;font-size:17px;color:#F5F1E8;letter-spacing:-0.01em;margin-bottom:6px";
+    titleEl.textContent = b.name;
+    body.appendChild(titleEl);
+    
+    var descEl = document.createElement("div");
+    descEl.style.cssText = "font-size:12px;color:#8a82a8;line-height:1.5;margin-bottom:10px";
+    descEl.textContent = b.description;
+    body.appendChild(descEl);
+    
+    var mentorRow = document.createElement("div");
+    mentorRow.style.cssText = "display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:10px";
+    mentorRow.innerHTML = '<div style="font-size:16px">' + b.mentor.avatar + '</div>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:11px;color:#F5F1E8;font-weight:700">' + b.mentor.name + '</div>' +
+        '<div style="font-size:9px;color:#8a82a8;font-family:JetBrains Mono,monospace;letter-spacing:1px;text-transform:uppercase">MENTORE - ' + b.mentor.role + '</div>' +
+      '</div>';
+    body.appendChild(mentorRow);
+    
+    if(!unlocked){
+      var gateBox = document.createElement("div");
+      gateBox.style.cssText = "margin-top:8px";
+      gateBox.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><span style="font-family:JetBrains Mono,monospace;font-size:10px;letter-spacing:1px;color:#FF8C4B;font-weight:700">REQUISITO</span><span style="font-size:11px;color:#8a82a8;font-weight:600">' + pct + '%</span></div>' +
+        '<div style="height:5px;background:rgba(255,255,255,0.06);border-radius:50px;overflow:hidden"><div style="width:' + pct + '%;height:100%;background:linear-gradient(90deg,#FF8C4B,#FBBA00);border-radius:50px"></div></div>' +
+        '<div style="font-size:11px;color:#a8a2c8;margin-top:8px">' + b.gateLabel + '</div>';
+      body.appendChild(gateBox);
+    } else if(isMember){
+      var enterBtn = document.createElement("button");
+      enterBtn.style.cssText = "width:100%;padding:10px;background:linear-gradient(135deg,#B872E0,#FBBA00);border:none;border-radius:12px;color:#1c1b29;font-weight:800;font-size:13px;cursor:pointer;font-family:Geist,sans-serif;margin-top:6px";
+      enterBtn.textContent = "Entra";
+      (function(id){enterBtn.onclick = function(){ openBottega(id); };})(b.id);
+      body.appendChild(enterBtn);
+    } else {
+      var joinBtn = document.createElement("button");
+      joinBtn.style.cssText = "width:100%;padding:10px;background:rgba(184,114,224,0.15);border:1px solid " + b.color + ";border-radius:12px;color:" + b.color + ";font-weight:800;font-size:13px;cursor:pointer;font-family:Geist,sans-serif;margin-top:6px";
+      joinBtn.textContent = "Unisciti";
+      (function(id){joinBtn.onclick = function(){ joinBottega(id); };})(b.id);
+      body.appendChild(joinBtn);
+    }
+    
+    card.appendChild(body);
+    container.appendChild(card);
+  });
+}
+
+async function openBottega(bottegaId){
+  var bottega = getBottega(bottegaId);
+  if(!bottega) return;
+  if(!isBottegaUnlocked(bottega)){
+    showToast("Non hai ancora i requisiti","");
+    return;
+  }
+  if(!isMemberOf(bottegaId)){
+    showToast("Devi iscriverti prima","");
+    return;
+  }
+  
+  A.currentBottega = bottega;
+  showScreen("bottega");
+  hideBottomNav();
+  
+  var container = document.getElementById("bottega-content");
+  if(!container) return;
+  
+  var members = await loadBottegaMembers(bottegaId);
+  container.innerHTML = "";
+  
+  var cover = document.createElement("div");
+  cover.style.cssText = "height:160px;background:" + bottega.coverGradient + ";position:relative;display:flex;align-items:center;justify-content:center";
+  
+  var backBtn = document.createElement("button");
+  backBtn.style.cssText = "position:absolute;top:14px;left:14px;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.2);color:#fff;font-size:16px;cursor:pointer";
+  backBtn.textContent = "<-";
+  backBtn.onclick = function(){ navTo("botteghe"); };
+  cover.appendChild(backBtn);
+  
+  var menuBtn = document.createElement("button");
+  menuBtn.style.cssText = "position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.2);color:#fff;font-size:14px;cursor:pointer";
+  menuBtn.textContent = "...";
+  (function(id){menuBtn.onclick = function(){ leaveBottega(id); };})(bottegaId);
+  cover.appendChild(menuBtn);
+  
+  var bigIcon = document.createElement("div");
+  bigIcon.style.cssText = "font-size:70px;line-height:1;text-shadow:0 4px 16px rgba(0,0,0,0.4)";
+  bigIcon.textContent = bottega.icon;
+  cover.appendChild(bigIcon);
+  
+  container.appendChild(cover);
+  
+  var info = document.createElement("div");
+  info.style.cssText = "padding:20px 16px 16px";
+  info.innerHTML = '<h1 style="font-family:Bricolage Grotesque,sans-serif;font-size:26px;font-weight:800;color:#F5F1E8;margin:0 0 8px;letter-spacing:-0.02em">' + bottega.name + '</h1>' +
+    '<p style="font-size:13px;color:#a8a2c8;margin:0 0 14px;line-height:1.5">' + bottega.description + '</p>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+      '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:50px;padding:6px 12px;display:flex;align-items:center;gap:6px"><span style="font-size:14px">👥</span><span style="font-size:12px;color:#F5F1E8;font-weight:700">' + members.length + ' / ' + bottega.maxMembers + '</span></div>' +
+      '<div style="background:rgba(184,114,224,0.10);border:1px solid rgba(184,114,224,0.25);border-radius:50px;padding:6px 12px;display:flex;align-items:center;gap:6px"><span style="font-size:14px">' + bottega.mentor.avatar + '</span><span style="font-size:12px;color:' + bottega.color + ';font-weight:700">' + bottega.mentor.name + '</span></div>' +
+    '</div>';
+  container.appendChild(info);
+  
+  var soon = document.createElement("div");
+  soon.style.cssText = "padding:20px 16px;margin-top:20px;background:rgba(255,255,255,0.02);border-top:1px solid rgba(255,255,255,0.06)";
+  soon.innerHTML = '<div style="font-family:JetBrains Mono,monospace;font-size:10px;letter-spacing:2px;color:#8a82a8;text-transform:uppercase;font-weight:700;margin-bottom:14px">PROSSIMAMENTE IN BOTTEGA</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
+      '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:14px;padding:14px;opacity:0.7"><div style="font-size:22px;margin-bottom:6px">📸</div><div style="font-weight:700;font-size:13px;color:#F5F1E8;margin-bottom:2px">Feed privato</div><div style="font-size:11px;color:#8a82a8">Solo membri</div></div>' +
+      '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:14px;padding:14px;opacity:0.7"><div style="font-size:22px;margin-bottom:6px">💬</div><div style="font-weight:700;font-size:13px;color:#F5F1E8;margin-bottom:2px">Chat di gruppo</div><div style="font-size:11px;color:#8a82a8">Mentor + membri</div></div>' +
+      '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:14px;padding:14px;opacity:0.7"><div style="font-size:22px;margin-bottom:6px">🏆</div><div style="font-weight:700;font-size:13px;color:#F5F1E8;margin-bottom:2px">Sfide esclusive</div><div style="font-size:11px;color:#8a82a8">Premi 2x token</div></div>' +
+      '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:14px;padding:14px;opacity:0.7"><div style="font-size:22px;margin-bottom:6px">📚</div><div style="font-weight:700;font-size:13px;color:#F5F1E8;margin-bottom:2px">Lezioni private</div><div style="font-size:11px;color:#8a82a8">Solo per membri</div></div>' +
+    '</div>' +
+    '<div style="text-align:center;margin-top:18px;font-size:11px;color:#6e6791;font-style:italic">Stai vivendo l anteprima delle Botteghe. Le funzionalita arriveranno presto.</div>';
+  container.appendChild(soon);
 }
 
 function init(){
