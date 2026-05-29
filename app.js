@@ -2025,7 +2025,12 @@ function navTo(screen){
   // Update avatar icon in nav
   var ni=document.getElementById("nav-avatar-icon");
   if(ni) ni.textContent=getAvatarIcon();
-  showBottomNav();
+  // Hide bottom nav for full-screen contexts (chat conversation, lesson player)
+  if(screen==="dm" || screen==="lesson" || screen==="pubprofile"){
+    hideBottomNav();
+  } else {
+    showBottomNav();
+  }
 }
 
 function showBottomNav(){ document.getElementById("bottom-nav").style.display="block"; }
@@ -4965,6 +4970,7 @@ async function openChat(userId,userName,userAvatar){
     
     var key="dl:dm_"+_dmUserId;
     var sbMsgs = await fetchMsgs();
+    hideBottomNav(); // defensive: in case something re-showed it during the async wait
     if(sbMsgs){
       try{localStorage.setItem(key, JSON.stringify(sbMsgs));}catch(e){}
       renderMsgs(sbMsgs);
