@@ -1113,3 +1113,7 @@ div[style*="color:#FFD60A"] {
 }
 
 @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+@keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }

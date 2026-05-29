@@ -5347,20 +5347,24 @@ function renderDashboard(){
     }
   }
 
-  // TODAY'S CHALLENGE
+  // TODAY'S CHALLENGE -> DAILY LESSON (centerpiece)
   var challengeCard = document.getElementById("dash-challenge-card");
   if(challengeCard){
-    var challengeTitle = "Disegna un oggetto sul tuo tavolo";
-    challengeCard.innerHTML = '<div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,rgba(251,186,0,0.18),rgba(255,140,0,0.18));border:1px solid rgba(251,186,0,0.3);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🎯</div>'+
-      '<div style="flex:1;min-width:0">'+
-        '<div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:1.5px;color:#FBBA00;font-weight:700;margin-bottom:4px">SFIDA DI OGGI</div>'+
-        '<div style="font-weight:700;font-size:14px;color:#F5F1E8;line-height:1.3">'+challengeTitle+'</div>'+
-      '</div>'+
-      '<div style="font-size:18px;color:#8a82a8;flex-shrink:0">→</div>';
-    challengeCard.onclick = function(){
-      if(typeof openChallengeSubmit==="function") openChallengeSubmit("daily","Oggetto sul tavolo");
-      else showToast("Sfida in arrivo","🎯");
-    };
+    var dailyLesson = getDailyLesson();
+    var dailyDone = isDailyDone();
+    var streak = getDailyStreak();
+    var statusColor = dailyDone ? "#66E0B5" : "#FBBA00";
+    var kickerText = dailyDone ? "GIA COMPLETATA" : "LEZIONE DEL GIORNO";
+    
+    challengeCard.style.cssText = "background:linear-gradient(135deg,rgba(184,114,224,0.10),rgba(251,186,0,0.08));border:1px solid "+(dailyDone?"rgba(102,224,181,0.30)":"rgba(251,186,0,0.30)")+";border-radius:18px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;margin-bottom:24px";
+    challengeCard.innerHTML = '<div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#B872E0,#FBBA00);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;'+(dailyDone?'opacity:0.6':'')+'">'+dailyLesson.icon+'</div>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:1.5px;color:'+statusColor+';font-weight:700;margin-bottom:4px">'+kickerText+(streak>0?' \u00B7 '+streak+' DI FILA':'')+'</div>' +
+        '<div style="font-weight:700;font-size:14px;color:'+(dailyDone?'#a8a2c8':'#F5F1E8')+';line-height:1.3;'+(dailyDone?'text-decoration:line-through;text-decoration-color:rgba(255,255,255,0.3)':'')+'">'+dailyLesson.title+'</div>' +
+        '<div style="font-size:11px;color:#8a82a8;margin-top:2px">⏱️ '+dailyLesson.duration+' min \u00B7 ⭐ +'+dailyLesson.reward+'</div>' +
+      '</div>' +
+      '<div style="font-size:18px;color:'+statusColor+';flex-shrink:0">'+(dailyDone?'✓':'\u2192')+'</div>';
+    challengeCard.onclick = function(){ openDailyLesson(); };
   }
 
   // CATEGORIES grid (with progress %)
@@ -6046,6 +6050,7 @@ var BADGES_CATALOG = [
   {id:"streak_3", category:"streak", title:"Primo focolare", desc:"3 giorni di fila", icon:"🔥", req:function(){return (A.streak&&A.streak.current||0)>=3;}, rarity:"common"},
   {id:"streak_7", category:"streak", title:"Una settimana viva", desc:"7 giorni di fila", icon:"🔥", req:function(){return (A.streak&&A.streak.current||0)>=7;}, rarity:"uncommon"},
   {id:"streak_14", category:"streak", title:"Disciplina d artista", desc:"14 giorni di fila", icon:"🔥", req:function(){return (A.streak&&A.streak.current||0)>=14;}, rarity:"rare"},
+  {id:"daily_30", icon:"📅", title:"Mese perfetto", desc:"30 lezioni del giorno in un mese", category:"streak", req:function(){return getDailyMonthlyCount()>=30;}},
   {id:"streak_30", category:"streak", title:"Maestro della costanza", desc:"30 giorni di fila", icon:"🏆", req:function(){return (A.streak&&A.streak.current||0)>=30;}, rarity:"epic"},
   // Lesson badges
   {id:"lesson_first", category:"lessons", title:"Primo passo", desc:"Prima lezione completata", icon:"🎯", req:function(){return getCompletedCount()>=1;}, rarity:"common"},
@@ -6492,6 +6497,256 @@ async function openBottega(bottegaId){
     '</div>' +
     '<div style="text-align:center;margin-top:18px;font-size:11px;color:#6e6791;font-style:italic">Stai vivendo l anteprima delle Botteghe. Le funzionalita arriveranno presto.</div>';
   container.appendChild(soon);
+}
+
+/* DAILY LESSON SYSTEM */
+var DAILY_LESSONS_POOL = [
+  // Volti
+  { id:"d1", category:"character", icon:"FACE_PROFILE", title:"Volto di profilo in 5 minuti", prompt:"Disegna un volto laterale partendo da un cerchio. Concentrati sul naso, mento e attaccatura del collo.", duration:5, reward:5 },
+  { id:"d2", category:"character", icon:"EYE", title:"Studio di uno sguardo", prompt:"Disegna due occhi mantenendo la simmetria. Aggiungi le sopracciglia e cerca di trasmettere un'emozione.", duration:6, reward:5 },
+  { id:"d3", category:"character", icon:"PERSON", title:"Pose veloci - 3 figure", prompt:"Disegna 3 pose veloci di figura intera in stile gesture drawing. Massimo 2 minuti per posa.", duration:6, reward:5 },
+  { id:"d4", category:"character", icon:"HAND", title:"Una mano in azione", prompt:"Disegna una mano che afferra qualcosa. Studia le articolazioni e le pieghe del palmo.", duration:7, reward:5 },
+  
+  // Environment
+  { id:"d5", category:"environment", icon:"PINE", title:"Albero stilizzato", prompt:"Disegna un albero in 3 versioni: realistico, stilizzato, cartoon. Focus sulla forma generale.", duration:6, reward:5 },
+  { id:"d6", category:"environment", icon:"HOUSE", title:"Casa con prospettiva semplice", prompt:"Disegna una casetta con prospettiva a un punto di fuga. Aggiungi finestre e una porta centrata.", duration:7, reward:5 },
+  { id:"d7", category:"environment", icon:"MOUNTAIN", title:"Skyline di montagne", prompt:"Disegna 3 strati di montagne sovrapposti, dal vicino al lontano, suggerendo profondita.", duration:5, reward:5 },
+  { id:"d8", category:"environment", icon:"CLOUD", title:"Studio di nuvole", prompt:"Disegna 4 tipi di nuvole: cumulo, stratificate, temporalesche, dolci. Solo contorni essenziali.", duration:6, reward:5 },
+  { id:"d9", category:"environment", icon:"WATER", title:"Riflessi nell'acqua", prompt:"Disegna un piccolo specchio d'acqua con il riflesso di un albero. Linee morbide e orizzontali.", duration:7, reward:5 },
+  
+  // Props
+  { id:"d10", category:"prop", icon:"CUP", title:"Tazza con prospettiva", prompt:"Disegna una tazza vista leggermente dall'alto. Studia l'ellisse del bordo e l'ombra proiettata.", duration:5, reward:5 },
+  { id:"d11", category:"prop", icon:"SWORD", title:"Una spada stilizzata", prompt:"Disegna una spada fantasy con elsa decorata. Focus su proporzioni e simmetria.", duration:7, reward:5 },
+  { id:"d12", category:"prop", icon:"BOOK", title:"Libro antico aperto", prompt:"Disegna un libro aperto vecchio con pagine ingiallite. Concentrati sulla curvatura delle pagine.", duration:6, reward:5 },
+  { id:"d13", category:"prop", icon:"KEY", title:"Chiave magica", prompt:"Disegna una chiave fantasy con dettagli intricati nella testa. Stile sketch veloce.", duration:5, reward:5 },
+  
+  // Fondamentali
+  { id:"d14", category:"fondamentali", icon:"CIRCLE", title:"5 sfere con luce diversa", prompt:"Disegna 5 sfere con illuminazione progressiva: piatta, soft, dura, controluce, drammatica.", duration:8, reward:6 },
+  { id:"d15", category:"fondamentali", icon:"CUBE", title:"Cubi in prospettiva", prompt:"Disegna 3 cubi in 3 diverse angolazioni. Focus sulle linee di prospettiva e profondita.", duration:6, reward:5 },
+  { id:"d16", category:"fondamentali", icon:"LINE", title:"Studio di linee", prompt:"Riempi una pagina con linee parallele, curve fluide, zig-zag e cerchi a mano libera. Senza riga.", duration:5, reward:4 },
+  { id:"d17", category:"fondamentali", icon:"VALUE", title:"Scala di grigi", prompt:"Disegna 5 quadrati a fianco con valori dal bianco al nero, scalando uniformemente.", duration:5, reward:4 },
+  
+  // Bonus / mixed
+  { id:"d18", category:"character", icon:"CAT", title:"Gatto in 4 pose", prompt:"Disegna lo stesso gatto in 4 pose: seduto, sdraiato, in agguato, in salto. Anche stilizzato.", duration:8, reward:6 },
+  { id:"d19", category:"environment", icon:"WIND", title:"Composizione astratta del vento", prompt:"Suggerisci il vento con linee curve e foglie volanti. Non disegnare oggetti solidi, solo movimento.", duration:6, reward:5 },
+  { id:"d20", category:"prop", icon:"GEM", title:"Cristallo magico", prompt:"Disegna un cristallo poliedrico con riflessi interni. Studia come la luce attraversa il vetro.", duration:7, reward:5 }
+];
+
+// Map text icons to emoji
+(function(){
+  var emojiMap = {
+    FACE_PROFILE:"\u{1F464}",
+    EYE:"\u{1F441}\uFE0F",
+    PERSON:"\u{1F9CD}",
+    HAND:"\u270B",
+    PINE:"\u{1F332}",
+    HOUSE:"\u{1F3E0}",
+    MOUNTAIN:"\u26F0\uFE0F",
+    CLOUD:"\u2601\uFE0F",
+    WATER:"\u{1F30A}",
+    CUP:"\u2615",
+    SWORD:"\u2694\uFE0F",
+    BOOK:"\u{1F4D6}",
+    KEY:"\u{1F511}",
+    CIRCLE:"\u26AA",
+    CUBE:"\u2B1C",
+    LINE:"\u3030\uFE0F",
+    VALUE:"\u25D1",
+    CAT:"\u{1F408}",
+    WIND:"\u{1F4A8}",
+    GEM:"\u{1F48E}"
+  };
+  DAILY_LESSONS_POOL.forEach(function(l){ if(emojiMap[l.icon]) l.icon = emojiMap[l.icon]; });
+})();
+
+function getTodayKey(){
+  return new Date().toISOString().split("T")[0];
+}
+
+function getDailyLesson(){
+  // Deterministic: same lesson for everyone on the same day
+  var today = new Date();
+  var dayOfYear = Math.floor((today - new Date(today.getFullYear(),0,0)) / 86400000);
+  var idx = dayOfYear % DAILY_LESSONS_POOL.length;
+  return DAILY_LESSONS_POOL[idx];
+}
+
+function isDailyDone(){
+  return localStorage.getItem("dl:daily_done_"+getTodayKey()) === "1";
+}
+
+function getDailyStreak(){
+  // Count consecutive past days completed (from yesterday going back)
+  var count = 0;
+  var d = new Date();
+  d.setDate(d.getDate() - 1);
+  while(localStorage.getItem("dl:daily_done_"+d.toISOString().split("T")[0]) === "1"){
+    count++;
+    d.setDate(d.getDate() - 1);
+    if(count > 365) break;
+  }
+  if(isDailyDone()) count++;
+  return count;
+}
+
+function getDailyMonthlyCount(){
+  // Count completed in current month
+  var d = new Date();
+  var year = d.getFullYear();
+  var month = d.getMonth();
+  var count = 0;
+  for(var day=1; day<=31; day++){
+    var dt = new Date(year, month, day);
+    if(dt.getMonth() !== month) break;
+    var key = dt.toISOString().split("T")[0];
+    if(localStorage.getItem("dl:daily_done_"+key) === "1") count++;
+  }
+  return count;
+}
+
+function openDailyLesson(){
+  var lesson = getDailyLesson();
+  if(!lesson) return;
+  var done = isDailyDone();
+  
+  var overlay = document.createElement("div");
+  overlay.id = "daily-overlay";
+  overlay.style.cssText = "position:fixed;inset:0;z-index:9999;background:radial-gradient(120% 60% at 50% 0%,#2a1d52 0%,#15102a 60%);overflow-y:auto;padding:20px;font-family:Geist,sans-serif;animation:fadeIn 0.25s ease-out";
+  
+  // Close button
+  var closeBtn = document.createElement("button");
+  closeBtn.style.cssText = "width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#F5F1E8;font-size:18px;cursor:pointer;margin-bottom:20px";
+  closeBtn.textContent = "×";
+  closeBtn.onclick = function(){ overlay.remove(); };
+  overlay.appendChild(closeBtn);
+  
+  // Kicker
+  var kicker = document.createElement("div");
+  kicker.style.cssText = "font-family:JetBrains Mono,monospace;font-size:10px;letter-spacing:2px;color:#FBBA00;font-weight:700;text-transform:uppercase;margin-bottom:10px";
+  kicker.textContent = "LEZIONE DEL GIORNO";
+  overlay.appendChild(kicker);
+  
+  // Icon
+  var iconWrap = document.createElement("div");
+  iconWrap.style.cssText = "width:96px;height:96px;border-radius:24px;background:linear-gradient(135deg,#B872E0,#FBBA00);display:flex;align-items:center;justify-content:center;font-size:48px;line-height:1;margin-bottom:20px;box-shadow:0 16px 40px rgba(184,114,224,0.30)";
+  iconWrap.textContent = lesson.icon;
+  overlay.appendChild(iconWrap);
+  
+  // Title
+  var title = document.createElement("h1");
+  title.style.cssText = "font-family:Bricolage Grotesque,sans-serif;font-size:30px;font-weight:800;color:#F5F1E8;margin:0 0 8px;letter-spacing:-0.02em;line-height:1.1";
+  title.textContent = lesson.title;
+  overlay.appendChild(title);
+  
+  // Duration badge
+  var meta = document.createElement("div");
+  meta.style.cssText = "display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap";
+  meta.innerHTML = '<span style="background:rgba(184,114,224,0.15);color:#B872E0;border:1px solid rgba(184,114,224,0.30);padding:4px 10px;border-radius:50px;font-size:11px;font-weight:700">⏱️ '+lesson.duration+' min</span>' +
+    '<span style="background:rgba(251,186,0,0.15);color:#FBBA00;border:1px solid rgba(251,186,0,0.30);padding:4px 10px;border-radius:50px;font-size:11px;font-weight:700">⭐ +'+lesson.reward+' DrawPass</span>';
+  overlay.appendChild(meta);
+  
+  // Prompt card
+  var promptCard = document.createElement("div");
+  promptCard.style.cssText = "background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:20px;margin-bottom:24px";
+  promptCard.innerHTML = '<div style="font-family:JetBrains Mono,monospace;font-size:10px;letter-spacing:2px;color:#8a82a8;text-transform:uppercase;font-weight:700;margin-bottom:10px">L\u2019ESERCIZIO</div>' +
+    '<div style="font-size:15px;color:#F5F1E8;line-height:1.5">'+lesson.prompt+'</div>';
+  overlay.appendChild(promptCard);
+  
+  // Stats row
+  var monthlyDone = getDailyMonthlyCount();
+  var streak = getDailyStreak();
+  var statsRow = document.createElement("div");
+  statsRow.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px";
+  statsRow.innerHTML = '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px;text-align:center"><div style="font-family:Bricolage Grotesque,sans-serif;font-size:22px;font-weight:800;color:#FBBA00">'+monthlyDone+'</div><div style="font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:1.5px;color:#8a82a8;text-transform:uppercase;margin-top:4px">DI '+new Date().getDate()+' GIORNI</div></div>' +
+    '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px;text-align:center"><div style="font-family:Bricolage Grotesque,sans-serif;font-size:22px;font-weight:800;color:#E07172">'+streak+'</div><div style="font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:1.5px;color:#8a82a8;text-transform:uppercase;margin-top:4px">streak daily</div></div>';
+  overlay.appendChild(statsRow);
+  
+  // Action button
+  var actionBtn = document.createElement("button");
+  if(done){
+    actionBtn.style.cssText = "width:100%;height:54px;background:rgba(102,224,181,0.15);border:1px solid rgba(102,224,181,0.40);border-radius:18px;color:#66E0B5;font-weight:800;font-size:15px;cursor:default;font-family:Geist,sans-serif";
+    actionBtn.textContent = "Gia completata oggi";
+    actionBtn.disabled = true;
+  } else {
+    actionBtn.style.cssText = "width:100%;height:54px;background:linear-gradient(135deg,#B872E0,#FBBA00);border:none;border-radius:18px;color:#1c1b29;font-weight:800;font-size:15px;cursor:pointer;box-shadow:0 16px 40px rgba(184,114,224,0.35);font-family:Geist,sans-serif";
+    actionBtn.textContent = "Ho completato il disegno";
+    actionBtn.onclick = function(){ completeDailyLesson(lesson, overlay); };
+  }
+  overlay.appendChild(actionBtn);
+  
+  // Tip note
+  var tipNote = document.createElement("div");
+  tipNote.style.cssText = "text-align:center;margin-top:16px;font-size:11px;color:#6e6791;font-style:italic;line-height:1.5";
+  tipNote.textContent = "Disegnalo su carta o tablet, poi tocca \"Ho completato\". Sarai onorato anche se fai solo 5 minuti.";
+  overlay.appendChild(tipNote);
+  
+  document.body.appendChild(overlay);
+}
+
+function completeDailyLesson(lesson, overlay){
+  var today = getTodayKey();
+  // Mark done
+  try{ localStorage.setItem("dl:daily_done_"+today, "1"); }catch(e){}
+  // Add tokens
+  A.tokens = (A.tokens||0) + lesson.reward;
+  try{ localStorage.setItem("dl:tokens", String(A.tokens)); }catch(e){}
+  
+  // Track GA4
+  try{
+    if(typeof track === "function"){
+      track("daily_lesson_completed", { lesson_id: lesson.id, category: lesson.category });
+      track("token_earned", { source: "daily_lesson", amount: lesson.reward });
+    }
+  }catch(e){}
+  
+  // Update streak
+  var streak = getDailyStreak();
+  
+  // Replace overlay content with reward screen
+  if(overlay){
+    overlay.innerHTML = "";
+    overlay.style.background = "radial-gradient(120% 60% at 50% 0%,#2a1d52 0%,#15102a 60%)";
+    overlay.style.display = "flex";
+    overlay.style.alignItems = "center";
+    overlay.style.justifyContent = "center";
+    overlay.style.flexDirection = "column";
+    overlay.style.padding = "40px 20px";
+    
+    var checkCircle = document.createElement("div");
+    checkCircle.style.cssText = "width:120px;height:120px;margin-bottom:24px;border-radius:50%;background:linear-gradient(135deg,#66E0B5,#3DBE7A);box-shadow:0 24px 60px rgba(102,224,181,0.40);display:flex;align-items:center;justify-content:center;animation:popIn 0.5s ease-out";
+    checkCircle.innerHTML = '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#15102a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+    overlay.appendChild(checkCircle);
+    
+    var kicker = document.createElement("div");
+    kicker.style.cssText = "font-family:JetBrains Mono,monospace;font-size:11px;letter-spacing:3px;color:#66E0B5;font-weight:700;text-transform:uppercase;margin-bottom:10px";
+    kicker.textContent = "FATTO!";
+    overlay.appendChild(kicker);
+    
+    var bigTitle = document.createElement("h1");
+    bigTitle.style.cssText = "font-family:Bricolage Grotesque,sans-serif;font-size:32px;font-weight:800;color:#F5F1E8;text-align:center;margin:0 0 16px;letter-spacing:-0.02em";
+    bigTitle.textContent = "Bravissimo!";
+    overlay.appendChild(bigTitle);
+    
+    var subtitle = document.createElement("p");
+    subtitle.style.cssText = "font-family:Instrument Serif,serif;font-style:italic;font-size:17px;color:#d8d2e8;text-align:center;margin:0 0 32px;line-height:1.4;max-width:340px";
+    subtitle.textContent = streak > 1 ? "Sei al " + streak + " giorno di fila. Continua cosi!" : "Hai iniziato un nuovo percorso quotidiano.";
+    overlay.appendChild(subtitle);
+    
+    var rewardRow = document.createElement("div");
+    rewardRow.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:340px;width:100%;margin-bottom:32px";
+    rewardRow.innerHTML = '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:18px;text-align:center"><div style="font-size:30px;margin-bottom:4px">⭐</div><div style="font-family:Bricolage Grotesque,sans-serif;font-size:22px;font-weight:800;color:#FBBA00">+'+lesson.reward+'</div><div style="font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:1.5px;color:#8a82a8;text-transform:uppercase;margin-top:4px">DrawPass</div></div>' +
+      '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:18px;padding:18px;text-align:center"><div style="font-size:30px;margin-bottom:4px">🔥</div><div style="font-family:Bricolage Grotesque,sans-serif;font-size:22px;font-weight:800;color:#E07172">'+streak+'</div><div style="font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:1.5px;color:#8a82a8;text-transform:uppercase;margin-top:4px">streak daily</div></div>';
+    overlay.appendChild(rewardRow);
+    
+    var doneBtn = document.createElement("button");
+    doneBtn.style.cssText = "max-width:340px;width:100%;height:54px;background:linear-gradient(135deg,#B872E0,#FBBA00);border:none;border-radius:18px;color:#1c1b29;font-weight:800;font-size:15px;cursor:pointer;box-shadow:0 16px 40px rgba(184,114,224,0.35);font-family:Geist,sans-serif";
+    doneBtn.textContent = "Continua";
+    doneBtn.onclick = function(){
+      overlay.remove();
+      if(typeof renderDashboard === "function") renderDashboard();
+    };
+    overlay.appendChild(doneBtn);
+  }
 }
 
 function init(){
