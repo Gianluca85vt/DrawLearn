@@ -4442,7 +4442,9 @@ function initRedlineCanvas(){
     if(!_rlDrawing)return; e.preventDefault();
     var p=getPos(e);
     var ctx=canvas.getContext("2d");
-    var size=parseInt(document.getElementById("rl-size")||{value:5}).value||5;
+    var sizeEl = document.getElementById("rl-size");
+    var size = sizeEl ? parseInt(sizeEl.value, 10) : 5;
+    if(isNaN(size) || size < 1) size = 5;
     ctx.lineWidth = _rlTool==="erase"?size*3:size;
     ctx.lineCap="round"; ctx.lineJoin="round";
     ctx.globalCompositeOperation = _rlTool==="erase"?"destination-out":"source-over";
