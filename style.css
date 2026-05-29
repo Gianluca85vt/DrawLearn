@@ -1111,3 +1111,5 @@ div[style*="color:#FFD60A"] {
 #home-cat-grid div:nth-last-child(1) {
   color: #8a82a8 !important;
 }
+
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }

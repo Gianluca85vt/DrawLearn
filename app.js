@@ -1080,39 +1080,204 @@ function renderHome(){
 
 /* ═══════════════ CATEGORY ═══════════════ */
 function renderCategory(){
+  // Safe progress read
   try{var _p=localStorage.getItem("dl:progress_all");if(_p){var _pp=JSON.parse(_p);if(typeof _pp==="object"&&_pp!==null&&!Array.isArray(_pp))A.progress=_pp;}}catch(e){}
   if(typeof A.progress!=="object"||A.progress===null||Array.isArray(A.progress))A.progress={};
-  var cat=A.cat,bg=BG[cat.id],ac=AC[cat.id];
-  document.getElementById("cat-header").innerHTML='<div style="background:'+bg+';padding:20px 20px 16px"><div style="max-width:600px;margin:0 auto"><button onclick="renderHome();showScreen(\'home\')" style="background:rgba(255,255,255,.7);border:none;border-radius:50px;padding:4px 11px;cursor:pointer;font-weight:700;font-size:11px;color:#1C1B2E;margin-bottom:12px">← Home</button><div style="font-size:44px;margin-bottom:4px">'+cat.icon+'</div><h1 style="font-weight:800;font-size:24px;color:#1C1B2E;margin-bottom:2px">'+cat.label+'</h1><p style="color:#4A4868;font-size:11px">'+cat.levels.length+' livelli · dal principiante all\'avanzato</p></div></div>';
-  var cont=document.getElementById("cat-content");cont.innerHTML="";
-  cat.levels.forEach(function(les,idx){
-    var k=pk(cat.id,les.id),pg=A.progress[k]||{completed:false,step:0};
-    var locked=!les.free&&!A.pro;
-    var pct=les.steps.length>0?Math.round(pg.step/les.steps.length*100):0;
-
-    stars=[0,1,2].map(function(i){return'<span style="color:'+(i<=idx?"#D4A200":"#ddd")+';font-size:12px">★</span>';}).join("");
-    var prog="";
-    if(!locked&&pg.step>0&&!pg.completed)prog='<div style="margin-top:5px"><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span style="font-size:9px;color:#9896B8">In corso</span><span style="font-size:9px;color:'+ac+';font-weight:700">'+pct+'%</span></div><div style="background:'+bg+';border-radius:50px;height:4px"><div style="width:'+pct+'%;background:'+ac+';height:100%;border-radius:50px"></div></div></div>';
-    if(pg.completed)prog='<div style="font-size:10px;color:'+ac+';font-weight:800;margin-top:3px">✓ Completata!</div>';
-    if(!locked&&pg.step===0)prog='<div style="font-size:10px;color:'+ac+';font-weight:700;margin-top:3px">▶ Inizia ora</div>';
-    var badge=locked?'<span style="background:linear-gradient(135deg,#FFD60A,#FF9500);color:#fff;border-radius:50px;padding:1px 7px;font-size:9px;font-weight:800">PRO</span>':"";
-    var checkmark=pg.completed?'<div style="position:absolute;bottom:-3px;right:-3px;width:14px;height:14px;background:'+ac+';border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:8px;font-weight:900">✓</div>':"";
-    var div=document.createElement("div");
-    div.className="card";
-    div.style.border=locked?"2px dashed #e0ddf5":"2px solid "+(pg.completed?ac+"40":"transparent");
-    div.innerHTML='<div style="display:flex;align-items:flex-start;gap:11px"><div style="width:44px;height:44px;background:'+(locked?"#f5f3ff":bg)+';border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;position:relative">'+(locked?"🔒":les.icon)+checkmark+'</div><div style="flex:1"><div style="display:flex;align-items:center;gap:5px;margin-bottom:3px"><span style="font-weight:800;font-size:14px;color:'+(locked?"#9896B8":"#1C1B2E")+'">'+les.title+'</span>'+badge+'</div><div style="display:flex;gap:2px;margin-bottom:3px;align-items:center">'+stars+'<span style="color:#9896B8;font-size:10px;margin-left:3px">'+les.diff+' · '+les.mins+'min · '+les.steps.length+' passi</span></div><p style="color:#9896B8;font-size:11px;margin:0;line-height:1.5">'+les.intro+'</p>'+prog+'</div></div>';
-    (function(c,l){div.style.cursor="pointer";div.addEventListener("click",function(){startLesson(c,l);});})(cat,les);
-    cont.appendChild(div);
-  });
-  if(!A.pro){
-    var proBanner=document.createElement("div");
-    proBanner.innerHTML='<div style="background:#1C1B2E;border-radius:14px;padding:14px;display:flex;gap:10px;align-items:center;cursor:pointer" onclick="showScreen(\'paywall\')"><div style="font-size:30px">👑</div><div style="flex:1"><div style="font-weight:800;color:#fff;font-size:13px;margin-bottom:1px">Sblocca il livello Avanzato</div><div style="color:#9896B8;font-size:10px">Tecnica professionale dei pro</div></div><div style="background:linear-gradient(135deg,#FFD60A,#FF9500);border-radius:8px;padding:4px 9px;font-weight:800;color:#fff;font-size:11px">Da €4,99</div></div>';
-    cont.appendChild(proBanner);
+  
+  var cat = A.cat;
+  if(!cat) return;
+  var ac = AC[cat.id] || "#B872E0";
+  
+  // Get or create container
+  var screen = document.getElementById("scr-category");
+  if(!screen) return;
+  
+  // Clear current content (but keep the screen div)
+  screen.innerHTML = "";
+  screen.style.cssText = "background:#15102a;min-height:100vh;padding-bottom:100px;font-family:\'Geist\',sans-serif;color:#F5F1E8";
+  
+  // Calculate progress
+  var done = cat.levels.filter(function(l){var k=pk(cat.id,l.id);return A.progress[k]&&A.progress[k].completed;}).length;
+  var total = cat.levels.length;
+  var pct = total?Math.round(done/total*100):0;
+  
+  // Find current lesson (first non-completed)
+  var currentLesson = null;
+  for(var li=0;li<cat.levels.length;li++){
+    var k = pk(cat.id, cat.levels[li].id);
+    var pv = A.progress[k];
+    if(!pv || !pv.completed){
+      currentLesson = cat.levels[li];
+      break;
+    }
   }
+  
+  // Estimated remaining minutes
+  var remainingMins = cat.levels.filter(function(l){var k=pk(cat.id,l.id);return !A.progress[k]||!A.progress[k].completed;}).reduce(function(s,l){return s+(l.mins||10);},0);
+  
+  // === TOP BAR ===
+  var topBar = document.createElement("div");
+  topBar.style.cssText = "padding:16px;display:flex;align-items:center;justify-content:space-between";
+  var backBtn = document.createElement("button");
+  backBtn.style.cssText = "width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#F5F1E8;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center";
+  backBtn.textContent = "←";
+  backBtn.onclick = function(){ navTo("home"); };
+  var heartBtn = document.createElement("button");
+  heartBtn.style.cssText = "width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#F5F1E8;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center";
+  heartBtn.innerHTML = "♡";
+  heartBtn.onclick = function(){ showToast("Salvato nei preferiti","❤️"); };
+  topBar.appendChild(backBtn);
+  topBar.appendChild(heartBtn);
+  screen.appendChild(topBar);
+  
+  // === HEADER (icon + title + desc) ===
+  var header = document.createElement("div");
+  header.style.cssText = "padding:0 20px 16px";
+  
+  var icon = document.createElement("div");
+  icon.style.cssText = "font-size:42px;margin-bottom:12px;line-height:1";
+  icon.textContent = cat.icon;
+  header.appendChild(icon);
+  
+  var title = document.createElement("h1");
+  title.style.cssText = "font-family:'Bricolage Grotesque',sans-serif;font-size:32px;font-weight:800;color:#F5F1E8;margin:0 0 8px;letter-spacing:-0.02em;line-height:1.05";
+  title.textContent = cat.label;
+  header.appendChild(title);
+  
+  var desc = document.createElement("p");
+  desc.style.cssText = "font-size:13px;color:#a8a2c8;margin:0;line-height:1.5";
+  desc.textContent = cat.info || "Impara con esercizi pratici e progressivi.";
+  header.appendChild(desc);
+  
+  screen.appendChild(header);
+  
+  // === PROGRESS RING + CONTINUE ===
+  var progBox = document.createElement("div");
+  progBox.style.cssText = "padding:0 20px 20px;display:flex;align-items:center;gap:14px";
+  
+  // Ring
+  var ring = document.createElement("div");
+  ring.style.cssText = "position:relative;width:58px;height:58px;flex-shrink:0";
+  ring.innerHTML = '<svg width="58" height="58" viewBox="0 0 58 58" style="transform:rotate(-90deg)">'+
+    '<circle cx="29" cy="29" r="25" stroke="rgba(255,255,255,0.08)" stroke-width="4" fill="none"/>'+
+    '<circle cx="29" cy="29" r="25" stroke="'+ac+'" stroke-width="4" fill="none" stroke-dasharray="'+(pct*157/100).toFixed(1)+' 157" stroke-linecap="round"/>'+
+    '</svg>'+
+    '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:\'JetBrains Mono\',monospace;font-size:11px;font-weight:800;color:'+ac+'">'+pct+'%</div>';
+  
+  // Stats
+  var stats = document.createElement("div");
+  stats.style.cssText = "flex:1";
+  stats.innerHTML = '<div style="font-weight:700;font-size:14px;color:#F5F1E8">'+done+' di '+total+' lezioni complete</div>'+
+    '<div style="font-size:12px;color:#8a82a8;margin-top:2px">~'+remainingMins+' minuti rimanenti</div>';
+  
+  // Continue button
+  var contBtn = document.createElement("button");
+  contBtn.style.cssText = "padding:10px 16px;background:linear-gradient(135deg,#B872E0,#FBBA00);border:none;border-radius:50px;color:#1c1b29;font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 8px 20px rgba(184,114,224,0.35);font-family:'Geist',sans-serif;flex-shrink:0";
+  contBtn.textContent = currentLesson ? "Continua →" : "Completato ✓";
+  contBtn.onclick = function(){ if(currentLesson) startLesson(cat, currentLesson); };
+  
+  progBox.appendChild(ring);
+  progBox.appendChild(stats);
+  progBox.appendChild(contBtn);
+  screen.appendChild(progBox);
+  
+  // === LEZIONI kicker ===
+  var kicker = document.createElement("div");
+  kicker.style.cssText = "padding:0 20px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:#8a82a8;text-transform:uppercase;font-weight:700;margin-bottom:10px";
+  kicker.textContent = "LEZIONI";
+  screen.appendChild(kicker);
+  
+  // === LESSON LIST ===
+  var listBox = document.createElement("div");
+  listBox.style.cssText = "padding:0 16px;display:flex;flex-direction:column;gap:8px";
+  
+  cat.levels.forEach(function(les, idx){
+    var k = pk(cat.id, les.id);
+    var pv = A.progress[k] || {};
+    var isDone = pv.completed === true;
+    var inProgress = !isDone && pv.step > 0;
+    var isLocked = !les.free && !A.pro;
+    var stepPct = inProgress ? Math.round(((pv.step||0)/Math.max(les.steps?les.steps.length:1,1))*100) : 0;
+    
+    var row = document.createElement("div");
+    row.style.cssText = "background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:"+(isLocked?"default":"pointer")+";transition:border-color .12s, background .12s";
+    if(!isLocked){
+      row.onmouseover = function(){this.style.borderColor="rgba(184,114,224,0.3)";this.style.background="rgba(255,255,255,0.04)";};
+      row.onmouseout = function(){this.style.borderColor="rgba(255,255,255,0.06)";this.style.background="rgba(255,255,255,0.03)";};
+      (function(c,l){row.addEventListener("click", function(){startLesson(c,l);});})(cat,les);
+    }
+    
+    // Status indicator
+    var statusEl = document.createElement("div");
+    statusEl.style.cssText = "width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:800;font-family:'JetBrains Mono',monospace;font-size:13px";
+    if(isLocked){
+      statusEl.style.background = "rgba(251,140,75,0.15)";
+      statusEl.style.color = "#FF8C4B";
+      statusEl.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+    } else if(isDone){
+      statusEl.style.background = "linear-gradient(135deg,#66E0B5,#3DBE7A)";
+      statusEl.style.color = "#15102a";
+      statusEl.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    } else if(inProgress){
+      statusEl.style.background = "linear-gradient(135deg,#FBBA00,#FF9500)";
+      statusEl.style.color = "#15102a";
+      statusEl.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    } else {
+      statusEl.style.background = "rgba(255,255,255,0.06)";
+      statusEl.style.color = "#8a82a8";
+      statusEl.textContent = (idx+1<10?"0":"")+(idx+1);
+    }
+    
+    // Info block
+    var info = document.createElement("div");
+    info.style.cssText = "flex:1;min-width:0";
+    var lTitle = document.createElement("div");
+    lTitle.style.cssText = "font-weight:700;font-size:14px;color:"+(isLocked?"#8a82a8":(isDone?"#a8a2c8":"#F5F1E8"))+";line-height:1.3"+(isDone?";text-decoration:line-through;text-decoration-color:rgba(255,255,255,0.3)":"");
+    lTitle.textContent = les.title;
+    info.appendChild(lTitle);
+    
+    var meta = document.createElement("div");
+    meta.style.cssText = "font-size:11px;color:#8a82a8;margin-top:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap";
+    meta.innerHTML = '<span>'+les.mins+' min</span>';
+    if(inProgress){
+      meta.innerHTML += '<span style="color:#FBBA00;background:rgba(251,186,0,0.12);padding:2px 7px;border-radius:50px;font-weight:700">In corso · '+stepPct+'%</span>';
+    }
+    if(isLocked){
+      meta.innerHTML += '<span style="color:#FF8C4B;font-weight:800">PRO</span>';
+    }
+    info.appendChild(meta);
+    
+    // Arrow
+    var arrow = document.createElement("div");
+    arrow.style.cssText = "color:#6e6791;font-size:18px;flex-shrink:0";
+    arrow.textContent = "→";
+    
+    row.appendChild(statusEl);
+    row.appendChild(info);
+    if(!isLocked) row.appendChild(arrow);
+    listBox.appendChild(row);
+  });
+  
+  screen.appendChild(listBox);
+}
+
+// Helper functions
+function goBackFromCategory(){
+  navTo("home");
+}
+function toggleFavCat(catId){
+  try{
+    var favs = JSON.parse(localStorage.getItem("dl:fav_cats")||"[]");
+    var idx = favs.indexOf(catId);
+    if(idx >= 0){ favs.splice(idx,1); showToast("Rimosso dai preferiti",""); }
+    else{ favs.push(catId); showToast("Aggiunto ai preferiti","♡"); }
+    localStorage.setItem("dl:fav_cats",JSON.stringify(favs));
+  }catch(e){}
 }
 
 /* ═══════════════ LESSON ═══════════════ */
 function startLesson(cat,les){
+  try{trackLessonStarted(cat.id, les.id);}catch(e){}
   localSet("dl:last",JSON.stringify({catId:cat.id,lesId:les.id,step:A.progress[pk(cat.id,les.id)]&&A.progress[pk(cat.id,les.id)].step||0,title:les.title,icon:les.icon||"📝",catIcon:cat.icon}));
   if(!les.free&&!A.pro&&!isLessonUnlockedByToken(cat.id,les.id)){
     // Show token unlock option
@@ -1231,12 +1396,14 @@ async function nextStep(){
     var uid_s=localStorage.getItem("dl:uid");
     if(uid_s){sbFetch("POST","dl_progress",{body:{user_id:uid_s,lesson_key:key,step:ns,completed:done,updated_at:new Date().toISOString()}}).catch(function(e){sbFetch("PATCH","dl_progress?user_id=eq."+uid_s+"&lesson_key=eq."+encodeURIComponent(key),{body:{step:ns,completed:done}}).catch(function(){});});}
     localStorage.setItem("dl:last",JSON.stringify({catId:cat.id,lesId:les.id,step:ns,title:les.title,icon:les.icon||"📝",catIcon:cat.icon}));
-    if(done){showLessonComplete(les,cat,prevDone);}
+    if(done){if(window.trackEvent) window.trackEvent("lesson_completed",{category_id:cat&&cat.id,lesson_id:les&&les.id,lesson_title:les&&les.title});
+      showLessonComplete(les,cat,prevDone);}
     else{A.step=Math.min(p+1,tot-1);renderLesson();}
   }catch(err){console.error("nextStep error:",err);showToast("Errore: "+err.message,"⚠️");}
 }
 
 function showLessonComplete(les,cat,prevDone){
+  try{trackLessonCompleted(cat.id, les.id);}catch(e){}
   var ac=AC[cat.id]||"#B872E0";
   // Read progress from localStorage
   var _raw=localStorage.getItem("dl:progress_all")||"{}";
@@ -1741,15 +1908,36 @@ function renderProfileSettings(cont){
 async function changeCoverPhoto(){
   var inp=document.createElement("input");
   inp.type="file"; inp.accept="image/*";
-  inp.onchange=function(e){
+  inp.onchange=async function(e){
     var file=e.target.files[0]; if(!file)return;
-    var reader=new FileReader();
-    reader.onload=function(ev){
-      localSet("dl:cover_"+A.user.id, ev.target.result);
-      renderProfile();
+    if(!A.user){showToast("Login necessario","");return;}
+    showToast("Caricamento...","");
+    try{
+      var compressed = await compressImage(file, 1600, 0.80);
+      var coverUrl = "";
+      try{ coverUrl = await sbUpload("Posts", A.user.id+"_cover_"+Date.now()+".jpg", compressed); }
+      catch(err){ console.warn("Cover SB upload failed:", err); }
+      if(!coverUrl){
+        coverUrl = await new Promise(function(resolve){
+          var r=new FileReader();
+          r.onload=function(ev){resolve(ev.target.result);};
+          r.readAsDataURL(compressed);
+        });
+      }
+      try{ localSet("dl:cover_"+A.user.id, coverUrl); }catch(e){}
+      if(sbReady() && coverUrl.indexOf("http")===0){
+        try{ await sbFetch("PATCH","dl_users?id=eq."+A.user.id,{body:{cover_url:coverUrl}}); }catch(e){}
+      }
+      var coverEl = document.getElementById("prof-cover-img");
+      var coverGrad = document.getElementById("prof-cover-grad");
+      if(coverEl){ coverEl.src = coverUrl; coverEl.style.display = "block"; }
+      if(coverGrad) coverGrad.style.display = "none";
+      if(typeof renderProfile==="function") renderProfile();
       showToast("Copertina aggiornata!","");
-    };
-    reader.readAsDataURL(file);
+    }catch(e){
+      console.error("changeCoverPhoto error:",e);
+      showToast("Errore: "+(e.message||"sconosciuto"),"");
+    }
   };
   inp.click();
 }
@@ -1792,13 +1980,26 @@ var _currentPostId = null;
 
     /* Navigation */
 function navTo(screen){
+  // Update bottom nav active state
+  try{
+    var navMap = {dashboard:"dashboard",feed:"feed",home:"home",profile:"profile",category:"home",lesson:"home",skill:"home"};
+    var activeKey = navMap[screen] || null;
+    if(activeKey && typeof setActiveNav==="function") setActiveNav(activeKey);
+  }catch(e){}
+
   var allScreens = ["feed","home","category","lesson","profile","drawpass","notif","search","pubprofile","explore","chat","dm","dashboard","challenges"];
   allScreens.forEach(function(s){ var el=document.getElementById("scr-"+s); if(el) el.style.display="none"; });
   // Special renders
-  if(screen==="feed"){ renderFeed(); showScreen("feed"); }
-  else if(screen==="dashboard"){
+  if(screen==="feed"){ renderFeed(); showScreen("feed"); if(typeof setActiveNav==="function")setActiveNav("feed"); }
+  else if(screen==="badges"){ 
+    renderBadgesPage();
+    showScreen("badges");
+    showBottomNav();
+    return;
+  }
+  if(screen==="dashboard"){
     renderDashboard();
-    showScreen("dashboard");
+    showScreen("dashboard"); if(typeof setActiveNav==="function")setActiveNav("dashboard");
     showBottomNav();
     setActiveNav("dashboard");
     return;
@@ -1806,15 +2007,15 @@ function navTo(screen){
   if(screen==="home"){
     // Force fresh progress from localStorage
     try{var _fp=localStorage.getItem("dl:progress_all");if(_fp){var _fpp=JSON.parse(_fp);if(typeof _fpp==="object"&&_fpp!==null&&!Array.isArray(_fpp))A.progress=_fpp;}}catch(e){}
-    renderHome(); showScreen("home");
+    renderHome(); showScreen("home"); if(typeof setActiveNav==="function")setActiveNav("home");
   }
-  else if(screen==="profile"){ renderProfile(); showScreen("profile"); }
-  else if(screen==="drawpass"){ renderDrawPass(); showScreen("drawpass"); }
-  else if(screen==="notif"){ loadNotifications(); showScreen("notif"); }
-  else if(screen==="chat"){ loadChatInbox(); showScreen("chat"); showBottomNav(); }
-  else if(screen==="search"){ showScreen("search"); loadTrending(); setTimeout(function(){var si=document.getElementById("search-input");if(si)si.focus();},100); }
-  else if(screen==="explore"){ showScreen("explore"); loadExplore(); setTimeout(function(){var si=document.getElementById("explore-search");if(si)si.focus();},100); }
-  else if(screen==="challenges"){ showScreen("challenges"); loadChallengeContent(); showBottomNav(); }
+  else if(screen==="profile"){ renderProfile(); showScreen("profile"); if(typeof setActiveNav==="function")setActiveNav("profile"); }
+  else if(screen==="drawpass"){ renderDrawPass(); showScreen("drawpass"); if(typeof setActiveNav==="function")setActiveNav("drawpass"); }
+  else if(screen==="notif"){ loadNotifications(); showScreen("notif"); if(typeof setActiveNav==="function")setActiveNav("notif"); }
+  else if(screen==="chat"){ loadChatInbox(); showScreen("chat"); if(typeof setActiveNav==="function")setActiveNav("chat"); showBottomNav(); }
+  else if(screen==="search"){ showScreen("search"); if(typeof setActiveNav==="function")setActiveNav("search"); loadTrending(); setTimeout(function(){var si=document.getElementById("search-input");if(si)si.focus();},100); }
+  else if(screen==="explore"){ showScreen("explore"); if(typeof setActiveNav==="function")setActiveNav("explore"); loadExplore(); setTimeout(function(){var si=document.getElementById("explore-search");if(si)si.focus();},100); }
+  else if(screen==="challenges"){ showScreen("challenges"); if(typeof setActiveNav==="function")setActiveNav("challenges"); loadChallengeContent(); showBottomNav(); }
   else showScreen(screen);
   // Update nav tabs
   ["feed","home","profile"].forEach(function(s){
@@ -2020,6 +2221,7 @@ async function toggleLike(postId){
 }
 
 async function sharePostNative(imageUrl, caption){
+  try{trackShareResult("postnative");}catch(e){}
   if(navigator.share){
     try{ await navigator.share({title:"DrawBound",text:caption||"Guarda il mio disegno!",url:imageUrl}); }
     catch(e){}
@@ -2096,7 +2298,34 @@ async function publishPost(){
     }});
 
     closeNewPost();
-    showToast("Post pubblicato!","🎨");
+    // Detect challenge submission via tags or active flag
+    var isChallengePost = _activeChallengeId || 
+      (tags && (tags.indexOf("#DrawBound")>=0 || tags.indexOf("#sfida")>=0 || tags.indexOf("#DTIYS")>=0)) ||
+      (caption && (caption.indexOf("sfida")>=0 || caption.indexOf("Sfida")>=0));
+    if(isChallengePost){
+      // Set today's flag
+      localStorage.setItem("dl:challenge_done_"+(new Date().toISOString().split("T")[0]), "1");
+      if(window._currentBannerChallengeId){
+        localStorage.setItem("dl:joined_challenge_"+window._currentBannerChallengeId, "1");
+      }
+      if(_activeChallengeId){
+        localStorage.setItem("dl:joined_challenge_"+_activeChallengeId, "1");
+      }
+      // Force-hide the banner element
+      var _bn=document.getElementById("challenge-banner");
+      if(_bn){_bn.style.display="none";_bn.innerHTML="";}
+      // Update dashboard challenge card
+      var _dc=document.getElementById("dash-challenge-card");
+      if(_dc){
+        _dc.style.opacity="0.7";
+        _dc.innerHTML='<div style="width:42px;height:42px;border-radius:12px;background:rgba(102,224,181,0.18);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">✅</div>'+
+          '<div style="flex:1"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:1.5px;color:#66E0B5;font-weight:700;margin-bottom:4px">SFIDA COMPLETATA</div>'+
+          '<div style="font-weight:700;font-size:14px;color:#F5F1E8">Hai partecipato oggi!</div></div>';
+      }
+      _activeChallengeId = null;
+      window._currentBannerChallengeId = null;
+    }
+    try{localStorage.setItem("dl:posted_any","1");}catch(e){} showToast("Post pubblicato!","🎨");
     navTo("feed");
   } catch(e){
     console.error("Publish error:", e);
@@ -2294,6 +2523,14 @@ async function loadChallengeBanner(){
     var challenges=await sbFetch("GET","dl_challenges",{filters:"active=eq.true",order:"created_at.desc",limit:1});
     if(!challenges||!challenges.length){ container.style.display="none"; return; }
     var c=challenges[0];
+    var todayKey = "dl:challenge_done_"+(new Date().toISOString().split("T")[0]);
+    if(localStorage.getItem("dl:joined_challenge_"+c.id)==="1" || localStorage.getItem(todayKey)==="1"){
+      container.style.display="none";
+      container.innerHTML="";
+      return;
+    }
+    // Store current challenge ID globally so publishPost can use it
+    window._currentBannerChallengeId = c.id;
     var daysLeft=Math.max(0,Math.ceil((new Date(c.end_date)-Date.now())/86400000));
     // Count entries
     var entries=await sbFetch("GET","dl_challenge_entries",{filters:"challenge_id=eq."+c.id,select:"id"});
@@ -2374,75 +2611,199 @@ async function voteChallengeEntry(entryId, btn){
 /* ═══════════════ SKILL TREE ═══════════════ */
 var _skillView="list"; // "list" | "tree"
 
-function toggleSkillView(){
-  _skillView = _skillView==="list"?"tree":"list";
-  var btn=document.getElementById("skill-view-btn");
-  if(btn) btn.textContent = _skillView==="list"?"🌳 Skill Tree":"📋 Lista";
-  renderHome();
-}
 
-function renderSkillTree(catGrid){
-  catGrid.style.display="none";
-  var treeEl=document.getElementById("skill-tree-view");
-  if(!treeEl){
-    treeEl=document.createElement("div");
-    treeEl.id="skill-tree-view";
-    catGrid.parentNode.insertBefore(treeEl,catGrid.nextSibling);
+
+function renderSkillTree(){
+  var container = document.getElementById("skill-tree-container");
+  if(!container){
+    container = document.createElement("div");
+    container.id = "skill-tree-container";
+    var grid = document.getElementById("home-cat-grid");
+    if(grid && grid.parentElement) grid.parentElement.appendChild(container);
   }
-  treeEl.style.display="block";
-  treeEl.innerHTML="";
-
-  CATS.forEach(function(cat){
-    var bg=BG[cat.id]||"#f5f5f5";
-    var ac=AC[cat.id]||"#555";
-    var section=document.createElement("div");
-    section.style.marginBottom="20px";
-    var title=document.createElement("div");
-    title.style.cssText="display:flex;align-items:center;gap:8px;padding:8px 4px;margin-bottom:10px";
-    title.innerHTML='<span style="font-size:20px">'+cat.icon+'</span><span style="font-weight:800;font-size:15px;color:#1C1B2E">'+cat.label+'</span>';
-    section.appendChild(title);
-
-    // Tree nodes in a horizontal flow
-    var row=document.createElement("div");
-    row.style.cssText="display:flex;align-items:center;gap:0;overflow-x:auto;padding:4px 0";
-
-    cat.levels.forEach(function(les,i){
-      var k=pk(cat.id,les.id);
-      var prog=A.progress[k]||{};
-      var completed=prog.completed;
-      var inProgress=prog.step>0&&!completed;
-      var locked=!les.free&&!A.pro&&!isLessonUnlockedByToken(cat.id,les.id);
-      var prevCompleted=i===0||(A.progress[pk(cat.id,cat.levels[i-1].id)]&&A.progress[pk(cat.id,cat.levels[i-1].id)].completed);
-      var accessible=les.free||A.pro||prevCompleted;
-
-      // Connector line (except first)
-      if(i>0){
-        var line=document.createElement("div");
-        line.style.cssText="width:24px;height:3px;flex-shrink:0;background:"+(prevCompleted?ac:"#e0ddf5")+";position:relative;top:0";
-        row.appendChild(line);
-      }
-
-      // Node
-      var node=document.createElement("div");
-      var nodeColor=completed?ac:(inProgress?ac+"88":(accessible?bg:"#f0f0f0"));
-      node.style.cssText="width:72px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:"+(accessible?"pointer":"default")+";opacity:"+(accessible?1:0.5);
-      node.innerHTML=
-        '<div style="width:56px;height:56px;border-radius:50%;background:'+nodeColor+';border:3px solid '+(completed?ac:(inProgress?ac:"#e0ddf5"))+';display:flex;align-items:center;justify-content:center;font-size:24px;position:relative;box-shadow:'+(completed?"0 4px 12px "+ac+"44":"none")+'">'+
-          (locked?"🔒":les.icon)+
-          (completed?'<div style="position:absolute;bottom:-2px;right:-2px;width:18px;height:18px;background:'+ac+';border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:900">✓</div>':'' )+
-        '</div>'+
-        '<div style="font-size:9px;font-weight:700;color:#4A4868;text-align:center;line-height:1.2;max-width:64px">'+les.title.split(" ").slice(0,2).join(" ")+'</div>'+
-        '<div style="font-size:8px;color:'+(completed?"#3DBE7A":(inProgress?ac:"#9896B8"))+'">'+
-          (completed?"✅ Fatto":(inProgress?Math.round((prog.step/les.steps.length)*100)+"%":"▶ Inizia"))+
-        '</div>';
-      if(accessible){
-        (function(c,l){ node.onclick=function(){startLesson(c,l);}; })(cat,les);
-      }
-      row.appendChild(node);
-    });
-    section.appendChild(row);
-    treeEl.appendChild(section);
+  container.innerHTML = "";
+  container.style.cssText = "padding:16px;background:rgba(255,255,255,0.02);border-radius:22px;border:1px solid rgba(255,255,255,0.06);margin:16px";
+  
+  // Title
+  var titleRow = document.createElement("div");
+  titleRow.style.cssText = "margin-bottom:14px";
+  titleRow.innerHTML = '<h2 style="font-family:\'Bricolage Grotesque\',sans-serif;font-size:22px;font-weight:800;color:#F5F1E8;margin:0;letter-spacing:-0.02em">Skill tree</h2>';
+  container.appendChild(titleRow);
+  
+  // Legend
+  var legend = document.createElement("div");
+  legend.style.cssText = "display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap";
+  var legendItems = [
+    {color:"#66E0B5", label:"Completata"},
+    {color:"#FBBA00", label:"In corso"},
+    {color:"#B872E0", label:"Sbloccata"},
+    {color:"#4a4868", label:"Bloccata"}
+  ];
+  legendItems.forEach(function(it){
+    var pill = document.createElement("div");
+    pill.style.cssText = "display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border-radius:50px;padding:6px 12px;font-size:11px;color:#c8c5e8;font-weight:600";
+    pill.innerHTML = '<div style="width:8px;height:8px;border-radius:50%;background:'+it.color+'"></div>'+it.label;
+    legend.appendChild(pill);
   });
+  container.appendChild(legend);
+  
+  // SVG container with nodes + connections
+  var svg = document.createElementNS("http://www.w3.org/2000/svg","svg");
+  svg.setAttribute("viewBox","0 0 360 640");
+  svg.setAttribute("style","width:100%;height:auto;max-height:640px");
+  svg.style.cssText = "background:rgba(255,255,255,0.02);border-radius:18px";
+  
+  // Calculate category progress / status
+  function getCatStatus(cat){
+    var done = cat.levels.filter(function(l){var k=pk(cat.id,l.id);return A.progress[k]&&A.progress[k].completed;}).length;
+    var total = cat.levels.length;
+    if(done === total) return {state:"done", done:done, total:total, color:"#66E0B5"};
+    if(done > 0) return {state:"current", done:done, total:total, color:"#FBBA00"};
+    // Check if unlocked
+    if(cat.id === "fondamentali") return {state:"unlocked", done:0, total:total, color:"#B872E0"};
+    var fondone = CATS[0].levels.every(function(l){var k=pk("fondamentali",l.id);return A.progress[k]&&A.progress[k].completed;});
+    if(fondone) return {state:"unlocked", done:0, total:total, color:"#B872E0"};
+    return {state:"locked", done:0, total:total, color:"#4a4868"};
+  }
+  
+  // Node positions (manual layout matching the mockup)
+  var nodes = [
+    {cat:CATS[0], x:180, y:60, label:"Fondamentali"},   // top
+    {cat:CATS[1], x:90, y:180, label:"Character"},      // left mid
+    {cat:CATS[2], x:270, y:180, label:"Environment"},   // right mid
+    {cat:CATS[3], x:180, y:340, label:"Prop"},          // center bottom
+  ];
+  // If MASTERS exist, add them as additional nodes
+  if(typeof MASTERS!=="undefined" && MASTERS.length){
+    nodes.push({cat:null, master:MASTERS[0], x:90, y:500, label:"Sofia R."});
+    if(MASTERS[1]) nodes.push({cat:null, master:MASTERS[1], x:270, y:500, label:"Luca F."});
+  }
+  
+  // Connections
+  var connections = [
+    [0,1], [0,2],  // Fondamentali → Character, Environment
+    [1,3], [2,3],  // Character, Environment → Prop
+  ];
+  if(nodes.length > 4){
+    connections.push([3,4]); // Prop → first master
+    if(nodes.length > 5) connections.push([3,5]); // Prop → second master
+  }
+  
+  // Draw connections (lines) first so nodes are on top
+  connections.forEach(function(conn){
+    var a = nodes[conn[0]], b = nodes[conn[1]];
+    if(!a || !b) return;
+    var line = document.createElementNS("http://www.w3.org/2000/svg","line");
+    line.setAttribute("x1", a.x); line.setAttribute("y1", a.y);
+    line.setAttribute("x2", b.x); line.setAttribute("y2", b.y);
+    line.setAttribute("stroke", "rgba(255,255,255,0.1)");
+    line.setAttribute("stroke-width", "2");
+    // If both ends are done/current, color the line
+    var aStatus = a.cat ? getCatStatus(a.cat) : {state:"locked"};
+    var bStatus = b.cat ? getCatStatus(b.cat) : {state:"locked"};
+    if(aStatus.state !== "locked" && bStatus.state !== "locked"){
+      line.setAttribute("stroke", "rgba(184,114,224,0.35)");
+    }
+    if(bStatus.state === "locked"){
+      line.setAttribute("stroke-dasharray", "4 4");
+    }
+    svg.appendChild(line);
+  });
+  
+  // Draw nodes
+  nodes.forEach(function(n){
+    var status = n.cat ? getCatStatus(n.cat) : {state:"locked", done:0, total:0, color:"#4a4868"};
+    if(n.master){
+      // Master nodes — gold
+      var mDone = n.master.lessons.filter(function(l){var k=pk("master_"+n.master.id, l.id);return A.progress[k]&&A.progress[k].completed;}).length;
+      status = mDone === n.master.lessons.length ? {state:"done", done:mDone, total:n.master.lessons.length, color:"#FBBA00"} :
+               mDone > 0 ? {state:"current", done:mDone, total:n.master.lessons.length, color:"#FBBA00"} :
+               {state:"unlocked", done:0, total:n.master.lessons.length, color:"#FBBA00"};
+    }
+    
+    var g = document.createElementNS("http://www.w3.org/2000/svg","g");
+    g.style.cursor = "pointer";
+    
+    // Outer ring
+    var ring = document.createElementNS("http://www.w3.org/2000/svg","circle");
+    ring.setAttribute("cx", n.x); ring.setAttribute("cy", n.y);
+    ring.setAttribute("r", "32");
+    ring.setAttribute("fill", status.state === "locked" ? "rgba(74,72,104,0.15)" : status.color+"22");
+    ring.setAttribute("stroke", status.color);
+    ring.setAttribute("stroke-width", status.state === "locked" ? "1.5" : "2.5");
+    if(status.state === "locked") ring.setAttribute("stroke-dasharray", "4 4");
+    g.appendChild(ring);
+    
+    // Inner content (checkmark or count or lock)
+    if(status.state === "done"){
+      // Big checkmark
+      var check = document.createElementNS("http://www.w3.org/2000/svg","path");
+      check.setAttribute("d", "M "+(n.x-9)+" "+n.y+" L "+(n.x-2)+" "+(n.y+7)+" L "+(n.x+10)+" "+(n.y-7));
+      check.setAttribute("stroke", status.color);
+      check.setAttribute("stroke-width", "3.5");
+      check.setAttribute("fill", "none");
+      check.setAttribute("stroke-linecap", "round");
+      check.setAttribute("stroke-linejoin", "round");
+      g.appendChild(check);
+    } else if(status.state === "locked"){
+      // Lock icon
+      var lockText = document.createElementNS("http://www.w3.org/2000/svg","text");
+      lockText.setAttribute("x", n.x); lockText.setAttribute("y", n.y+5);
+      lockText.setAttribute("text-anchor", "middle");
+      lockText.setAttribute("font-size", "20");
+      lockText.textContent = "🔒";
+      g.appendChild(lockText);
+    } else {
+      // Number (current progress)
+      var numText = document.createElementNS("http://www.w3.org/2000/svg","text");
+      numText.setAttribute("x", n.x); numText.setAttribute("y", n.y+5);
+      numText.setAttribute("text-anchor", "middle");
+      numText.setAttribute("font-size", "20");
+      numText.setAttribute("font-weight", "800");
+      numText.setAttribute("font-family", "Bricolage Grotesque, sans-serif");
+      numText.setAttribute("fill", status.color);
+      numText.textContent = (status.done+1);
+      g.appendChild(numText);
+    }
+    
+    // Label below
+    var labelText = document.createElementNS("http://www.w3.org/2000/svg","text");
+    labelText.setAttribute("x", n.x); labelText.setAttribute("y", n.y+52);
+    labelText.setAttribute("text-anchor", "middle");
+    labelText.setAttribute("font-size", "13");
+    labelText.setAttribute("font-weight", "700");
+    labelText.setAttribute("font-family", "Geist, sans-serif");
+    labelText.setAttribute("fill", "#F5F1E8");
+    labelText.textContent = n.label;
+    g.appendChild(labelText);
+    
+    // Progress text
+    var progText = document.createElementNS("http://www.w3.org/2000/svg","text");
+    progText.setAttribute("x", n.x); progText.setAttribute("y", n.y+68);
+    progText.setAttribute("text-anchor", "middle");
+    progText.setAttribute("font-size", "10");
+    progText.setAttribute("font-family", "JetBrains Mono, monospace");
+    progText.setAttribute("fill", status.state==="locked"?"#4a4868":status.color);
+    progText.setAttribute("font-weight", "600");
+    progText.textContent = status.state === "locked" ? "Vol+Ani" : (status.done+"/"+status.total);
+    g.appendChild(progText);
+    
+    // Click handler
+    if(status.state !== "locked"){
+      g.addEventListener("click", function(){
+        if(n.master && typeof openMasterDetail==="function") openMasterDetail(n.master);
+        else if(n.cat){
+          A.cat = n.cat;
+          if(typeof renderCategory === "function") renderCategory();
+          showScreen("category");
+        }
+      });
+    }
+    
+    svg.appendChild(g);
+  });
+  
+  container.appendChild(svg);
 }
 
 /* ═══════════════ BIO EDITING ═══════════════ */
@@ -3056,6 +3417,7 @@ async function loadPubProfile(userId){
 }
 
 async function toggleFollow(userId){
+  try{localStorage.setItem("dl:followed_any","1");}catch(e){}
   if(!A.user){ showToast("Accedi per seguire",""); return; }
   var btn = document.getElementById("follow-btn-"+userId);
   var amFollowing = btn && btn.textContent.includes("già");
@@ -3241,6 +3603,7 @@ function isLessonUnlockedByToken(catId, lesId){
 }
 
 function unlockLessonWithToken(catId, lesId){
+  try{trackTokenSpent("lesson_unlock", 5);}catch(e){}
   var cur = getTokens();
   if(cur < 5){
     showToast("Token insufficienti! Hai "+cur+", servono 5","");
@@ -4567,6 +4930,10 @@ async function openChat(userId,userName,userAvatar){
     } else {
       msgs.forEach(function(m){
         var isMe=m.from===(A.user&&A.user.id);
+        if(m.type==="image" || m.type==="audio"){
+          appendMediaBubble(m, isMe);
+          return;
+        }
         var bubble=document.createElement("div");
         bubble.style.cssText="display:flex;justify-content:"+(isMe?"flex-end":"flex-start")+";margin-bottom:8px;padding:0 12px";
         var inner=document.createElement("div");
@@ -4579,6 +4946,8 @@ async function openChat(userId,userName,userAvatar){
         bubble.appendChild(inner);
         msgContainer.appendChild(bubble);
       });
+      // Init mic button (press and hold)
+      setTimeout(initMicButton, 50);
       msgContainer.scrollTop=msgContainer.scrollHeight;
     }
   }catch(e){
@@ -4666,6 +5035,7 @@ function selectPlan(plan){
   }
 }
 function proceedToCheckout(){
+  if(window.trackEvent) window.trackEvent("checkout_started",{plan:A.payPlan||"annual"});
   if(!A.payPlan)A.payPlan="annual";
   showScreen("checkout");
 }
@@ -4885,6 +5255,624 @@ function setActiveNav(name){
   var activeId = "nav-"+(name==="dashboard"?"dashboard":name==="feed"?"feed":name==="home"?"home":name==="profile"?"profile":"");
   var active=document.getElementById(activeId);
   if(active){active.style.color="#FBBA00";active.style.opacity="1";}
+}
+
+/* ═══════════════ TOKEN ECONOMY TRACKING ═══════════════ */
+function addTokens(amount, source){
+  if(!A.user) return;
+  if(typeof A.user.tokens !== "number") A.user.tokens = 0;
+  A.user.tokens += amount;
+  try{localStorage.setItem("dl:user",JSON.stringify(A.user));}catch(e){}
+  if(window.trackEvent) window.trackEvent("token_earned",{source:source||"unknown",amount:amount});
+  // Update dashboard token badge
+  var t = document.getElementById("dash-tokens");
+  if(t) t.textContent = A.user.tokens;
+  return A.user.tokens;
+}
+
+function spendTokens(amount, itemUnlocked){
+  if(!A.user) return false;
+  if(typeof A.user.tokens !== "number") A.user.tokens = 0;
+  if(A.user.tokens < amount) return false;
+  A.user.tokens -= amount;
+  try{localStorage.setItem("dl:user",JSON.stringify(A.user));}catch(e){}
+  if(window.trackEvent) window.trackEvent("token_spent",{item_unlocked:itemUnlocked||"unknown",amount:amount});
+  var t = document.getElementById("dash-tokens");
+  if(t) t.textContent = A.user.tokens;
+  return true;
+}
+
+function hideTodaysChallengeBanner(){
+  try{
+    if(window._activeChallengeId){
+      localStorage.setItem("dl:joined_challenge_"+window._activeChallengeId, "1");
+    }
+    localStorage.setItem("dl:challenge_done_"+(new Date().toISOString().split("T")[0]), "1");
+    var banner = document.getElementById("challenge-banner");
+    if(banner) banner.style.display = "none";
+    var inner = document.getElementById("challenge-banner-block");
+    if(inner) inner.remove();
+    var dashChal = document.getElementById("dash-challenge-card");
+    if(dashChal){
+      dashChal.style.opacity = "0.7";
+      dashChal.innerHTML = '<div style="width:42px;height:42px;border-radius:12px;background:rgba(102,224,181,0.18);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">✅</div>'+
+        '<div style="flex:1"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:1.5px;color:#66E0B5;font-weight:700;margin-bottom:4px">SFIDA COMPLETATA</div>'+
+        '<div style="font-weight:700;font-size:14px;color:#F5F1E8">Hai partecipato oggi!</div></div>';
+    }
+    window._activeChallengeId = null;
+  }catch(e){console.warn("hideTodaysChallengeBanner",e);}
+}
+
+/* ═══════════════ GA4 TRACKING ═══════════════ */
+function track(event, params){
+  try{
+    if(typeof gtag === "function"){
+      gtag("event", event, params || {});
+    }
+    if(console&&console.log) console.log("[GA4]", event, params||{});
+  }catch(e){console.warn("track error",e);}
+}
+
+function trackStreakAchieved(days){ track("streak_achieved", {streak_days: days}); }
+function trackLessonStarted(catId, lessonId){ track("lesson_started", {category_id: catId, lesson_id: lessonId}); }
+function trackLessonCompleted(catId, lessonId){ track("lesson_completed", {category_id: catId, lesson_id: lessonId}); }
+function trackTokenEarned(source, amount){ track("token_earned", {source: source, amount: amount||0}); }
+function trackTokenSpent(itemUnlocked, amount){ track("token_spent", {item_unlocked: itemUnlocked, amount: amount||0}); }
+function trackPaywallViewed(trigger){ track("paywall_viewed", {trigger: trigger}); }
+function trackCheckoutStarted(plan){ track("checkout_started", {plan: plan}); }
+function trackShareResult(platform){ track("share_result", {platform: platform}); }
+
+/* ═══════════════ SKILL TREE (visual tree) ═══════════════ */
+function renderSkillTreeAurora(){
+  var container = document.getElementById("skill-tree-container");
+  if(!container) return;
+  container.innerHTML = "";
+  container.style.cssText = "padding:16px;display:block";
+  
+  // Safe progress
+  try{var _p=localStorage.getItem("dl:progress_all");if(_p){var _pp=JSON.parse(_p);if(typeof _pp==="object"&&_pp!==null&&!Array.isArray(_pp))A.progress=_pp;}}catch(e){}
+  if(typeof A.progress!=="object"||A.progress===null||Array.isArray(A.progress))A.progress={};
+  
+  // Header + legend
+  var header = document.createElement("div");
+  header.style.cssText = "display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px";
+  header.innerHTML = '<h2 style="font-family:\'Bricolage Grotesque\',sans-serif;font-size:22px;font-weight:800;color:#F5F1E8;margin:0;letter-spacing:-0.02em">Skill tree</h2>'+
+    '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
+      '<span style="background:rgba(102,224,181,0.12);color:#66E0B5;border:1px solid rgba(102,224,181,0.3);padding:3px 9px;border-radius:50px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:4px"><span style="width:6px;height:6px;border-radius:50%;background:#66E0B5"></span>Completata</span>'+
+      '<span style="background:rgba(251,186,0,0.12);color:#FBBA00;border:1px solid rgba(251,186,0,0.3);padding:3px 9px;border-radius:50px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:4px"><span style="width:6px;height:6px;border-radius:50%;background:#FBBA00"></span>In corso</span>'+
+      '<span style="background:rgba(184,114,224,0.12);color:#B872E0;border:1px solid rgba(184,114,224,0.3);padding:3px 9px;border-radius:50px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:4px"><span style="width:6px;height:6px;border-radius:50%;background:#B872E0"></span>Sbloccata</span>'+
+      '<span style="background:rgba(255,255,255,0.04);color:#8a82a8;border:1px solid rgba(255,255,255,0.08);padding:3px 9px;border-radius:50px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:4px"><span style="width:6px;height:6px;border-radius:50%;background:#6e6791"></span>Bloccata</span>'+
+    '</div>';
+  container.appendChild(header);
+  
+  // Tree container
+  var tree = document.createElement("div");
+  tree.style.cssText = "background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:22px;padding:30px 16px;position:relative;min-height:600px";
+  
+  // Compute states for each category
+  function getCatState(cat){
+    var done = cat.levels.filter(function(l){var k=pk(cat.id,l.id);return A.progress[k]&&A.progress[k].completed;}).length;
+    var total = cat.levels.length;
+    var inProgress = cat.levels.some(function(l){var k=pk(cat.id,l.id);return A.progress[k]&&A.progress[k].step>0&&!A.progress[k].completed;});
+    var isLocked = !cat.levels.some(function(l){return l.free;}) && !A.pro;
+    var isComplete = done === total && total > 0;
+    var isUnlocked = !isLocked;
+    return {done:done, total:total, isComplete:isComplete, inProgress:inProgress, isLocked:isLocked, isUnlocked:isUnlocked};
+  }
+  
+  // Tree node positions (approximate, mobile-friendly)
+  var nodes = CATS.map(function(cat, idx){
+    return {cat: cat, idx: idx, state: getCatState(cat)};
+  });
+  
+  // SVG for connection lines
+  var svg = document.createElement("div");
+  svg.style.cssText = "position:relative;display:flex;flex-direction:column;align-items:center;gap:24px";
+  
+  // Render nodes vertically with branches
+  nodes.forEach(function(n, i){
+    // Connection line (except first)
+    if(i > 0){
+      var line = document.createElement("div");
+      var isUnlocked = n.state.isUnlocked;
+      line.style.cssText = "width:2px;height:24px;background:"+(isUnlocked?"linear-gradient(180deg,rgba(184,114,224,0.4),rgba(184,114,224,0.6))":"rgba(255,255,255,0.05)")+";margin:-24px 0;border-radius:2px;"+(!isUnlocked?"border-left:1px dashed rgba(255,255,255,0.1);background:transparent":"");
+      svg.appendChild(line);
+    }
+    
+    var nodeWrap = document.createElement("div");
+    nodeWrap.style.cssText = "display:flex;flex-direction:column;align-items:center;cursor:"+(n.state.isLocked?"default":"pointer");
+    
+    var nodeColor, fillColor, borderColor, contentEl;
+    if(n.state.isComplete){
+      nodeColor = "#66E0B5";
+      borderColor = "#66E0B5";
+      fillColor = "rgba(102,224,181,0.18)";
+      contentEl = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#66E0B5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    } else if(n.state.inProgress){
+      nodeColor = "#FBBA00";
+      borderColor = "#FBBA00";
+      fillColor = "rgba(251,186,0,0.18)";
+      contentEl = '<div style="font-family:\'Bricolage Grotesque\',sans-serif;font-size:24px;font-weight:800;color:#FBBA00">'+(n.idx+1)+'</div>';
+    } else if(n.state.isUnlocked){
+      nodeColor = "#B872E0";
+      borderColor = "#B872E0";
+      fillColor = "rgba(184,114,224,0.10)";
+      contentEl = '<div style="font-family:\'Bricolage Grotesque\',sans-serif;font-size:24px;font-weight:800;color:#B872E0">'+(n.idx+1)+'</div>';
+    } else {
+      nodeColor = "#6e6791";
+      borderColor = "rgba(255,255,255,0.1)";
+      fillColor = "rgba(255,255,255,0.02)";
+      contentEl = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF8C4B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+    }
+    
+    var nodeCircle = document.createElement("div");
+    nodeCircle.style.cssText = "width:64px;height:64px;border-radius:50%;border:2.5px solid "+borderColor+";background:"+fillColor+";display:flex;align-items:center;justify-content:center;transition:transform .15s, box-shadow .15s;"+(n.state.isUnlocked?"box-shadow:0 0 24px "+borderColor+"33":"");
+    nodeCircle.innerHTML = contentEl;
+    
+    if(!n.state.isLocked){
+      nodeCircle.onmouseover = function(){this.style.transform="scale(1.06)";};
+      nodeCircle.onmouseout = function(){this.style.transform="scale(1)";};
+      (function(c){nodeWrap.addEventListener("click", function(){A.cat=c; renderCategory(); showScreen("category");});})(n.cat);
+    }
+    
+    var nodeLabel = document.createElement("div");
+    nodeLabel.style.cssText = "margin-top:10px;font-family:'Geist',sans-serif;font-weight:700;font-size:13px;color:"+(n.state.isLocked?"#8a82a8":"#F5F1E8")+";text-align:center";
+    nodeLabel.textContent = n.cat.label;
+    
+    var nodeProg = document.createElement("div");
+    nodeProg.style.cssText = "font-family:'JetBrains Mono',monospace;font-size:10px;color:"+nodeColor+";margin-top:2px;font-weight:600";
+    nodeProg.textContent = n.state.done + "/" + n.state.total;
+    
+    nodeWrap.appendChild(nodeCircle);
+    nodeWrap.appendChild(nodeLabel);
+    nodeWrap.appendChild(nodeProg);
+    svg.appendChild(nodeWrap);
+  });
+  
+  tree.appendChild(svg);
+  container.appendChild(tree);
+}
+
+// Override the existing toggleSkillView to use the new tree
+function toggleSkillView(){
+  var grid = document.getElementById("home-cat-grid");
+  var tree = document.getElementById("skill-tree-container");
+  var btn = document.getElementById("skill-view-btn");
+  if(!grid || !tree) return;
+  
+  if(tree.style.display === "block"){
+    // Switch to list
+    tree.style.display = "none";
+    grid.style.display = "grid";
+    if(btn) btn.innerHTML = "🌳 Skill Tree";
+    var fs = document.getElementById("founders-section");
+    if(fs) fs.style.display = "";
+  } else {
+    // Switch to tree
+    grid.style.display = "none";
+    tree.style.display = "block";
+    if(btn) btn.innerHTML = "📋 Lista";
+    var fs2 = document.getElementById("founders-section");
+    if(fs2) fs2.style.display = "none";
+    renderSkillTreeAurora();
+  }
+}
+
+/* ═══════════════ CHAT MEDIA (images + audio) ═══════════════ */
+
+// Upload a Blob/File to Supabase Storage bucket "dl_chat_media"
+async function uploadChatMedia(blob, ext){
+  if(!A.user){ throw new Error("no user"); }
+  ext = ext || "bin";
+  var path = A.user.id + "/" + Date.now() + "_" + Math.random().toString(36).slice(2,8) + "." + ext;
+  var url = SB_URL + "/storage/v1/object/dl_chat_media/" + encodeURIComponent(path);
+  try{
+    var res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + SB_KEY,
+        "apikey": SB_KEY,
+        "Content-Type": blob.type || "application/octet-stream",
+        "x-upsert": "false"
+      },
+      body: blob
+    });
+    if(!res.ok){
+      var errText = await res.text().catch(function(){return "";});
+      throw new Error("upload failed " + res.status + ": " + errText.slice(0,80));
+    }
+    return SB_URL + "/storage/v1/object/public/dl_chat_media/" + path;
+  }catch(e){
+    console.error("uploadChatMedia error:", e);
+    throw e;
+  }
+}
+
+// Compress image client-side before upload
+function compressImage(file, maxDim, quality){
+  maxDim = maxDim || 1200;
+  quality = quality || 0.85;
+  return new Promise(function(resolve, reject){
+    var img = new Image();
+    var reader = new FileReader();
+    reader.onload = function(e){
+      img.onload = function(){
+        var canvas = document.createElement("canvas");
+        var w = img.width, h = img.height;
+        if(w > maxDim || h > maxDim){
+          var ratio = w / h;
+          if(w > h){ w = maxDim; h = Math.round(maxDim / ratio); }
+          else{ h = maxDim; w = Math.round(maxDim * ratio); }
+        }
+        canvas.width = w; canvas.height = h;
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+        canvas.toBlob(function(blob){
+          if(blob) resolve(blob);
+          else reject(new Error("compression failed"));
+        }, "image/jpeg", quality);
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function attachChatImage(){
+  if(!_dmUserId){ showToast("Apri prima una chat",""); return; }
+  var input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.style.display = "none";
+  document.body.appendChild(input);
+  input.onchange = async function(){
+    var file = input.files && input.files[0];
+    document.body.removeChild(input);
+    if(!file) return;
+    var imgBtn = document.getElementById("dm-img-btn");
+    if(imgBtn){ imgBtn.disabled=true; imgBtn.style.opacity="0.5"; imgBtn.innerHTML='<div style="width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top:2px solid #FBBA00;border-radius:50%;animation:spin .8s linear infinite"></div>'; }
+    try{
+      var blob = await compressImage(file, 1200, 0.85);
+      var url = await uploadChatMedia(blob, "jpg");
+      await sendDMMedia("image", url);
+    }catch(e){
+      console.error(e);
+      showToast("Caricamento fallito","⚠️");
+    }finally{
+      if(imgBtn){ imgBtn.disabled=false; imgBtn.style.opacity="1"; imgBtn.textContent="📷"; }
+    }
+  };
+  input.click();
+}
+
+// ─── Audio recording ───
+var _recState = { recorder: null, chunks: [], stream: null, startTime: 0, timerInt: null, isRecording: false };
+
+async function startAudioRec(){
+  if(_recState.isRecording) return;
+  try{
+    var stream = await navigator.mediaDevices.getUserMedia({audio: true});
+    _recState.stream = stream;
+    _recState.chunks = [];
+    var mime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus") ? "audio/webm;codecs=opus" :
+               MediaRecorder.isTypeSupported("audio/mp4") ? "audio/mp4" : "audio/webm";
+    _recState.recorder = new MediaRecorder(stream, {mimeType: mime});
+    _recState.recorder.ondataavailable = function(e){ if(e.data&&e.data.size>0) _recState.chunks.push(e.data); };
+    _recState.recorder.start();
+    _recState.startTime = Date.now();
+    _recState.isRecording = true;
+    // Visual feedback
+    var micBtn = document.getElementById("dm-mic-btn");
+    if(micBtn){
+      micBtn.style.background = "linear-gradient(135deg,#FF3B30,#E07172)";
+      micBtn.style.color = "#fff";
+      micBtn.style.transform = "scale(1.1)";
+      micBtn.textContent = "●";
+    }
+    showRecordingIndicator(true);
+    // Auto-stop after 60s
+    setTimeout(function(){ if(_recState.isRecording) stopAudioRec(true); }, 60000);
+  }catch(e){
+    console.error("mic error:", e);
+    if(e.name==="NotAllowedError") showToast("Permesso microfono negato","🎤");
+    else showToast("Errore microfono","⚠️");
+    _recState.isRecording = false;
+  }
+}
+
+async function stopAudioRec(autoStop){
+  if(!_recState.isRecording || !_recState.recorder) return;
+  var minMs = 500;
+  var duration = Date.now() - _recState.startTime;
+  
+  var micBtn = document.getElementById("dm-mic-btn");
+  if(micBtn){
+    micBtn.style.background = "rgba(255,255,255,0.05)";
+    micBtn.style.color = "#F5F1E8";
+    micBtn.style.transform = "scale(1)";
+    micBtn.textContent = "🎤";
+  }
+  showRecordingIndicator(false);
+  
+  if(duration < minMs){
+    // Too short — discard
+    try{_recState.recorder.stop();}catch(e){}
+    if(_recState.stream) _recState.stream.getTracks().forEach(function(t){t.stop();});
+    _recState.isRecording = false;
+    if(!autoStop) showToast("Tieni premuto per registrare","🎤");
+    return;
+  }
+  
+  return new Promise(function(resolve){
+    _recState.recorder.onstop = async function(){
+      try{
+        var blob = new Blob(_recState.chunks, {type: _recState.recorder.mimeType || "audio/webm"});
+        if(_recState.stream) _recState.stream.getTracks().forEach(function(t){t.stop();});
+        _recState.isRecording = false;
+        var ext = blob.type.indexOf("mp4")>=0 ? "mp4" : "webm";
+        if(micBtn){ micBtn.disabled=true; micBtn.style.opacity="0.5"; }
+        var url = await uploadChatMedia(blob, ext);
+        await sendDMMedia("audio", url, Math.round(duration/1000));
+      }catch(e){
+        console.error(e);
+        showToast("Invio audio fallito","⚠️");
+      }finally{
+        if(micBtn){ micBtn.disabled=false; micBtn.style.opacity="1"; }
+      }
+      resolve();
+    };
+    try{_recState.recorder.stop();}catch(e){}
+  });
+}
+
+function showRecordingIndicator(show){
+  var ind = document.getElementById("dm-rec-indicator");
+  if(show){
+    if(!ind){
+      ind = document.createElement("div");
+      ind.id = "dm-rec-indicator";
+      ind.style.cssText = "position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:rgba(228,49,49,0.95);color:#fff;padding:8px 16px;border-radius:50px;font-size:13px;font-weight:700;z-index:9999;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(228,49,49,0.5)";
+      ind.innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:#fff;animation:pulse 1s infinite"></span><span>Registrazione...</span><span id="dm-rec-time">0:00</span>';
+      document.body.appendChild(ind);
+      var t0 = Date.now();
+      _recState.timerInt = setInterval(function(){
+        var sec = Math.floor((Date.now()-t0)/1000);
+        var el = document.getElementById("dm-rec-time");
+        if(el) el.textContent = Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0");
+      }, 100);
+    }
+  } else {
+    if(_recState.timerInt){ clearInterval(_recState.timerInt); _recState.timerInt=null; }
+    if(ind) ind.remove();
+  }
+}
+
+// Wire up mic button press-and-hold (touch + mouse)
+function initMicButton(){
+  var btn = document.getElementById("dm-mic-btn");
+  if(!btn || btn._wired) return;
+  btn._wired = true;
+  var pressed = false;
+  
+  var start = function(e){
+    e.preventDefault();
+    if(pressed) return;
+    pressed = true;
+    startAudioRec();
+  };
+  var end = function(e){
+    if(!pressed) return;
+    pressed = false;
+    stopAudioRec(false);
+  };
+  
+  btn.addEventListener("touchstart", start, {passive:false});
+  btn.addEventListener("touchend", end);
+  btn.addEventListener("touchcancel", end);
+  btn.addEventListener("mousedown", start);
+  btn.addEventListener("mouseup", end);
+  btn.addEventListener("mouseleave", function(e){if(pressed)end(e);});
+}
+
+// Send a media message
+async function sendDMMedia(mediaType, url, duration){
+  if(!_dmUserId) return;
+  var msg = {
+    id: "local_"+Date.now()+"_"+Math.random().toString(36).substring(7),
+    type: mediaType,
+    media_url: url,
+    duration: duration || 0,
+    text: "",
+    from: (A.user&&A.user.id)||"me",
+    time: Date.now(),
+    userName: _dmUserName,
+    userAvatar: _dmUserAvatar,
+    read: false
+  };
+  // Save locally
+  var key = "dl:dm_"+_dmUserId;
+  var msgs = [];
+  try{msgs = JSON.parse(localStorage.getItem(key)||"[]");}catch(e){}
+  msgs.push(msg);
+  localStorage.setItem(key, JSON.stringify(msgs));
+  
+  // Render in UI
+  appendMediaBubble(msg, true);
+  
+  // Send via Supabase
+  if(sbReady() && A.user){
+    sbFetch("POST","dl_messages",{
+      body:{
+        from_user: A.user.id,
+        to_user: _dmUserId,
+        text: "",
+        type: mediaType,
+        media_url: url,
+        duration: duration||0,
+        created_at: new Date().toISOString()
+      }
+    }).catch(function(e){console.warn("Supabase media send failed:",e);});
+  }
+}
+
+function appendMediaBubble(msg, isMe){
+  var msgContainer = document.getElementById("dm-messages");
+  if(!msgContainer) return;
+  // Clear empty state
+  if(msgContainer.innerHTML.indexOf("Inizia la conversazione")>=0) msgContainer.innerHTML="";
+  
+  var bubble = document.createElement("div");
+  bubble.style.cssText = "display:flex;justify-content:"+(isMe?"flex-end":"flex-start")+";margin-bottom:8px;padding:0 12px";
+  
+  var inner = document.createElement("div");
+  inner.style.cssText = "max-width:78%;border-radius:14px 14px "+(isMe?"4px 14px":"14px 4px")+";overflow:hidden;background:"+(isMe?"linear-gradient(135deg,#B872E0,#FBBA00)":"rgba(255,255,255,0.06)")+(isMe?"":";border:1px solid rgba(255,255,255,0.08)");
+  
+  if(msg.type === "image"){
+    var img = document.createElement("img");
+    img.src = msg.media_url;
+    img.style.cssText = "display:block;max-width:260px;max-height:340px;width:100%;border-radius:14px;cursor:pointer";
+    img.onclick = function(){
+      // Lightbox
+      var lb = document.createElement("div");
+      lb.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;cursor:pointer";
+      lb.onclick = function(){lb.remove();};
+      var fi = document.createElement("img");
+      fi.src = msg.media_url;
+      fi.style.cssText = "max-width:100%;max-height:90vh;object-fit:contain;border-radius:12px";
+      lb.appendChild(fi);
+      document.body.appendChild(lb);
+    };
+    inner.appendChild(img);
+  } else if(msg.type === "audio"){
+    var audioWrap = document.createElement("div");
+    audioWrap.style.cssText = "padding:10px 12px;min-width:200px;display:flex;align-items:center;gap:10px;color:"+(isMe?"#1c1b29":"#F5F1E8");
+    var icon = document.createElement("span");
+    icon.style.cssText = "font-size:24px;cursor:pointer;line-height:1";
+    icon.textContent = "▶️";
+    var audio = document.createElement("audio");
+    audio.src = msg.media_url;
+    audio.preload = "metadata";
+    audio.style.display = "none";
+    icon.onclick = function(){
+      if(audio.paused){ audio.play(); icon.textContent="⏸️"; }
+      else { audio.pause(); icon.textContent="▶️"; }
+    };
+    audio.onended = function(){ icon.textContent="▶️"; };
+    var info = document.createElement("div");
+    info.style.cssText = "flex:1;font-size:12px;font-weight:700";
+    var dur = msg.duration || 0;
+    info.textContent = "Audio · "+Math.floor(dur/60)+":"+String(dur%60).padStart(2,"0");
+    audioWrap.appendChild(icon);
+    audioWrap.appendChild(info);
+    audioWrap.appendChild(audio);
+    inner.appendChild(audioWrap);
+  } else {
+    // Fallback text
+    inner.style.padding = "9px 14px";
+    inner.style.color = isMe?"#1c1b29":"#F5F1E8";
+    inner.style.fontSize = "13px";
+    inner.style.fontWeight = isMe?"600":"normal";
+    inner.textContent = msg.text || msg.media_url || "";
+  }
+  
+  bubble.appendChild(inner);
+  msgContainer.appendChild(bubble);
+  msgContainer.scrollTop = msgContainer.scrollHeight;
+}
+
+/* ═══════════════ BADGES SYSTEM ═══════════════ */
+var BADGES_CATALOG = [
+  // Streak badges
+  {id:"streak_3", category:"streak", title:"Primo focolare", desc:"3 giorni di fila", icon:"🔥", req:function(){return (A.streak&&A.streak.current||0)>=3;}, rarity:"common"},
+  {id:"streak_7", category:"streak", title:"Una settimana viva", desc:"7 giorni di fila", icon:"🔥", req:function(){return (A.streak&&A.streak.current||0)>=7;}, rarity:"uncommon"},
+  {id:"streak_14", category:"streak", title:"Disciplina d artista", desc:"14 giorni di fila", icon:"🔥", req:function(){return (A.streak&&A.streak.current||0)>=14;}, rarity:"rare"},
+  {id:"streak_30", category:"streak", title:"Maestro della costanza", desc:"30 giorni di fila", icon:"🏆", req:function(){return (A.streak&&A.streak.current||0)>=30;}, rarity:"epic"},
+  // Lesson badges
+  {id:"lesson_first", category:"lessons", title:"Primo passo", desc:"Prima lezione completata", icon:"🎯", req:function(){return getCompletedCount()>=1;}, rarity:"common"},
+  {id:"lesson_10", category:"lessons", title:"Apprendista", desc:"10 lezioni completate", icon:"📚", req:function(){return getCompletedCount()>=10;}, rarity:"uncommon"},
+  {id:"lesson_27", category:"lessons", title:"Specialista", desc:"27 lezioni completate", icon:"🎓", req:function(){return getCompletedCount()>=27;}, rarity:"rare"},
+  // Category mastery badges
+  {id:"cat_fondamentali", category:"mastery", title:"Maestro delle Fondamentali", desc:"Tutta la categoria Fondamentali", icon:"🌱", req:function(){return isCategoryComplete("fondamentali");}, rarity:"rare"},
+  {id:"cat_character", category:"mastery", title:"Character Designer", desc:"Tutta Character Design", icon:"🦸", req:function(){return isCategoryComplete("character");}, rarity:"rare"},
+  {id:"cat_environment", category:"mastery", title:"World Builder", desc:"Tutta Environment Design", icon:"🏔️", req:function(){return isCategoryComplete("environment");}, rarity:"rare"},
+  {id:"cat_prop", category:"mastery", title:"Prop Master", desc:"Tutta Prop Design", icon:"⚔️", req:function(){return isCategoryComplete("prop");}, rarity:"rare"},
+  // Social badges
+  {id:"social_first_post", category:"social", title:"Primo disegno", desc:"Hai pubblicato il primo post", icon:"📸", req:function(){return localStorage.getItem("dl:posted_any")==="1";}, rarity:"common"},
+  {id:"social_followed", category:"social", title:"Connesso", desc:"Hai seguito qualcuno", icon:"🤝", req:function(){return localStorage.getItem("dl:followed_any")==="1";}, rarity:"common"},
+];
+
+function getCompletedCount(){
+  var done=0;
+  for(var k in A.progress){if(A.progress.hasOwnProperty(k)&&A.progress[k]&&A.progress[k].completed)done++;}
+  return done;
+}
+
+function isCategoryComplete(catId){
+  var cat = CATS.find(function(c){return c.id===catId;});
+  if(!cat) return false;
+  return cat.levels.every(function(l){var k=pk(catId,l.id);return A.progress[k]&&A.progress[k].completed;});
+}
+
+function getEarnedBadges(){
+  return BADGES_CATALOG.filter(function(b){try{return b.req();}catch(e){return false;}});
+}
+
+function renderBadgesPage(){
+  var container = document.getElementById("badges-list");
+  if(!container) return;
+  container.innerHTML = "";
+  
+  var earned = getEarnedBadges();
+  var earnedIds = earned.map(function(b){return b.id;});
+  
+  // Stats header
+  var header = document.createElement("div");
+  header.style.cssText = "margin:0 16px 18px;background:linear-gradient(135deg,rgba(184,114,224,0.15),rgba(251,186,0,0.10));border:1px solid rgba(184,114,224,0.25);border-radius:18px;padding:18px;text-align:center";
+  header.innerHTML = '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;letter-spacing:2px;color:#FBBA00;text-transform:uppercase;font-weight:700;margin-bottom:6px">I TUOI BADGE</div>'+
+    '<div style="font-family:\'Bricolage Grotesque\',sans-serif;font-size:36px;font-weight:800;color:#F5F1E8">'+earned.length+'<span style="font-size:18px;color:#8a82a8;font-weight:500"> / '+BADGES_CATALOG.length+'</span></div>'+
+    '<div style="font-size:12px;color:#a8a2c8;margin-top:4px">Continua a disegnare per sbloccarne altri</div>';
+  container.appendChild(header);
+  
+  // Group by category
+  var cats = [
+    {key:"streak", label:"🔥 Streak", color:"#E07172"},
+    {key:"lessons", label:"📚 Lezioni", color:"#B872E0"},
+    {key:"mastery", label:"🎓 Mastery", color:"#66E0B5"},
+    {key:"social", label:"🤝 Social", color:"#72A0E0"}
+  ];
+  
+  cats.forEach(function(cat){
+    var catBadges = BADGES_CATALOG.filter(function(b){return b.category===cat.key;});
+    if(!catBadges.length) return;
+    var sec = document.createElement("div");
+    sec.style.cssText = "padding:0 16px;margin-bottom:24px";
+    var secTitle = document.createElement("div");
+    secTitle.style.cssText = "font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:#8a82a8;text-transform:uppercase;font-weight:700;margin-bottom:10px";
+    secTitle.textContent = cat.label;
+    sec.appendChild(secTitle);
+    
+    var grid = document.createElement("div");
+    grid.style.cssText = "display:grid;grid-template-columns:repeat(3,1fr);gap:8px";
+    
+    catBadges.forEach(function(b){
+      var isEarned = earnedIds.indexOf(b.id) >= 0;
+      var card = document.createElement("div");
+      card.style.cssText = "background:"+(isEarned?"rgba(255,255,255,0.05)":"rgba(255,255,255,0.02)")+";border:1px solid "+(isEarned?cat.color+"55":"rgba(255,255,255,0.05)")+";border-radius:14px;padding:14px 8px;text-align:center;cursor:pointer;transition:transform .12s";
+      if(isEarned) card.onmouseover=function(){this.style.transform="scale(1.04)";};
+      card.onmouseout=function(){this.style.transform="scale(1)";};
+      card.innerHTML = '<div style="font-size:36px;filter:'+(isEarned?"none":"grayscale(1) opacity(0.3)")+';margin-bottom:6px;line-height:1">'+b.icon+'</div>'+
+        '<div style="font-weight:700;font-size:11px;color:'+(isEarned?"#F5F1E8":"#6e6791")+';line-height:1.2;margin-bottom:3px">'+b.title+'</div>'+
+        '<div style="font-size:9px;color:#8a82a8;line-height:1.2">'+b.desc+'</div>';
+      card.onclick = function(){
+        showToast(b.title+" — "+(isEarned?"Sbloccato! "+b.icon:"Da sbloccare"),"");
+      };
+      grid.appendChild(card);
+    });
+    sec.appendChild(grid);
+    container.appendChild(sec);
+  });
 }
 
 function init(){
