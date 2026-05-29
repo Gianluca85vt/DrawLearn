@@ -3,7 +3,7 @@
 var LANG_STRINGS={
   it:{
     // Nav
-    gallery:"Galleria",learn:"Impara",post:"Post",chat:"Chat",profile:"Profilo",
+    gallery:"Galleria",learn:"Impara",post:"Post",chat:"Chat",profile:"Profilo",navHome:"Home",navFeed:"Feed",navSkill:"Skill",navProfile:"Profilo",
     // Auth
     login:"Accedi",register:"Registrati",logout:"Esci",email:"Email",password:"Password",
     loginWith:"Accedi con",orContinueWith:"Oppure continua con",
@@ -29,7 +29,7 @@ var LANG_STRINGS={
     founderBadge:"⭐ MASTER",exclusive:"ESCLUSIVO",
   },
   en:{
-    gallery:"Gallery",learn:"Learn",post:"Post",chat:"Chat",profile:"Profile",
+    gallery:"Gallery",learn:"Learn",post:"Post",chat:"Chat",profile:"Profile",navHome:"Home",navFeed:"Feed",navSkill:"Skill",navProfile:"Profile",
     login:"Log in",register:"Sign up",logout:"Log out",email:"Email",password:"Password",
     loginWith:"Log in with",orContinueWith:"Or continue with",
     yourPath:"Your path",chooseCategory:"Choose a category",skillTree:"Skill Tree",list:"List",
@@ -49,7 +49,7 @@ var LANG_STRINGS={
     founderBadge:"⭐ MASTER",exclusive:"EXCLUSIVE",
   },
   es:{
-    gallery:"Galería",learn:"Aprende",post:"Publicar",chat:"Chat",profile:"Perfil",
+    gallery:"Galería",learn:"Aprende",post:"Publicar",chat:"Chat",profile:"Perfil",navHome:"Inicio",navFeed:"Feed",navSkill:"Habilidad",navProfile:"Perfil",
     login:"Iniciar sesión",register:"Registrarse",logout:"Cerrar sesión",email:"Correo",password:"Contraseña",
     loginWith:"Entrar con",orContinueWith:"O continuar con",
     yourPath:"Tu camino",chooseCategory:"Elige categoría",skillTree:"Árbol",list:"Lista",
@@ -69,7 +69,7 @@ var LANG_STRINGS={
     founderBadge:"⭐ MASTER",exclusive:"EXCLUSIVO",
   },
   fr:{
-    gallery:"Galerie",learn:"Apprendre",post:"Publier",chat:"Chat",profile:"Profil",
+    gallery:"Galerie",learn:"Apprendre",post:"Publier",chat:"Chat",profile:"Profil",navHome:"Accueil",navFeed:"Feed",navSkill:"Compétence",navProfile:"Profil",
     login:"Connexion",register:"S'inscrire",logout:"Déconnexion",email:"Email",password:"Mot de passe",
     loginWith:"Connexion avec",orContinueWith:"Ou continuer avec",
     yourPath:"Votre parcours",chooseCategory:"Choisir une catégorie",skillTree:"Arbre",list:"Liste",
@@ -89,7 +89,7 @@ var LANG_STRINGS={
     founderBadge:"⭐ MASTER",exclusive:"EXCLUSIF",
   },
   de:{
-    gallery:"Galerie",learn:"Lernen",post:"Beitrag",chat:"Chat",profile:"Profil",
+    gallery:"Galerie",learn:"Lernen",post:"Beitrag",chat:"Chat",profile:"Profil",navHome:"Home",navFeed:"Feed",navSkill:"Skill",navProfile:"Profil",
     login:"Anmelden",register:"Registrieren",logout:"Abmelden",email:"E-Mail",password:"Passwort",
     loginWith:"Anmelden mit",orContinueWith:"Oder weiter mit",
     yourPath:"Dein Weg",chooseCategory:"Kategorie wählen",skillTree:"Fähigkeitsbaum",list:"Liste",
@@ -109,7 +109,7 @@ var LANG_STRINGS={
     founderBadge:"⭐ MASTER",exclusive:"EXKLUSIV",
   },
   zh:{
-    gallery:"画廊",learn:"学习",post:"发布",chat:"聊天",profile:"我的",
+    gallery:"画廊",learn:"学习",post:"发布",chat:"聊天",profile:"我的",navHome:"主页",navFeed:"动态",navSkill:"技能",navProfile:"我的",
     login:"登录",register:"注册",logout:"退出",email:"邮箱",password:"密码",
     loginWith:"使用...登录",orContinueWith:"或继续使用",
     yourPath:"你的课程",chooseCategory:"选择类别",skillTree:"技能树",list:"列表",
@@ -129,7 +129,7 @@ var LANG_STRINGS={
     founderBadge:"⭐ 大师",exclusive:"独家",
   },
   ja:{
-    gallery:"ギャラリー",learn:"学ぶ",post:"投稿",chat:"チャット",profile:"プロフィール",
+    gallery:"ギャラリー",learn:"学ぶ",post:"投稿",chat:"チャット",profile:"プロフィール",navHome:"ホーム",navFeed:"フィード",navSkill:"スキル",navProfile:"プロフィール",
     login:"ログイン",register:"登録",logout:"ログアウト",email:"メール",password:"パスワード",
     loginWith:"でログイン",orContinueWith:"または続ける",
     yourPath:"あなたの学習",chooseCategory:"カテゴリを選ぶ",skillTree:"スキルツリー",list:"リスト",
@@ -290,9 +290,10 @@ async function handleGoogleProfile(profile){
   // Navigate to home
   showToast("Bentornato, "+name.split(" ")[0]+"!","👋");
   setTimeout(function(){
-    if(typeof renderHome==="function") renderHome();
-    showScreen("home");
+    if(typeof renderDashboard==="function") renderDashboard();
+    showScreen("dashboard");
     showBottomNav();
+    setActiveNav("dashboard");
   }, 600);
 }
 
@@ -1791,11 +1792,18 @@ var _currentPostId = null;
 
     /* Navigation */
 function navTo(screen){
-  var allScreens = ["feed","home","category","lesson","profile","drawpass","notif","search","pubprofile","explore","chat","dm","challenges"];
+  var allScreens = ["feed","home","category","lesson","profile","drawpass","notif","search","pubprofile","explore","chat","dm","dashboard","challenges"];
   allScreens.forEach(function(s){ var el=document.getElementById("scr-"+s); if(el) el.style.display="none"; });
   // Special renders
   if(screen==="feed"){ renderFeed(); showScreen("feed"); }
-  else if(screen==="home"){
+  else if(screen==="dashboard"){
+    renderDashboard();
+    showScreen("dashboard");
+    showBottomNav();
+    setActiveNav("dashboard");
+    return;
+  }
+  if(screen==="home"){
     // Force fresh progress from localStorage
     try{var _fp=localStorage.getItem("dl:progress_all");if(_fp){var _fpp=JSON.parse(_fp);if(typeof _fpp==="object"&&_fpp!==null&&!Array.isArray(_fpp))A.progress=_fpp;}}catch(e){}
     renderHome(); showScreen("home");
@@ -2781,33 +2789,128 @@ async function doSearch(q, outputEl){
   if(!output) return;
   try {
     var isTag = q.startsWith("#");
-    var results = "";
+    output.innerHTML = "";
+    
     if(isTag){
-      // Search posts by tag
+      // Tag search
       var posts = await sbFetch("GET","dl_posts",{filters:"tags=ilike.*"+encodeURIComponent(q)+"*",order:"created_at.desc",limit:20});
-      if(posts&&posts.length){
-        results += '<div style="font-size:11px;font-weight:800;color:#9896B8;letter-spacing:1px;margin-bottom:10px">POST CON '+q.toUpperCase()+'</div>';
-        results += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px">';
+      
+      if(posts && posts.length){
+        var header = document.createElement("div");
+        header.style.cssText = "font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:#8a82a8;text-transform:uppercase;margin-bottom:10px;font-weight:700";
+        header.textContent = "POST CON " + q.toUpperCase();
+        output.appendChild(header);
+        
+        var grid = document.createElement("div");
+        grid.style.cssText = "display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px";
         posts.forEach(function(p){
-          results += '<div onclick="openPostDetail(\"'+p.id+'\")" style="aspect-ratio:1;overflow:hidden;cursor:pointer"><img src="'+p.image_url+'" style="width:100%;height:100%;object-fit:cover" loading="lazy"/></div>';
+          var cell = document.createElement("div");
+          cell.style.cssText = "aspect-ratio:1;overflow:hidden;cursor:pointer;background:#221c43;border-radius:6px";
+          var img = document.createElement("img");
+          img.src = p.image_url;
+          img.style.cssText = "width:100%;height:100%;object-fit:cover";
+          img.loading = "lazy";
+          cell.appendChild(img);
+          (function(postId){
+            cell.addEventListener("click", function(){ if(typeof openPostDetail==="function") openPostDetail(postId); });
+          })(p.id);
+          grid.appendChild(cell);
         });
-        results += '</div>';
-      } else { results = '<div style="text-align:center;padding:30px;color:#9896B8">Nessun post trovato per '+q+'</div>'; }
+        output.appendChild(grid);
+      } else {
+        output.innerHTML = '<div style="text-align:center;padding:40px 20px;color:#8a82a8"><div style="font-size:36px;margin-bottom:8px">🔍</div>Nessun post trovato per <strong style="color:#F5F1E8">'+q+'</strong></div>';
+      }
     } else {
-      // Search users by name
+      // User search
       var users = await sbFetch("GET","dl_users",{filters:"name=ilike.*"+encodeURIComponent(q)+"*",limit:20});
-      if(users&&users.length){
-        results += '<div style="font-size:11px;font-weight:800;color:#9896B8;letter-spacing:1px;margin-bottom:10px">UTENTI</div>';
+      
+      if(users && users.length){
+        var uHeader = document.createElement("div");
+        uHeader.style.cssText = "font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:#8a82a8;text-transform:uppercase;margin-bottom:10px;font-weight:700";
+        uHeader.textContent = "UTENTI";
+        output.appendChild(uHeader);
+        
         users.forEach(function(u){
-          results += '<div onclick="openPubProfile(\"'+u.id+'\",\"'+u.name+'\")" style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer">'+
-            '<div style="width:44px;height:44px;border-radius:50%;background:#2d2a4a;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">'+( u.avatar||"👤")+'</div>'+
-            '<div><div style="font-weight:800;font-size:14px;color:#fff">'+u.name+'</div>'+
-            '<div style="font-size:11px;color:#9896B8">'+( u.followers_count||0)+' follower</div></div></div>';
+          var row = document.createElement("div");
+          row.style.cssText = "display:flex;align-items:center;gap:12px;padding:12px;border:1px solid rgba(255,255,255,0.06);border-radius:14px;margin-bottom:8px;cursor:pointer;background:rgba(255,255,255,0.02);transition:background .15s,border-color .15s";
+          row.onmouseover = function(){ this.style.background = "rgba(255,255,255,0.05)"; this.style.borderColor = "rgba(184,114,224,0.3)"; };
+          row.onmouseout = function(){ this.style.background = "rgba(255,255,255,0.02)"; this.style.borderColor = "rgba(255,255,255,0.06)"; };
+          
+          // Avatar
+          var avatar = document.createElement("div");
+          avatar.style.cssText = "width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#814393,#FBBA00);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;color:#fff;font-weight:700";
+          if(u.picture && u.picture.indexOf("http")===0){
+            var img = document.createElement("img");
+            img.src = u.picture;
+            img.style.cssText = "width:100%;height:100%;border-radius:50%;object-fit:cover";
+            avatar.innerHTML = "";
+            avatar.appendChild(img);
+          } else {
+            avatar.textContent = u.avatar || (u.name ? u.name.charAt(0).toUpperCase() : "👤");
+          }
+          
+          // Info
+          var info = document.createElement("div");
+          info.style.cssText = "flex:1;min-width:0";
+          var name = document.createElement("div");
+          name.style.cssText = "font-weight:700;font-size:14px;color:#F5F1E8;margin-bottom:2px";
+          name.textContent = u.name || "Utente";
+          var sub = document.createElement("div");
+          sub.style.cssText = "font-size:11px;color:#8a82a8";
+          sub.textContent = (u.followers_count||0) + " follower";
+          info.appendChild(name);
+          info.appendChild(sub);
+          
+          // Follow button (only if not me)
+          var followBtn = null;
+          if(A.user && A.user.id !== u.id){
+            followBtn = document.createElement("button");
+            followBtn.style.cssText = "padding:6px 14px;border-radius:50px;border:1px solid rgba(184,114,224,0.4);background:rgba(184,114,224,0.15);color:#B872E0;font-weight:700;font-size:12px;cursor:pointer;font-family:'Geist',sans-serif;flex-shrink:0";
+            followBtn.textContent = "+ Segui";
+            (function(targetId, btn){
+              btn.addEventListener("click", async function(e){
+                e.stopPropagation();
+                if(typeof toggleFollow === "function"){
+                  await toggleFollow(targetId);
+                  // Toggle button state visually
+                  if(btn.textContent === "+ Segui"){
+                    btn.textContent = "✓ Seguito";
+                    btn.style.background = "rgba(102,224,181,0.15)";
+                    btn.style.color = "#66E0B5";
+                    btn.style.borderColor = "rgba(102,224,181,0.4)";
+                  } else {
+                    btn.textContent = "+ Segui";
+                    btn.style.background = "rgba(184,114,224,0.15)";
+                    btn.style.color = "#B872E0";
+                    btn.style.borderColor = "rgba(184,114,224,0.4)";
+                  }
+                } else { showToast("Funzione non disponibile",""); }
+              });
+            })(u.id, followBtn);
+          }
+          
+          row.appendChild(avatar);
+          row.appendChild(info);
+          if(followBtn) row.appendChild(followBtn);
+          
+          // Click on row → open profile (but not when clicking follow btn)
+          (function(userId, userName){
+            row.addEventListener("click", function(e){
+              if(e.target.tagName === "BUTTON") return; // ignore follow btn clicks
+              if(typeof openPubProfile === "function") openPubProfile(userId, userName);
+            });
+          })(u.id, u.name);
+          
+          output.appendChild(row);
         });
-      } else { results = '<div style="text-align:center;padding:30px;color:#9896B8">Nessun utente trovato</div>'; }
+      } else {
+        output.innerHTML = '<div style="text-align:center;padding:40px 20px;color:#8a82a8"><div style="font-size:36px;margin-bottom:8px">🔍</div>Nessun utente trovato per <strong style="color:#F5F1E8">'+q+'</strong></div>';
+      }
     }
-    output.innerHTML = results || '<div style="text-align:center;padding:30px;color:#9896B8">Nessun risultato</div>';
-  } catch(e){ output.innerHTML='<div style="padding:20px;color:#9896B8">Errore ricerca</div>'; }
+  } catch(e){
+    console.error("doSearch error:", e);
+    output.innerHTML = '<div style="padding:20px;color:#8a82a8;text-align:center">Errore ricerca: '+e.message+'</div>';
+  }
 }
 
 async function loadTrending(){
@@ -4300,33 +4403,26 @@ function renderMasterCategory(master){} // kept for compatibility, logic moved t
 
 
 function applyTranslations(){
-  // Bottom nav labels
-  var navMap=[["nav-feed-label","gallery"],["nav-home-label","learn"],["nav-post-label","post"],["nav-chat-label","chat"],["nav-profile-label","profile"]];
-  // Translate by finding nav-tab text spans
+  // Bottom nav labels — match new structure: Home, Feed, +, Skill, Profilo
   try{
-    var navTabs=document.querySelectorAll("#bottom-nav .nav-tab");
-    var keys=["gallery","learn","post","chat","profile"];
-    navTabs.forEach(function(tab,i){
-      var label=tab.querySelector(".nav-label")||tab.querySelector("span:last-child");
-      if(label&&keys[i])label.textContent=t(keys[i]);
+    var navMap=[
+      {id:"nav-dashboard", key:"navHome"},
+      {id:"nav-feed", key:"navFeed"},
+      {id:"nav-home", key:"navSkill"},
+      {id:"nav-profile", key:"navProfile"}
+    ];
+    navMap.forEach(function(m){
+      var btn=document.getElementById(m.id);
+      if(!btn)return;
+      var label=btn.querySelector(".nav-label");
+      if(label) label.textContent = t(m.key);
     });
   }catch(e){}
-  // Home header "Scegli una categoria"
+  // Translate generic data-i18n elements
   try{
-    var els=document.querySelectorAll("[data-i18n]");
-    els.forEach(function(el){var k=el.getAttribute("data-i18n");if(k)el.textContent=t(k);});
-  }catch(e){}
-  // Common headings by text content match
-  var headingMap={
-    "Scegli una categoria":"chooseCategory",
-    "Il tuo percorso":"yourPath"
-  };
-  try{
-    document.querySelectorAll("h1,h2,h3,div").forEach(function(el){
-      if(el.children.length===0){
-        var txt=el.textContent.trim();
-        if(headingMap[txt])el.textContent=t(headingMap[txt]);
-      }
+    document.querySelectorAll("[data-i18n]").forEach(function(el){
+      var k=el.getAttribute("data-i18n");
+      if(k)el.textContent=t(k);
     });
   }catch(e){}
 }
@@ -4585,6 +4681,211 @@ function toggleAuthMode(){
   }
 }
 function showSplash(){showScreen("splash");}
+
+/* ═══════════════ DASHBOARD (new Home) ═══════════════ */
+function renderDashboard(){
+  // Validate progress
+  try{
+    var _p=localStorage.getItem("dl:progress_all");
+    if(_p){var _pp=JSON.parse(_p);if(typeof _pp==="object"&&_pp!==null&&!Array.isArray(_pp))A.progress=_pp;}
+  }catch(e){}
+  if(typeof A.progress!=="object"||A.progress===null||Array.isArray(A.progress))A.progress={};
+
+  // Greeting with first name
+  var name = (A.user&&(A.user.name||A.user.full_name))||"";
+  var firstName = name.split(" ")[0] || "amico";
+  var hour = new Date().getHours();
+  var hi = hour<5?"Notte fonda":hour<12?"Buongiorno":hour<18?"Ciao":"Buonasera";
+  var greet = document.getElementById("dash-greeting");
+  if(greet) greet.textContent = hi+", "+firstName+", ben tornato";
+
+  // Tokens
+  var tokens = (A.tokens||248);  // fallback display value
+  if(A.user&&A.user.tokens!==undefined) tokens=A.user.tokens;
+  var tokEl = document.getElementById("dash-tokens");
+  if(tokEl) tokEl.textContent = tokens;
+
+  // Avatar (initial or picture)
+  var avEl = document.getElementById("dash-avatar");
+  if(avEl){
+    if(A.user&&A.user.picture&&A.user.picture.indexOf("http")===0){
+      avEl.innerHTML = '<img src="'+A.user.picture+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover"/>';
+    } else {
+      avEl.textContent = firstName.charAt(0).toUpperCase();
+    }
+  }
+
+  // STREAK
+  var streak = (A.streak&&A.streak.current)||12;
+  var streakDays = document.getElementById("dash-streak-days");
+  if(streakDays) streakDays.textContent = streak;
+  var pills = document.getElementById("dash-streak-pills");
+  if(pills){
+    pills.innerHTML="";
+    for(var i=0;i<8;i++){
+      var p=document.createElement("div");
+      p.style.cssText="width:3px;height:18px;border-radius:50px;background:"+(i<Math.min(streak,8)?"#FBBA00":"rgba(255,255,255,0.1)");
+      pills.appendChild(p);
+    }
+  }
+
+  // CONTINUE LESSON — find last incomplete lesson with progress > 0
+  var continueCard = document.getElementById("dash-continue-card");
+  if(continueCard){
+    var lastLesson = null, lastCat = null;
+    // Find lesson with highest step that's incomplete
+    for(var ci=0;ci<CATS.length;ci++){
+      var cat = CATS[ci];
+      for(var li=0;li<cat.levels.length;li++){
+        var les = cat.levels[li];
+        var k = pk(cat.id, les.id);
+        var pv = A.progress[k];
+        if(pv && pv.step>0 && !pv.completed){
+          lastLesson = les;
+          lastCat = cat;
+          break;
+        }
+      }
+      if(lastLesson) break;
+    }
+    // Fallback: first uncompleted lesson
+    if(!lastLesson){
+      for(var ci2=0;ci2<CATS.length;ci2++){
+        for(var li2=0;li2<CATS[ci2].levels.length;li2++){
+          var les2 = CATS[ci2].levels[li2];
+          var k2 = pk(CATS[ci2].id, les2.id);
+          if(!A.progress[k2]||!A.progress[k2].completed){
+            lastLesson = les2; lastCat = CATS[ci2]; break;
+          }
+        }
+        if(lastLesson) break;
+      }
+    }
+    
+    if(lastLesson && lastCat){
+      var k3 = pk(lastCat.id, lastLesson.id);
+      var pv3 = A.progress[k3]||{};
+      var stepNum = (pv3.step||0)+1;
+      var totSteps = lastLesson.steps?lastLesson.steps.length:5;
+      var pctP = Math.round(((pv3.step||0)/totSteps)*100);
+      var catLabel = lastCat.label.toUpperCase();
+      var lessonIdx = lastCat.levels.findIndex(function(l){return l.id===lastLesson.id;})+1;
+      
+      continueCard.innerHTML = '<div style="width:54px;height:54px;border-radius:14px;background:rgba(184,114,224,0.12);border:1px solid rgba(184,114,224,0.25);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0">'+lastLesson.icon+'</div>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'+
+            '<span style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:1.5px;color:#FBBA00;font-weight:700;background:rgba(251,186,0,0.12);padding:2px 7px;border-radius:50px">'+catLabel+' · L'+(lessonIdx<10?"0":"")+lessonIdx+'</span>'+
+          '</div>'+
+          '<div style="font-weight:800;font-size:15px;color:#F5F1E8;margin-bottom:8px;line-height:1.2">'+lastLesson.title+'</div>'+
+          '<div style="display:flex;align-items:center;gap:8px">'+
+            '<div style="flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:50px;overflow:hidden">'+
+              '<div style="width:'+pctP+'%;height:100%;background:linear-gradient(90deg,#B872E0,#FBBA00);border-radius:50px"></div>'+
+            '</div>'+
+            '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#8a82a8;font-weight:700">'+(pv3.step||0)+'/'+totSteps+'</div>'+
+          '</div>'+
+        '</div>';
+      (function(c,l){continueCard.onclick=function(){startLesson(c,l);};})(lastCat,lastLesson);
+    } else {
+      continueCard.innerHTML = '<div style="width:54px;height:54px;border-radius:14px;background:rgba(102,224,181,0.12);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0">🎉</div>'+
+        '<div style="flex:1"><div style="font-weight:800;font-size:14px;color:#F5F1E8">Tutto completato!</div>'+
+        '<div style="font-size:12px;color:#8a82a8;margin-top:2px">Esplora altre categorie</div></div>';
+      continueCard.onclick = function(){navTo("home");};
+    }
+  }
+
+  // TODAY'S CHALLENGE
+  var challengeCard = document.getElementById("dash-challenge-card");
+  if(challengeCard){
+    var challengeTitle = "Disegna un oggetto sul tuo tavolo";
+    challengeCard.innerHTML = '<div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,rgba(251,186,0,0.18),rgba(255,140,0,0.18));border:1px solid rgba(251,186,0,0.3);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🎯</div>'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:1.5px;color:#FBBA00;font-weight:700;margin-bottom:4px">SFIDA DI OGGI</div>'+
+        '<div style="font-weight:700;font-size:14px;color:#F5F1E8;line-height:1.3">'+challengeTitle+'</div>'+
+      '</div>'+
+      '<div style="font-size:18px;color:#8a82a8;flex-shrink:0">→</div>';
+    challengeCard.onclick = function(){
+      if(typeof openChallengeSubmit==="function") openChallengeSubmit("daily","Oggetto sul tavolo");
+      else showToast("Sfida in arrivo","🎯");
+    };
+  }
+
+  // CATEGORIES grid (with progress %)
+  var catGrid = document.getElementById("dash-categories");
+  if(catGrid){
+    catGrid.innerHTML = "";
+    CATS.forEach(function(cat){
+      var ac = AC[cat.id] || "#B872E0";
+      var done = cat.levels.filter(function(l){var k=pk(cat.id,l.id);return A.progress[k]&&A.progress[k].completed;}).length;
+      var total = cat.levels.length;
+      var pct = total?Math.round(done/total*100):0;
+      
+      var card = document.createElement("div");
+      card.style.cssText="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:18px;padding:14px;cursor:pointer;position:relative;transition:transform .12s,border-color .12s";
+      card.onmouseover=function(){this.style.borderColor="rgba(184,114,224,0.3)";};
+      card.onmouseout=function(){this.style.borderColor="rgba(255,255,255,0.07)";};
+      
+      // Top row: icon + progress ring
+      var topRow = document.createElement("div");
+      topRow.style.cssText="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:32px";
+      
+      var iconEl = document.createElement("div");
+      iconEl.style.cssText="width:42px;height:42px;border-radius:12px;background:"+ac+"22;display:flex;align-items:center;justify-content:center;font-size:24px";
+      iconEl.textContent = cat.icon;
+      topRow.appendChild(iconEl);
+      
+      // Progress ring
+      var ring = document.createElement("div");
+      ring.style.cssText="position:relative;width:38px;height:38px";
+      ring.innerHTML='<svg width="38" height="38" viewBox="0 0 38 38" style="transform:rotate(-90deg)">'+
+        '<circle cx="19" cy="19" r="16" stroke="rgba(255,255,255,0.08)" stroke-width="3" fill="none"/>'+
+        '<circle cx="19" cy="19" r="16" stroke="'+ac+'" stroke-width="3" fill="none" stroke-dasharray="'+(pct*100.53/100).toFixed(1)+' 100.53" stroke-linecap="round"/>'+
+        '</svg>'+
+        '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:\'JetBrains Mono\',monospace;font-size:9px;font-weight:800;color:'+ac+'">'+pct+'%</div>';
+      topRow.appendChild(ring);
+      card.appendChild(topRow);
+      
+      // Title + count
+      var title = document.createElement("div");
+      title.style.cssText="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px;color:#F5F1E8;margin-bottom:4px;letter-spacing:-0.01em";
+      title.textContent = cat.label;
+      card.appendChild(title);
+      
+      var count = document.createElement("div");
+      count.style.cssText="font-size:11px;color:#8a82a8;font-weight:500";
+      count.textContent = done + "/" + total + " lezioni";
+      card.appendChild(count);
+      
+      // Click → category
+      (function(c){card.addEventListener("click", function(){
+        A.cat = c;
+        if(typeof renderCategory==="function") renderCategory();
+        showScreen("category");
+      });})(cat);
+      
+      catGrid.appendChild(card);
+    });
+  }
+}
+
+function openSettings(){
+  // Open profile settings tab
+  navTo("profile");
+  setTimeout(function(){
+    var settingsBtn = document.querySelector('[onclick*="settings"]')||document.getElementById("tab-settings-btn");
+    if(settingsBtn) settingsBtn.click();
+  }, 100);
+}
+
+function setActiveNav(name){
+  var ids=["nav-dashboard","nav-feed","nav-home","nav-profile"];
+  ids.forEach(function(id){
+    var el=document.getElementById(id);
+    if(el){el.style.color="#8a82a8";el.style.opacity="0.6";}
+  });
+  var activeId = "nav-"+(name==="dashboard"?"dashboard":name==="feed"?"feed":name==="home"?"home":name==="profile"?"profile":"");
+  var active=document.getElementById(activeId);
+  if(active){active.style.color="#FBBA00";active.style.opacity="1";}
+}
 
 function init(){
   applyTheme(); // Apply saved theme

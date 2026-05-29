@@ -1064,3 +1064,50 @@ div[style*="color:#FFD60A"] {
   font-family: 'Geist', system-ui, sans-serif !important;
   font-size: 14px !important;
 }
+
+
+/* ════════════════════════════════════════════════════════════════
+   FIX DARK TEXT ON CATEGORY CARDS (Skill page)
+   ════════════════════════════════════════════════════════════════ */
+#scr-home #home-cat-grid > div * {
+  color: #F5F1E8 !important;
+}
+#scr-home #home-cat-grid > div > div > div:first-child {
+  /* category name */
+  color: #F5F1E8 !important;
+}
+
+/* Category label text — force light */
+[style*="color:#1C1B2E"],
+[style*="color: #1C1B2E"],
+[style*="color:#1c1b2e"],
+[style*="color:#1C1B29"],
+[style*="color:#1c1b29"],
+[style*="color:#15102a"],
+[style*="color: #15102a"] {
+  color: #F5F1E8 !important;
+}
+
+/* Inline dark colors in JS-generated cards */
+.cat-card *, [class*="cat-"] * {
+  color: inherit;
+}
+
+/* Category cards: ensure title is visible */
+#home-cat-grid div[onclick*="A.cat"],
+#home-cat-grid div[onclick*="renderCategory"],
+#home-cat-grid > div {
+  color: #F5F1E8 !important;
+}
+#home-cat-grid > div > div {
+  color: #F5F1E8;
+}
+#home-cat-grid > div > div > div {
+  color: #F5F1E8 !important;
+}
+
+/* The "Sblocchi:" descriptions should be muted but visible */
+#home-cat-grid div[style*="italic"],
+#home-cat-grid div:nth-last-child(1) {
+  color: #8a82a8 !important;
+}
