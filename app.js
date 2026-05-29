@@ -919,6 +919,7 @@ async function onLogin(){
     }
   }catch(e){A.pro=false;A.progress={};A.profile={avatar:"def",border:"none"};}
   A.tokens = parseInt(localGet("dl:tokens"))||0;
+  try{ A.pro = localStorage.getItem("dl:pro") === "1"; }catch(e){ A.pro = false; }
   await loadTutorialsFromDB();
   showBottomNav();
   var ni=document.getElementById("nav-avatar-icon");
@@ -1931,6 +1932,111 @@ function renderProfileSettings(cont){
       sel.onchange=function(){setLang(this.value);setTimeout(function(){location.reload();},150);};
     }
   },50);
+
+  // DEV TOOLS
+  var devSec = document.createElement("div");
+  devSec.style.cssText = "background:linear-gradient(135deg,rgba(184,114,224,0.10),rgba(251,186,0,0.08));border:1px solid rgba(184,114,224,0.30);border-radius:14px;padding:14px;margin-bottom:10px;margin-top:14px";
+  
+  var devHeader = document.createElement("div");
+  devHeader.style.cssText = "display:flex;align-items:center;gap:8px;margin-bottom:12px";
+  devHeader.innerHTML = '<span style="font-size:18px">🔧</span><span style="font-family:JetBrains Mono,monospace;font-size:11px;letter-spacing:2px;color:#FBBA00;font-weight:800;text-transform:uppercase">Sviluppatore</span>';
+  devSec.appendChild(devHeader);
+  
+  // PRO toggle
+  var proRow = document.createElement("div");
+  proRow.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:10px;margin-bottom:8px";
+  var proLabel = document.createElement("div");
+  proLabel.innerHTML = '<div style="font-weight:700;font-size:13px;color:#F5F1E8">PRO attivo</div><div style="font-size:11px;color:#8a82a8;margin-top:2px">Sblocca tutte le lezioni e funzioni premium</div>';
+  proRow.appendChild(proLabel);
+  
+  var proToggle = document.createElement("button");
+  var isPro = A.pro === true;
+  proToggle.style.cssText = "padding:8px 16px;border-radius:50px;border:none;font-weight:800;font-size:12px;cursor:pointer;font-family:Geist,sans-serif;" +
+    (isPro ? "background:linear-gradient(135deg,#FBBA00,#FF9500);color:#15102a" : "background:rgba(255,255,255,0.08);color:#8a82a8;border:1px solid rgba(255,255,255,0.10)");
+  proToggle.textContent = isPro ? "ON" : "OFF";
+  proToggle.onclick = function(){
+    A.pro = !A.pro;
+    try{localStorage.setItem("dl:pro", A.pro ? "1" : "0");}catch(e){}
+    showToast("PRO " + (A.pro ? "attivato" : "disattivato"), A.pro ? "✨" : "");
+    renderProfileSettings(cont);
+    if(typeof renderProfile === "function") renderProfile();
+  };
+  proRow.appendChild(proToggle);
+  devSec.appendChild(proRow);
+  
+  // Token grant
+  var tokRow = document.createElement("div");
+  tokRow.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:10px;margin-bottom:8px";
+  var curTokens = A.tokens || 0;
+  tokRow.innerHTML = '<div><div style="font-weight:700;font-size:13px;color:#F5F1E8">Token attuali</div><div style="font-size:11px;color:#FBBA00;margin-top:2px">⭐ ' + curTokens + '</div></div>';
+  var addTokBtn = document.createElement("button");
+  addTokBtn.style.cssText = "padding:8px 14px;border-radius:50px;background:rgba(251,186,0,0.15);border:1px solid rgba(251,186,0,0.35);color:#FBBA00;font-weight:800;font-size:12px;cursor:pointer;font-family:Geist,sans-serif";
+  addTokBtn.textContent = "+ 100";
+  addTokBtn.onclick = function(){
+    A.tokens = (A.tokens || 0) + 100;
+    try{localStorage.setItem("dl:tokens", String(A.tokens));}catch(e){}
+    showToast("+100 token", "⭐");
+    renderProfileSettings(cont);
+    if(typeof renderDashboard === "function") renderDashboard();
+  };
+  tokRow.appendChild(addTokBtn);
+  devSec.appendChild(tokRow);
+  
+  // Quick complete category
+  var quickRow = document.createElement("div");
+  quickRow.style.cssText = "padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:10px;margin-bottom:8px";
+  quickRow.innerHTML = '<div style="font-weight:700;font-size:13px;color:#F5F1E8;margin-bottom:6px">Completa rapida</div><div style="font-size:11px;color:#8a82a8;margin-bottom:8px">Sblocca botteghe testando subito</div>';
+  var btnRow = document.createElement("div");
+  btnRow.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:6px";
+  
+  CATS.forEach(function(cat){
+    var b = document.createElement("button");
+    b.style.cssText = "padding:7px 8px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);color:#F5F1E8;font-weight:600;font-size:11px;cursor:pointer;font-family:Geist,sans-serif;display:flex;align-items:center;gap:6px;justify-content:center";
+    b.innerHTML = '<span>' + cat.icon + '</span><span>' + cat.label + '</span>';
+    (function(c){
+      b.onclick = function(){
+        c.levels.forEach(function(les){
+          var k = pk(c.id, les.id);
+          A.progress[k] = {step: (les.steps?les.steps.length:5), completed: true, completed_at: Date.now()};
+        });
+        try{localStorage.setItem("dl:progress_all", JSON.stringify(A.progress));}catch(e){}
+        showToast(c.label + " completato!", "✅");
+        renderProfileSettings(cont);
+      };
+    })(cat);
+    btnRow.appendChild(b);
+  });
+  
+  quickRow.appendChild(btnRow);
+  devSec.appendChild(quickRow);
+  
+  // Reset progress
+  var resetRow = document.createElement("div");
+  resetRow.style.cssText = "padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:10px";
+  resetRow.innerHTML = '<div style="font-weight:700;font-size:13px;color:#F5F1E8;margin-bottom:6px">Reset progressi</div><div style="font-size:11px;color:#8a82a8;margin-bottom:8px">Riparte da zero (lezioni + badge + botteghe)</div>';
+  var resetBtn = document.createElement("button");
+  resetBtn.style.cssText = "width:100%;padding:8px 12px;border-radius:8px;background:rgba(228,76,60,0.10);border:1px solid rgba(228,76,60,0.30);color:#E07172;font-weight:800;font-size:12px;cursor:pointer;font-family:Geist,sans-serif";
+  resetBtn.textContent = "Reset completo";
+  resetBtn.onclick = function(){
+    if(!confirm("Sicuro? Cancella tutti i progressi (anche le iscrizioni alle botteghe).")) return;
+    A.progress = {};
+    A.tokens = 0;
+    _myBotteghe = [];
+    var keysToRemove = [];
+    for(var i=0;i<localStorage.length;i++){
+      var k = localStorage.key(i);
+      if(k && (k.indexOf("dl:progress_")===0 || k.indexOf("dl:my_botteghe")===0 || k.indexOf("dl:tokens")===0 || k.indexOf("dl:posted_any")===0 || k.indexOf("dl:followed_any")===0 || k.indexOf("dl:challenge_done_")===0 || k.indexOf("dl:joined_challenge_")===0)){
+        keysToRemove.push(k);
+      }
+    }
+    keysToRemove.forEach(function(k){localStorage.removeItem(k);});
+    showToast("Reset completato", "🔁");
+    renderProfileSettings(cont);
+  };
+  resetRow.appendChild(resetBtn);
+  devSec.appendChild(resetRow);
+  
+  cont.appendChild(devSec);
 }
 
 async function changeCoverPhoto(){
