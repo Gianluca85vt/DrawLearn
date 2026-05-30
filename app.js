@@ -2163,6 +2163,12 @@ var _currentPostId = null;
 
     /* Navigation */
 function navTo(screen){
+  // Save for refresh restoration
+  try{
+    var safeScreens = ["dashboard","feed","home","profile","botteghe","badges","drawpass","search","chat"];
+    if(safeScreens.indexOf(screen) >= 0){ localStorage.setItem("dl:last_screen", screen); }
+  }catch(e){}
+
   // Update bottom nav active state
   try{
     var navMap = {dashboard:"dashboard",feed:"feed",home:"home",profile:"profile",category:"home",lesson:"home",skill:"home"};
@@ -6229,7 +6235,7 @@ var BOTTEGHE_CATALOG = [
     gate: { type: "category", category: "character", progress: 0.5 },
     gateLabel: "50% di Character Design",
     maxMembers: 30,
-    mentor: { name: "Sofia Ricci", role: "Concept Artist", avatar: "👩‍🎨", id: "founder_sofia" }
+    mentor: { name: "Sofia Ricci", role: "Concept Artist", avatar: "👩‍🎨", id: "master_sofia" }
   },
   {
     id: "officina_anatomica",
@@ -6241,7 +6247,7 @@ var BOTTEGHE_CATALOG = [
     gate: { type: "category", category: "character", progress: 0.7 },
     gateLabel: "70% di Character Design",
     maxMembers: 30,
-    mentor: { name: "Sofia Ricci", role: "Concept Artist", avatar: "👩‍🎨", id: "founder_sofia" }
+    mentor: { name: "Sofia Ricci", role: "Concept Artist", avatar: "👩‍🎨", id: "master_sofia" }
   },
   {
     id: "studio_paesaggio",
@@ -6253,7 +6259,7 @@ var BOTTEGHE_CATALOG = [
     gate: { type: "category", category: "environment", progress: 0.5 },
     gateLabel: "50% di Environment",
     maxMembers: 50,
-    mentor: { name: "Luca Ferretti", role: "Environment Artist", avatar: "👨‍🎨", id: "founder_luca" }
+    mentor: { name: "Luca Ferretti", role: "Environment Artist", avatar: "👨‍🎨", id: "master_luca" }
   },
   {
     id: "caverna_concept",
@@ -6265,7 +6271,7 @@ var BOTTEGHE_CATALOG = [
     gate: { type: "total_completed", count: 15 },
     gateLabel: "15 lezioni totali complete",
     maxMembers: 50,
-    mentor: { name: "Luca Ferretti", role: "Environment Artist", avatar: "👨‍🎨", id: "founder_luca" }
+    mentor: { name: "Luca Ferretti", role: "Environment Artist", avatar: "👨‍🎨", id: "master_luca" }
   }
 ];
 
@@ -6560,7 +6566,7 @@ async function openBottega(bottegaId){
   info.style.cssText = "padding:16px 16px 12px";
   info.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px"><h1 style="font-family:Bricolage Grotesque,sans-serif;font-size:22px;font-weight:800;color:#F5F1E8;margin:0;letter-spacing:-0.02em">' + bottega.name + '</h1>' +
     '<div style="display:flex;gap:6px;flex-shrink:0"><div style="background:rgba(255,255,255,0.06);border-radius:50px;padding:3px 8px;font-size:10px;color:#F5F1E8;font-weight:700;font-family:JetBrains Mono,monospace" id="bottega-members-count">👥 ...</div></div></div>' +
-    '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(184,114,224,0.10);border:1px solid rgba(184,114,224,0.25);border-radius:50px;font-size:11px;color:' + bottega.color + ';font-weight:700;width:fit-content"><span style="font-size:14px">' + bottega.mentor.avatar + '</span><span>Mentor: ' + bottega.mentor.name + '</span></div>';
+    '<div onclick="openMentorProfile(\'' + bottega.mentor.id + '\')" style="cursor:pointer;display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(184,114,224,0.10);border:1px solid rgba(184,114,224,0.25);border-radius:50px;font-size:11px;color:' + bottega.color + ';font-weight:700;width:fit-content"><span style="font-size:14px">' + bottega.mentor.avatar + '</span><span>Mentor: ' + bottega.mentor.name + ' \u203A</span></div>';
   container.appendChild(info);
   
   // New post button
@@ -7347,16 +7353,22 @@ async function showBottegaPostPreview(bottegaId, file){
     submitBtn.disabled = true;
     submitBtn.textContent = "Caricamento...";
     submitBtn.style.opacity = "0.7";
+    var prevErr = card.querySelector(".bottega-upload-error");
+    if(prevErr) prevErr.remove();
     var caption = capInput.value.trim();
-    var success = await submitBottegaPost(bottegaId, file, caption);
-    if(success){
+    var result = await submitBottegaPost(bottegaId, file, caption);
+    if(result === true){
       overlay.remove();
-      // Re-open bottega to refresh feed
       openBottega(bottegaId);
     } else {
       submitBtn.disabled = false;
       submitBtn.textContent = "Riprova";
       submitBtn.style.opacity = "1";
+      var errBox = document.createElement("div");
+      errBox.className = "bottega-upload-error";
+      errBox.style.cssText = "margin-top:12px;padding:10px 12px;background:rgba(228,76,60,0.10);border:1px solid rgba(228,76,60,0.30);border-radius:10px;color:#E07172;font-size:12px;line-height:1.5";
+      errBox.textContent = "Errore: " + (typeof result === "string" ? result : "controlla la console del browser (F12)");
+      card.appendChild(errBox);
     }
   };
   
@@ -7370,45 +7382,52 @@ async function showBottegaPostPreview(bottegaId, file){
 }
 
 async function submitBottegaPost(bottegaId, file, caption){
-  if(!A.user) return false;
-  if(!isMemberOf(bottegaId)){ showToast("Non sei membro",""); return false; }
-  
+  if(!A.user) return "non sei loggato";
+  if(!isMemberOf(bottegaId)) return "non sei membro";
+  if(!sbReady()) return "Supabase non disponibile";
   try{
-    // Compress
+    console.log("[bottega] compressing...");
     var blob = await compressImage(file, 1600, 0.85);
-    
-    // Upload to Storage  
+    console.log("[bottega] compressed", blob.size, "bytes");
+    console.log("[bottega] uploading to Posts bucket...");
     var fname = A.user.id + "_bottega_" + bottegaId + "_" + Date.now() + ".jpg";
     var imageUrl = await sbUpload("Posts", fname, blob);
-    if(!imageUrl) throw new Error("upload failed");
-    
-    // Insert into dl_bottega_posts
-    await sbFetch("POST","dl_bottega_posts",{
-      body:{
-        bottega_id: bottegaId,
-        user_id: A.user.id,
-        user_name: A.user.name || "Membro",
-        user_avatar: A.user.picture || A.user.avatar || "",
-        image_url: imageUrl,
-        caption: caption || "",
-        likes_count: 0,
-        comments_count: 0,
-        created_at: new Date().toISOString()
-      }
-    });
-    
+    console.log("[bottega] image url:", imageUrl);
+    if(!imageUrl) return "upload immagine fallito (verifica bucket Posts)";
+    console.log("[bottega] saving row to dl_bottega_posts...");
+    await sbFetch("POST","dl_bottega_posts",{body:{
+      bottega_id: bottegaId,
+      user_id: A.user.id,
+      user_name: A.user.name || "Membro",
+      user_avatar: A.user.picture || A.user.avatar || "",
+      image_url: imageUrl,
+      caption: caption || "",
+      likes_count: 0,
+      comments_count: 0,
+      created_at: new Date().toISOString()
+    }});
+    console.log("[bottega] post saved!");
     try{ localStorage.setItem("dl:posted_any","1"); }catch(e){}
     try{ if(typeof track==="function") track("bottega_post_created", {bottega_id: bottegaId}); }catch(e){}
-    showToast("Post pubblicato nella bottega!", "");
+    showToast("Post pubblicato!", "");
     return true;
   }catch(e){
-    console.error("submitBottegaPost error:", e);
-    var msg = e.message || "errore sconosciuto";
-    if(msg.indexOf("bucket")>=0||msg.indexOf("Bucket")>=0) msg = "Bucket 'Posts' non configurato";
-    if(msg.indexOf("relation")>=0) msg = "Tabella dl_bottega_posts non creata";
-    showToast("Errore: " + msg, "");
-    return false;
+    console.error("[bottega] error:", e);
+    var msg = e.message || String(e) || "errore sconosciuto";
+    if(msg.indexOf("dl_bottega_posts")>=0 || msg.indexOf("relation")>=0 || msg.indexOf("does not exist")>=0)
+      return "tabella dl_bottega_posts non creata - esegui lo SQL su Supabase";
+    if(msg.indexOf("bucket")>=0||msg.indexOf("Bucket")>=0||msg.indexOf("storage")>=0)
+      return "bucket Posts non accessibile";
+    if(msg.indexOf("403")>=0) return "permesso negato (RLS)";
+    return msg.slice(0, 130);
   }
+}
+
+function openMentorProfile(masterId){
+  var master = (typeof MASTERS !== "undefined") ? MASTERS.find(function(m){return m.id===masterId;}) : null;
+  if(!master){ showToast("Profilo non disponibile",""); return; }
+  if(typeof openMasterDetail === "function"){ openMasterDetail(master); return; }
+  showToast("Profilo " + master.name + " in arrivo", "");
 }
 
 function init(){
@@ -7488,7 +7507,13 @@ async function loadUserSession(uid, authTimer){
     showBottomNav();
     var ni=document.getElementById("nav-avatar-icon");
     if(ni) ni.textContent=getAvatarIcon();
-    renderFeed(); showScreen("feed"); navTo("feed");
+    renderFeed(); showScreen("feed"); var lastScreen = "dashboard";
+  try{
+    var ls = localStorage.getItem("dl:last_screen");
+    var safe = ["dashboard","feed","home","profile","botteghe","badges","drawpass","search","chat"];
+    if(ls && safe.indexOf(ls) >= 0) lastScreen = ls;
+  }catch(e){}
+  navTo(lastScreen);
     
   } catch(e) {
     console.error("loadUserSession error:", e);
