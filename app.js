@@ -7224,6 +7224,16 @@ function renderBottegaFeed(bottega, posts){
     })(p.id, likeBtn, likesCount, isLiked);
     actions.appendChild(likeBtn);
     
+    // Comment button
+    var commentsCount = p.comments_count || 0;
+    var commentBtn = document.createElement("button");
+    commentBtn.style.cssText = "background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;color:#F5F1E8;font-weight:700;font-size:13px;font-family:Geist,sans-serif;padding:0";
+    commentBtn.innerHTML = '<span style="font-size:17px">💬</span><span>' + commentsCount + '</span>';
+    (function(post){
+      commentBtn.onclick = function(){ openBottegaComments(post, post.bottega_id); };
+    })(p);
+    actions.appendChild(commentBtn);
+    
     card.appendChild(actions);
     
     // Caption
@@ -7428,6 +7438,168 @@ function openMentorProfile(masterId){
   if(!master){ showToast("Profilo non disponibile",""); return; }
   if(typeof openMasterDetail === "function"){ openMasterDetail(master); return; }
   showToast("Profilo " + master.name + " in arrivo", "");
+}
+
+/* BOTTEGA COMMENTS */
+async function loadBottegaComments(postId){
+  if(!sbReady()) return [];
+  try{
+    var rows = await sbFetch("GET","dl_bottega_comments",{
+      filters:"post_id=eq."+postId,
+      order:"created_at.asc",
+      limit:200
+    });
+    return rows || [];
+  }catch(e){
+    console.warn("loadBottegaComments error:", e);
+    return [];
+  }
+}
+
+async function openBottegaComments(post, bottegaId){
+  if(!post || !post.id){ showToast("Post non valido",""); return; }
+  
+  var overlay = document.createElement("div");
+  overlay.id = "comments-overlay";
+  overlay.style.cssText = "position:fixed;inset:0;z-index:10002;background:#15102a;display:flex;flex-direction:column;animation:fadeIn 0.2s ease-out";
+  
+  var header = document.createElement("div");
+  header.style.cssText = "padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:12px;background:#1c1738;flex-shrink:0";
+  header.innerHTML = '<button onclick="document.getElementById('+comments-overlay+').remove()" style="width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#F5F1E8;font-size:18px;cursor:pointer">←</button>' +
+    '<div style="flex:1"><div style="font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:2px;color:#8a82a8;font-weight:700;text-transform:uppercase">COMMENTI</div><div style="font-weight:700;font-size:14px;color:#F5F1E8" id="comments-header-title">Caricamento...</div></div>';
+  overlay.appendChild(header);
+  
+  var scroll = document.createElement("div");
+  scroll.style.cssText = "flex:1;overflow-y:auto;padding-bottom:80px";
+  
+  var postPreview = document.createElement("div");
+  postPreview.style.cssText = "padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:12px;background:rgba(255,255,255,0.02)";
+  var avHTML = (post.user_avatar && post.user_avatar.indexOf("http")===0)
+    ? '<img src="'+post.user_avatar+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0">'
+    : '<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#814393,#FBBA00);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0">' + (post.user_name?post.user_name.charAt(0).toUpperCase():"?") + '</div>';
+  var thumbHTML = post.image_url ? '<img src="'+post.image_url+'" style="width:60px;height:60px;border-radius:10px;object-fit:cover;flex-shrink:0">' : '';
+  postPreview.innerHTML = avHTML +
+    '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px;color:#F5F1E8;margin-bottom:2px">' + (post.user_name||"Membro") + '</div>' +
+    '<div style="font-size:12px;color:#a8a2c8;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + (post.caption || "(senza descrizione)") + '</div></div>' +
+    thumbHTML;
+  scroll.appendChild(postPreview);
+  
+  var listDiv = document.createElement("div");
+  listDiv.id = "bottega-comments-list";
+  listDiv.style.cssText = "padding:16px";
+  listDiv.innerHTML = '<div style="text-align:center;padding:30px;color:#9896B8"><div style="width:24px;height:24px;border:3px solid rgba(255,255,255,.1);border-top:3px solid #B872E0;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px"></div>Caricamento commenti...</div>';
+  scroll.appendChild(listDiv);
+  
+  overlay.appendChild(scroll);
+  
+  var inputBar = document.createElement("div");
+  inputBar.style.cssText = "position:absolute;left:0;right:0;bottom:0;padding:10px 12px;background:#1c1738;border-top:1px solid rgba(255,255,255,0.08);display:flex;gap:8px;align-items:center";
+  
+  var input = document.createElement("input");
+  input.id = "comment-input";
+  input.type = "text";
+  input.placeholder = "Aggiungi un commento...";
+  input.maxLength = 500;
+  input.style.cssText = "flex:1;height:42px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);border-radius:14px;color:#F5F1E8;padding:0 14px;font-family:Geist,sans-serif;font-size:13px;outline:none";
+  inputBar.appendChild(input);
+  
+  var sendBtn = document.createElement("button");
+  sendBtn.id = "comment-send-btn";
+  sendBtn.style.cssText = "width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#B872E0,#FBBA00);border:none;color:#1c1b29;font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center";
+  sendBtn.innerHTML = "↑";
+  sendBtn.onclick = function(){
+    var text = input.value.trim();
+    if(!text) return;
+    submitBottegaComment(post.id, text, bottegaId);
+    input.value = "";
+  };
+  inputBar.appendChild(sendBtn);
+  overlay.appendChild(inputBar);
+  
+  document.body.appendChild(overlay);
+  
+  input.addEventListener("keydown", function(e){
+    if(e.key === "Enter"){ sendBtn.click(); }
+  });
+  
+  var comments = await loadBottegaComments(post.id);
+  renderBottegaComments(comments);
+  var ht = document.getElementById("comments-header-title");
+  if(ht) ht.textContent = comments.length + " " + (comments.length===1?"commento":"commenti");
+}
+
+function renderBottegaComments(comments){
+  var list = document.getElementById("bottega-comments-list");
+  if(!list) return;
+  list.innerHTML = "";
+  
+  if(!comments.length){
+    list.innerHTML = '<div style="text-align:center;padding:50px 20px;color:#8a82a8"><div style="font-size:42px;margin-bottom:12px;opacity:0.5">💬</div><div style="font-size:13px;line-height:1.5">Nessun commento ancora.<br>Sii il primo a rispondere!</div></div>';
+    return;
+  }
+  
+  var bottega = A.currentBottega || null;
+  var mentorId = bottega ? bottega.mentor.id : null;
+  
+  comments.forEach(function(c){
+    var item = document.createElement("div");
+    item.style.cssText = "display:flex;gap:10px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.04)";
+    var isMentor = (c.user_id === mentorId);
+    var avHTML = (c.user_avatar && c.user_avatar.indexOf("http")===0)
+      ? '<img src="'+c.user_avatar+'" style="width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0">'
+      : '<div style="width:34px;height:34px;border-radius:50%;background:' + (isMentor?'linear-gradient(135deg,#FBBA00,#FF9500)':'linear-gradient(135deg,#814393,#FBBA00)') + ';display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0">' + (c.user_name?c.user_name.charAt(0).toUpperCase():"?") + '</div>';
+    var mentorBadge = isMentor ? ' <span style="background:linear-gradient(135deg,#FBBA00,#FF9500);color:#15102a;font-size:9px;font-weight:800;padding:2px 6px;border-radius:50px;font-family:JetBrains Mono,monospace;letter-spacing:0.5px;margin-left:4px">MENTOR</span>' : '';
+    item.innerHTML = avHTML +
+      '<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span style="font-weight:700;font-size:13px;color:' + (isMentor?'#FBBA00':'#F5F1E8') + '">' + (c.user_name||"Membro") + '</span>' + mentorBadge +
+      '<span style="font-size:10px;color:#6e6791;font-family:JetBrains Mono,monospace;margin-left:auto">' + formatTimeAgo(c.created_at) + '</span></div>' +
+      '<div style="font-size:13px;color:#d8d2e8;line-height:1.5;white-space:pre-wrap;word-wrap:break-word">' + c.text + '</div></div>';
+    list.appendChild(item);
+  });
+}
+
+async function submitBottegaComment(postId, text, bottegaId){
+  if(!A.user){ showToast("Accedi prima",""); return; }
+  if(!sbReady()){ showToast("Connessione assente",""); return; }
+  if(!text || !text.trim()) return;
+  
+  var sendBtn = document.getElementById("comment-send-btn");
+  if(sendBtn){ sendBtn.disabled = true; sendBtn.style.opacity = "0.5"; }
+  
+  try{
+    await sbFetch("POST","dl_bottega_comments",{body:{
+      post_id: postId,
+      user_id: A.user.id,
+      user_name: A.user.name || "Membro",
+      user_avatar: A.user.picture || A.user.avatar || "",
+      text: text.trim(),
+      created_at: new Date().toISOString()
+    }});
+    
+    try{
+      var p = await sbFetch("GET","dl_bottega_posts",{filters:"id=eq."+postId, limit:1});
+      var curCount = (p && p[0] && p[0].comments_count) || 0;
+      await sbFetch("PATCH","dl_bottega_posts?id=eq."+postId,{body:{comments_count: curCount+1}});
+    }catch(e){console.warn("counter inc failed:",e);}
+    
+    try{ if(typeof track==="function") track("bottega_comment_created", {bottega_id: bottegaId}); }catch(e){}
+    
+    var fresh = await loadBottegaComments(postId);
+    renderBottegaComments(fresh);
+    var ht = document.getElementById("comments-header-title");
+    if(ht) ht.textContent = fresh.length + " " + (fresh.length===1?"commento":"commenti");
+    
+    var scroll = document.querySelector("#comments-overlay > div:nth-child(2)");
+    if(scroll) scroll.scrollTop = scroll.scrollHeight;
+  }catch(e){
+    console.error("[comment] error:", e);
+    var msg = e.message || String(e);
+    if(msg.indexOf("dl_bottega_comments")>=0 || msg.indexOf("relation")>=0 || msg.indexOf("does not exist")>=0)
+      showToast("Tabella dl_bottega_comments non creata","");
+    else
+      showToast("Errore: " + msg.slice(0,80), "");
+  }
+  
+  if(sendBtn){ sendBtn.disabled = false; sendBtn.style.opacity = "1"; }
 }
 
 function init(){
