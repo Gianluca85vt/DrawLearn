@@ -573,6 +573,9 @@ function showToast(msg,e){const t=document.getElementById("toast");t.textContent
 function togglePwd(id,btn){const el=document.getElementById(id);el.type=el.type==="password"?"text":"password";btn.textContent=el.type==="password"?"○":"👁";}
 var DISP={"splash":"flex","auth":"flex","home":"block","category":"block","lesson":"block","paywall":"flex","checkout":"flex","profile":"block","drawpass":"block","feed":"block"};
 function showScreen(name){
+  // GUARD: do not show auth screen if user is logged in (prevents accidental logout)
+  if(scr==="auth" && A && A.user){ console.warn("Refused to show auth: user is logged in"); return; }
+
   try{ if(scr==="auth"||scr==="splash"){ var _bn=document.getElementById("bottom-nav"); if(_bn) _bn.style.display="none"; } }catch(e){}
   document.querySelectorAll(".screen").forEach(function(s){
     s.style.display="none";
@@ -932,7 +935,7 @@ async function onLogin(){
     }).catch(function(){});
   }
   var streak=checkAndUpdateStreak();
-  renderFeed(); showScreen("feed"); navTo("feed");
+   navTo("feed");
   var greeting="Benvenuto, "+A.user.name.split(" ")[0]+"!";
   if(streak>1) greeting+=" 🔥"+streak+" giorni!";
   showToast(greeting,"");
@@ -8644,8 +8647,9 @@ function proceedInit(){
 
   // STEP 1: after 2s max, show auth regardless (safety net)
   var authTimer = setTimeout(function(){
-    if(A.screen==="splash"){ setStatus(""); showScreen("auth"); }
-  }, 2000);
+    // Only show auth if we're STILL on splash AND don't have a user yet (extra guard)
+    if(A.screen==="splash" && !A.user){ setStatus(""); showScreen("auth"); }
+  }, 7000);
 
   // STEP 2: try to restore session from localStorage
   var uid = localGet("dl:uid");
@@ -8664,6 +8668,9 @@ function proceedInit(){
 }
 
 async function loadUserSession(uid, authTimer){
+  // Clear safety timer immediately so race condition cannot kick us to auth
+  if(authTimer) clearTimeout(authTimer);
+
   try {
     setStatus("Caricamento dati...");
     var rows = await Promise.race([
