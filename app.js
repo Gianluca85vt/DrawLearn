@@ -2007,7 +2007,8 @@ function renderProfileSettings(cont){
   genderSec.appendChild(genderRow);
   cont.appendChild(genderSec);
 
-  // DEV TOOLS
+  // DEV TOOLS — only render if server-side admin flag is true
+  if(typeof isAdmin === "function" && isAdmin()){
   var devSec = document.createElement("div");
   devSec.style.cssText = "background:linear-gradient(135deg,rgba(184,114,224,0.10),rgba(251,186,0,0.08));border:1px solid rgba(184,114,224,0.30);border-radius:14px;padding:14px;margin-bottom:10px;margin-top:14px";
   
@@ -2151,6 +2152,7 @@ function renderProfileSettings(cont){
   devSec.appendChild(resetRow);
   
   cont.appendChild(devSec);
+  } // end isAdmin() guard
 }
 
 async function changeCoverPhoto(){
@@ -7264,6 +7266,8 @@ function openHamburger(){
   
   var accountSection = document.createElement("div");
   accountSection.style.cssText = "padding:8px 0 24px";
+  accountSection.appendChild(makeItem("🛡️","Privacy Policy","Come trattiamo i tuoi dati", function(){ showLegalModal("privacy"); }));
+  accountSection.appendChild(makeItem("📜","Termini di Servizio","Le regole dell'app", function(){ showLegalModal("terms"); }));
   accountSection.appendChild(makeItem("🚪","Esci","Disconnetti il tuo account", function(){
     if(confirm("Sei sicuro di voler uscire?")){
       try{ localStorage.removeItem("dl:uid"); localStorage.removeItem("dl:user"); }catch(e){}
@@ -7273,6 +7277,8 @@ function openHamburger(){
       hideBottomNav();
     }
   }));
+  // Account deletion (GDPR/store compliance)
+  accountSection.appendChild(makeItem("🗑️","Elimina account","Cancella tutti i tuoi dati", function(){ confirmDeleteAccount(); }));
   drawer.appendChild(accountSection);
   
   // Version footer
@@ -8667,6 +8673,264 @@ function getDrawBoundLogoSVG(size, uid){
     '</svg>';
 }
 
+/* ─── SERVER-SIDE PRO VERIFICATION ─── */
+var _proVerifyCache = { value: null, fetchedAt: 0 };
+
+async function verifyProServerSide(forceFresh){
+  if(!A.user || !A.user.id) return false;
+  
+  // Use cache (5 min) unless forced
+  var now = Date.now();
+  if(!forceFresh && _proVerifyCache.value !== null && (now - _proVerifyCache.fetchedAt) < 300000){
+    return _proVerifyCache.value;
+  }
+  
+  if(!sbReady()){
+    // Offline — trust the cached A.pro until back online
+    return A.pro === true;
+  }
+  
+  try{
+    var rows = await sbFetch("GET", "dl_subscriptions", {
+      filters: "user_id=eq." + A.user.id + "&active=eq.true"
+    });
+    var ok = !!(rows && rows[0]);
+    _proVerifyCache = { value: ok, fetchedAt: now };
+    // Sync local state too
+    A.pro = ok;
+    try{ localStorage.setItem("dl:pro", ok ? "1" : "0"); }catch(e){}
+    return ok;
+  }catch(e){
+    console.warn("verifyProServerSide error:", e);
+    return A.pro === true;
+  }
+}
+
+/* Gate function: use this before accessing PRO-only features.
+   If A.pro is false, returns false immediately (no DB call).
+   If A.pro is true, validates against DB. */
+async function requirePro(){
+  if(A.pro !== true){
+    // Show paywall
+    if(typeof showPaywall === "function") showPaywall();
+    return false;
+  }
+  // Validate server-side (anti-tampering)
+  var ok = await verifyProServerSide();
+  if(!ok){
+    A.pro = false;
+    try{ localStorage.setItem("dl:pro", "0"); }catch(e){}
+    if(typeof showToast === "function") showToast("Abbonamento non attivo, prosegui con il pagamento","");
+    if(typeof showPaywall === "function") setTimeout(showPaywall, 800);
+    return false;
+  }
+  return true;
+}
+
+/* ─── ACCOUNT DELETION (GDPR / store compliance) ─── */
+async function deleteMyAccount(){
+  if(!A.user || !A.user.id){ showToast("Non sei loggato",""); return; }
+  
+  if(!sbReady()){
+    showToast("Connessione assente, riprova","");
+    return;
+  }
+  
+  var uid = A.user.id;
+  showToast("Cancellazione in corso...","");
+  
+  // Delete from all tables, log errors but keep going
+  var tables = [
+    "dl_progress",
+    "dl_subscriptions",
+    "dl_profiles",
+    "dl_bottega_posts",
+    "dl_bottega_comments",
+    "dl_bottega_chat",
+    "dl_bottega_members",
+    "dl_messages",
+    "dl_posts",
+    "dl_reports"
+  ];
+  
+  for(var i=0; i<tables.length; i++){
+    try{
+      // Most have user_id filter
+      await sbFetch("DELETE", tables[i] + "?user_id=eq." + uid, {});
+    }catch(e){ console.warn("Delete from " + tables[i] + " failed:", e.message); }
+  }
+  
+  // Messages also have "from_user" or "to_user"
+  try{ await sbFetch("DELETE", "dl_messages?from_user=eq." + uid, {}); }catch(e){}
+  try{ await sbFetch("DELETE", "dl_messages?to_user=eq." + uid, {}); }catch(e){}
+  
+  // Finally delete user record itself
+  try{
+    await sbFetch("DELETE", "dl_users?id=eq." + uid, {});
+  }catch(e){ console.warn("Delete dl_users failed:", e.message); }
+  
+  // Wipe local storage
+  try{
+    var keys = [];
+    for(var k=0; k<localStorage.length; k++){
+      var key = localStorage.key(k);
+      if(key && key.indexOf("dl:") === 0) keys.push(key);
+    }
+    keys.forEach(function(key){ try{ localStorage.removeItem(key); }catch(e){} });
+  }catch(e){}
+  
+  // Reset state
+  A.user = null;
+  A.pro = false;
+  A.progress = {};
+  A.profile = null;
+  A.tokens = 0;
+  
+  showToast("Account eliminato. Arrivederci.","");
+  setTimeout(function(){
+    try{ window.location.reload(); }catch(e){ if(typeof showScreen==="function") showScreen("auth"); }
+  }, 1500);
+}
+
+function confirmDeleteAccount(){
+  var overlay = document.createElement("div");
+  overlay.id = "delete-account-overlay";
+  overlay.style.cssText = "position:fixed;inset:0;z-index:10003;background:rgba(21,16,42,0.92);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn 0.2s ease-out";
+  
+  var card = document.createElement("div");
+  card.style.cssText = "background:#1c1738;border:1px solid rgba(228,76,60,0.30);border-radius:24px;padding:24px;max-width:420px;width:100%";
+  
+  card.innerHTML = '<div style="text-align:center;margin-bottom:16px"><div style="width:64px;height:64px;border-radius:50%;background:rgba(228,76,60,0.15);border:2px solid rgba(228,76,60,0.40);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 14px">\u26A0\uFE0F</div><div style="font-family:Bricolage Grotesque,sans-serif;font-size:22px;font-weight:800;color:#E07172;margin-bottom:6px">Elimina account</div><div style="font-size:13px;color:#a8a2c8;line-height:1.5">Questa azione e <strong style="color:#E07172">irreversibile</strong>. Verranno cancellati per sempre:</div></div>';
+  
+  var list = document.createElement("div");
+  list.style.cssText = "background:rgba(228,76,60,0.06);border:1px solid rgba(228,76,60,0.20);border-radius:14px;padding:14px;margin-bottom:18px;font-size:12px;color:#F5F1E8;line-height:1.7";
+  list.innerHTML = "\u2022 Il tuo profilo (nome, foto, bio)<br>\u2022 Tutte le lezioni completate e il tuo progresso<br>\u2022 I tuoi post nelle botteghe<br>\u2022 I commenti e i messaggi che hai scritto<br>\u2022 L\'abbonamento PRO (senza rimborso)<br>\u2022 Tutti i token e i badge guadagnati";
+  card.appendChild(list);
+  
+  var typeBox = document.createElement("div");
+  typeBox.style.cssText = "margin-bottom:18px";
+  typeBox.innerHTML = '<div style="font-size:12px;color:#a8a2c8;margin-bottom:6px">Per confermare, scrivi <strong style="color:#E07172">ELIMINA</strong>:</div>';
+  var typeInput = document.createElement("input");
+  typeInput.type = "text";
+  typeInput.placeholder = "ELIMINA";
+  typeInput.style.cssText = "width:100%;height:46px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);border-radius:12px;color:#F5F1E8;padding:0 14px;font-family:Geist,sans-serif;font-size:14px;outline:none;box-sizing:border-box;text-align:center;letter-spacing:2px;font-weight:700";
+  typeBox.appendChild(typeInput);
+  card.appendChild(typeBox);
+  
+  var btnRow = document.createElement("div");
+  btnRow.style.cssText = "display:flex;gap:10px";
+  
+  var cancelBtn = document.createElement("button");
+  cancelBtn.style.cssText = "flex:1;height:48px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);border-radius:12px;color:#F5F1E8;font-weight:700;font-size:14px;cursor:pointer;font-family:Geist,sans-serif";
+  cancelBtn.textContent = "Annulla";
+  cancelBtn.onclick = function(){ overlay.remove(); };
+  btnRow.appendChild(cancelBtn);
+  
+  var deleteBtn = document.createElement("button");
+  deleteBtn.style.cssText = "flex:1;height:48px;background:rgba(228,76,60,0.20);border:1px solid rgba(228,76,60,0.50);border-radius:12px;color:#E07172;font-weight:800;font-size:14px;cursor:not-allowed;font-family:Geist,sans-serif;opacity:0.5";
+  deleteBtn.textContent = "Elimina";
+  deleteBtn.disabled = true;
+  
+  typeInput.addEventListener("input", function(){
+    var ok = typeInput.value.trim().toUpperCase() === "ELIMINA";
+    deleteBtn.disabled = !ok;
+    deleteBtn.style.opacity = ok ? "1" : "0.5";
+    deleteBtn.style.cursor = ok ? "pointer" : "not-allowed";
+    if(ok){
+      deleteBtn.style.background = "rgba(228,76,60,0.30)";
+    }
+  });
+  
+  deleteBtn.onclick = function(){
+    if(deleteBtn.disabled) return;
+    overlay.remove();
+    deleteMyAccount();
+  };
+  btnRow.appendChild(deleteBtn);
+  
+  card.appendChild(btnRow);
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+  
+  setTimeout(function(){ typeInput.focus(); }, 100);
+}
+
+/* ─── PRIVACY POLICY & TERMS (Apple/Google compliance) ─── */
+function showLegalModal(type){
+  // type: "privacy" or "terms"
+  var overlay = document.createElement("div");
+  overlay.id = "legal-modal";
+  overlay.style.cssText = "position:fixed;inset:0;z-index:10003;background:#15102a;display:flex;flex-direction:column;animation:fadeIn 0.2s ease-out";
+  
+  try{ history.pushState({dlApp:true, overlay:"legal"}, "", ""); }catch(e){}
+  
+  var header = document.createElement("div");
+  header.style.cssText = "padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:12px;background:#1c1738;flex-shrink:0";
+  
+  var backBtn = document.createElement("button");
+  backBtn.style.cssText = "width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#F5F1E8;font-size:18px;cursor:pointer;flex-shrink:0";
+  backBtn.textContent = "\u2190";
+  backBtn.onclick = function(){
+    var ov = document.getElementById("legal-modal");
+    if(ov) ov.remove();
+    try{ history.back(); }catch(e){}
+  };
+  header.appendChild(backBtn);
+  
+  var titleEl = document.createElement("div");
+  titleEl.style.cssText = "flex:1;font-family:Bricolage Grotesque,sans-serif;font-size:16px;font-weight:800;color:#F5F1E8";
+  titleEl.textContent = type === "privacy" ? "Privacy Policy" : "Termini di Servizio";
+  header.appendChild(titleEl);
+  
+  overlay.appendChild(header);
+  
+  var body = document.createElement("div");
+  body.style.cssText = "flex:1;overflow-y:auto;padding:20px 16px;color:#a8a2c8;font-size:14px;line-height:1.7";
+  
+  if(type === "privacy"){
+    body.innerHTML = '<h2 style="color:#F5F1E8;font-size:18px;font-weight:800;margin:0 0 14px">Informativa sulla Privacy</h2>' +
+      '<p style="margin:0 0 14px">Ultimo aggiornamento: ' + new Date().toLocaleDateString("it-IT") + '</p>' +
+      '<h3 style="color:#F5F1E8;font-size:15px;font-weight:700;margin:18px 0 8px">1. Dati che raccogliamo</h3>' +
+      '<p style="margin:0 0 12px">DrawBound raccoglie i seguenti dati per fornire il servizio: nome, email, immagini caricate, progressi delle lezioni, messaggi inviati nelle chat/botteghe, badge guadagnati, abbonamento PRO.</p>' +
+      '<h3 style="color:#F5F1E8;font-size:15px;font-weight:700;margin:18px 0 8px">2. Come usiamo i dati</h3>' +
+      '<p style="margin:0 0 12px">I dati servono esclusivamente a: erogare il servizio, mostrare i tuoi contenuti agli altri utenti che ne hanno diritto (es. nelle botteghe a cui sei iscritto), gestire l\'abbonamento PRO, prevenire abusi. <strong style="color:#F5F1E8">Non vendiamo i tuoi dati a terzi.</strong></p>' +
+      '<h3 style="color:#F5F1E8;font-size:15px;font-weight:700;margin:18px 0 8px">3. Servizi terzi</h3>' +
+      '<p style="margin:0 0 12px">Usiamo Supabase (database e storage), PayPal (pagamenti), Google Sign-In (autenticazione opzionale), Google Analytics (uso anonimo dell\'app).</p>' +
+      '<h3 style="color:#F5F1E8;font-size:15px;font-weight:700;margin:18px 0 8px">4. I tuoi diritti (GDPR)</h3>' +
+      '<p style="margin:0 0 12px">Hai diritto a: accedere ai tuoi dati, correggerli, cancellarli (vai in Impostazioni \u2192 Elimina account), portarli altrove (export), opporti al trattamento. Per esercitare questi diritti scrivi a: <strong style="color:#FBBA00">privacy@drawbound.app</strong></p>' +
+      '<h3 style="color:#F5F1E8;font-size:15px;font-weight:700;margin:18px 0 8px">5. Conservazione</h3>' +
+      '<p style="margin:0 0 12px">I dati vengono conservati finche il tuo account esiste. Se elimini l\'account, tutti i dati personali vengono cancellati entro 30 giorni.</p>' +
+      '<h3 style="color:#F5F1E8;font-size:15px;font-weight:700;margin:18px 0 8px">6. Minori</h3>' +
+      '<p style="margin:0 0 12px">DrawBound non e destinato a minori di 13 anni. Se sei minorenne, e necessario il consenso di un genitore.</p>' +
+      '<h3 style="color:#F5F1E8;font-size:15px;font-weight:700;margin:18px 0 8px">7. Contatti</h3>' +
+      '<p style="margin:0 0 20px">DrawBound \u2022 contact@drawbound.app</p>';
+  } else {
+    body.innerHTML = '<h2 style="color:#F5F1E8;font-size:18px;font-weight:800;margin:0 0 14px">Termini di Servizio</h2>' +
+      '<p style="margin:0 0 14px">Ultimo aggiornamento: ' + new Date().toLocaleDateString("it-IT") + '</p>' +
+      '<h3 style="color:#F5F1E8;font-size:15px;font-weight:700;margin:18px 0 8px">1. Accettazione</h3>' +
+      '<p style="margin:0 0 12px">Usando DrawBound accetti questi termini. Se non sei d\'accordo, non utilizzare l\'app.</p>' +
+      '<h3 style="color:#F5F1E8;font-size:15px;font-weight:700;margin:18px 0 8px">2. Il servizio</h3>' +
+      '<p style="margin:0 0 12px">DrawBound e una piattaforma per imparare a disegnare attraverso lezioni guidate, esercizi, sfide e una community. L\'accesso a contenuti premium richiede un abbonamento PRO.</p>' +
+      '<h3 style="color:#F5F1E8;font-size:15px;font-weight:700;margin:18px 0 8px">3. Account</h3>' +
+      '<p style="margin:0 0 12px">Sei responsabile della sicurezza del tuo account. Devi avere almeno 13 anni per usare DrawBound (16 in alcuni paesi UE). Un account per persona.</p>' +
+      '<h3 style="color:#F5F1E8;font-size:15px;font-weight:700;margin:18px 0 8px">4. Contenuti caricati</h3>' +
+      '<p style="margin:0 0 12px">Mantieni i diritti d\'autore sui tuoi disegni. Ci concedi una licenza limitata per mostrarli all\'interno dell\'app. Sei responsabile di non caricare contenuti che violino diritti altrui, leggi, o che siano offensivi/illegali.</p>' +
+      '<h3 style="color:#F5F1E8;font-size:15px;font-weight:700;margin:18px 0 8px">5. Comportamento</h3>' +
+      '<p style="margin:0 0 12px">E vietato: spammare, molestare altri utenti, hackerare l\'app, usare bot, vendere il tuo account, postare contenuti sessuali/violenti/illegali. Violazioni portano a sospensione o cancellazione dell\'account.</p>' +
+      '<h3 style="color:#F5F1E8;font-size:15px;font-weight:700;margin:18px 0 8px">6. Abbonamento PRO</h3>' +
+      '<p style="margin:0 0 12px">DrawBound PRO ha rinnovo automatico. Puoi disdire in qualsiasi momento dalle impostazioni. Il rimborso e disponibile entro 14 giorni dall\'acquisto se non hai usato funzioni PRO.</p>' +
+      '<h3 style="color:#F5F1E8;font-size:15px;font-weight:700;margin:18px 0 8px">7. Modifiche</h3>' +
+      '<p style="margin:0 0 12px">Possiamo modificare il servizio o questi termini. Cambiamenti rilevanti vengono notificati. L\'uso continuato dopo la modifica costituisce accettazione.</p>' +
+      '<h3 style="color:#F5F1E8;font-size:15px;font-weight:700;margin:18px 0 8px">8. Limitazione</h3>' +
+      '<p style="margin:0 0 12px">Il servizio e fornito "cosi com\'e". Non garantiamo che sia ininterrotto o privo di errori. La nostra responsabilita massima e limitata al prezzo dell\'abbonamento dei 12 mesi precedenti.</p>' +
+      '<h3 style="color:#F5F1E8;font-size:15px;font-weight:700;margin:18px 0 8px">9. Legge applicabile</h3>' +
+      '<p style="margin:0 0 20px">Questi termini sono regolati dalla legge italiana. Foro competente: Roma.</p>';
+  }
+  
+  overlay.appendChild(body);
+  document.body.appendChild(overlay);
+}
+
 function init(){
   _initBackHandler();
   applyTheme(); // Apply saved theme
@@ -8767,10 +9031,11 @@ function proceedInit(){
     
     // Load subscription
     sbFetch("GET","dl_subscriptions",{filters:"user_id=eq."+uid}).then(function(rows){
-      if(rows && rows[0]){
-        A.pro = !!(rows[0].active);
-        try{ localStorage.setItem("dl:pro", A.pro?"1":"0"); }catch(e){}
-      }
+      // Server is the source of truth for PRO status
+      var serverPro = !!(rows && rows[0] && rows[0].active);
+      A.pro = serverPro;
+      try{ localStorage.setItem("dl:pro", serverPro?"1":"0"); }catch(e){}
+      _proVerifyCache = { value: serverPro, fetchedAt: Date.now() };
     }).catch(function(){});
     
     // Load progress
