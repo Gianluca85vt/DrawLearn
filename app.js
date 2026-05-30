@@ -574,9 +574,8 @@ function togglePwd(id,btn){const el=document.getElementById(id);el.type=el.type=
 var DISP={"splash":"flex","auth":"flex","home":"block","category":"block","lesson":"block","paywall":"flex","checkout":"flex","profile":"block","drawpass":"block","feed":"block"};
 function showScreen(name){
   // GUARD: do not show auth screen if user is logged in (prevents accidental logout)
-  if(scr==="auth" && A && A.user){ console.warn("Refused to show auth: user is logged in"); return; }
-
-  try{ if(scr==="auth"||scr==="splash"){ var _bn=document.getElementById("bottom-nav"); if(_bn) _bn.style.display="none"; } }catch(e){}
+  if(name==="auth" && A && A.user){ console.warn("Refused to show auth: user is logged in"); return; }
+  try{ if(name==="auth"||name==="splash"){ var _bn=document.getElementById("bottom-nav"); if(_bn) _bn.style.display="none"; } }catch(e){}
   document.querySelectorAll(".screen").forEach(function(s){
     s.style.display="none";
     s.classList.remove("on");
@@ -8628,6 +8627,25 @@ function openFounderProfile(masterId){
 }
 
 function openMentorProfile(masterId){ openFounderProfile(masterId); }
+
+/* DrawBound Logo SVG helper (returns inline SVG markup) */
+function getDrawBoundLogoSVG(size, uid){
+  size = size || 32;
+  uid = uid || ("db" + Math.random().toString(36).slice(2,8));
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="37 160 522 522" width="'+size+'" height="'+size+'" style="display:inline-block;vertical-align:middle;flex-shrink:0">' +
+    '<defs>' +
+      '<filter id="dbglow-'+uid+'" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur result="blur" stdDeviation="15"/><feComposite in="SourceGraphic" in2="blur"/></filter>' +
+      '<linearGradient id="dbgrad-'+uid+'" x1="-.13" y1="841.97" x2="1.06" y2="840.78" gradientTransform="translate(198.0067 254767.9623) scale(199.2601 -302.2884)" gradientUnits="userSpaceOnUse">' +
+        '<stop offset=".37" stop-color="#814393"/><stop offset="1" stop-color="#fbba00"/>' +
+      '</linearGradient>' +
+    '</defs>' +
+    '<rect fill="#1c1b29" x="37.2" y="160.51" width="520.87" height="520.87" rx="127.89" ry="127.89"/>' +
+    '<g style="filter:url(#dbglow-'+uid+');isolation:isolate;opacity:.3"><polygon points="297.64 262.82 406.93 460.47 297.64 588.37 188.35 460.47 297.64 262.82"/></g>' +
+    '<path fill="url(#dbgrad-'+uid+')" d="M297.64,240.93l116.32,207.71c4.25,6.35,2.55,14.96-3.8,19.21-.97.65-2.02,1.17-3.12,1.56l-109.4,131.55-109.4-131.55c-7.22-2.53-11.02-10.43-8.48-17.65.39-1.1.91-2.15,1.56-3.12l116.32-207.71Z"/>' +
+    '<path fill="none" stroke="#1c1b29" stroke-linecap="round" stroke-miterlimit="4.65" stroke-width="16.28" d="M297.64,365.55v235.41"/>' +
+    '<circle fill="#1c1b29" cx="297.64" cy="365.55" r="22.16"/>' +
+    '</svg>';
+}
 
 function init(){
   _initBackHandler();
