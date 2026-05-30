@@ -5557,16 +5557,26 @@ function openSettings(){
 
 function setActiveNav(name){
   var navTabs = ["nav-dashboard","nav-feed","nav-home","nav-profile"];
+  // Reset ALL tabs explicitly with concrete colors (not just clearing)
   navTabs.forEach(function(id){
     var el = document.getElementById(id);
     if(el){
       el.classList.remove("nav-active");
-      el.style.color = "";
-      el.style.opacity = "";
+      // Force-reset inline styles to inactive state
+      el.style.color = "#8a82a8";
+      el.style.opacity = "0.6";
+      // Reset SVG stroke explicitly  
       var svgEl = el.querySelector("svg");
-      if(svgEl) svgEl.style.stroke = "";
+      if(svgEl){
+        svgEl.style.stroke = "#8a82a8";
+        // Also reset the SVG fill if used
+      }
+      // Reset label color
+      var labelEl = el.querySelector(".nav-label");
+      if(labelEl) labelEl.style.color = "#8a82a8";
     }
   });
+  // Determine active id
   var map = {
     dashboard:"nav-dashboard", home:"nav-home", feed:"nav-feed", profile:"nav-profile",
     category:"nav-home", lesson:"nav-home", pubprofile:"nav-feed",
@@ -5578,8 +5588,13 @@ function setActiveNav(name){
   var active = document.getElementById(activeId);
   if(active){
     active.classList.add("nav-active");
+    // Force active state with explicit colors
+    active.style.color = "#FBBA00";
+    active.style.opacity = "1";
     var svgEl = active.querySelector("svg");
     if(svgEl) svgEl.style.stroke = "#FBBA00";
+    var labelEl = active.querySelector(".nav-label");
+    if(labelEl) labelEl.style.color = "#FBBA00";
   }
 }
 
@@ -7053,7 +7068,7 @@ function openHamburger(){
   var settingsSection = document.createElement("div");
   settingsSection.style.cssText = "padding:8px 0";
   settingsSection.appendChild(makeItem("👤","Profilo","Modifica le tue info", function(){ navTo("profile"); }));
-  settingsSection.appendChild(makeItem("⚙️","Impostazioni","Lingua, tema, privacy", function(){ navTo("profile"); setTimeout(function(){ if(typeof switchProfileTab==="function") switchProfileTab("settings"); }, 200); }));
+  settingsSection.appendChild(makeItem("⚙️","Impostazioni","Lingua, tema, privacy", function(){ navTo("profile"); setTimeout(function(){ if(typeof setProfileTab==="function") setProfileTab("settings"); }, 200); }));
   settingsSection.appendChild(makeItem("✨","Sblocca PRO","Tutte le funzioni premium", function(){ navTo("paywall"); }));
   drawer.appendChild(settingsSection);
   
