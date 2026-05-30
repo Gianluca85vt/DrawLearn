@@ -6530,21 +6530,21 @@ async function openBottega(bottegaId){
   var container = document.getElementById("bottega-content");
   if(!container) return;
   
-  var members = await loadBottegaMembers(bottegaId);
   container.innerHTML = "";
   
+  // Cover
   var cover = document.createElement("div");
   cover.style.cssText = "height:160px;background:" + bottega.coverGradient + ";position:relative;display:flex;align-items:center;justify-content:center";
   
   var backBtn = document.createElement("button");
   backBtn.style.cssText = "position:absolute;top:14px;left:14px;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.2);color:#fff;font-size:16px;cursor:pointer";
-  backBtn.textContent = "<-";
+  backBtn.textContent = "←";
   backBtn.onclick = function(){ navTo("botteghe"); };
   cover.appendChild(backBtn);
   
   var menuBtn = document.createElement("button");
   menuBtn.style.cssText = "position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.2);color:#fff;font-size:14px;cursor:pointer";
-  menuBtn.textContent = "...";
+  menuBtn.textContent = "⋯";
   (function(id){menuBtn.onclick = function(){ leaveBottega(id); };})(bottegaId);
   cover.appendChild(menuBtn);
   
@@ -6555,27 +6555,42 @@ async function openBottega(bottegaId){
   
   container.appendChild(cover);
   
+  // Header info (compact)
   var info = document.createElement("div");
-  info.style.cssText = "padding:20px 16px 16px";
-  info.innerHTML = '<h1 style="font-family:Bricolage Grotesque,sans-serif;font-size:26px;font-weight:800;color:#F5F1E8;margin:0 0 8px;letter-spacing:-0.02em">' + bottega.name + '</h1>' +
-    '<p style="font-size:13px;color:#a8a2c8;margin:0 0 14px;line-height:1.5">' + bottega.description + '</p>' +
-    '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
-      '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:50px;padding:6px 12px;display:flex;align-items:center;gap:6px"><span style="font-size:14px">👥</span><span style="font-size:12px;color:#F5F1E8;font-weight:700">' + members.length + ' / ' + bottega.maxMembers + '</span></div>' +
-      '<div style="background:rgba(184,114,224,0.10);border:1px solid rgba(184,114,224,0.25);border-radius:50px;padding:6px 12px;display:flex;align-items:center;gap:6px"><span style="font-size:14px">' + bottega.mentor.avatar + '</span><span style="font-size:12px;color:' + bottega.color + ';font-weight:700">' + bottega.mentor.name + '</span></div>' +
-    '</div>';
+  info.style.cssText = "padding:16px 16px 12px";
+  info.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px"><h1 style="font-family:Bricolage Grotesque,sans-serif;font-size:22px;font-weight:800;color:#F5F1E8;margin:0;letter-spacing:-0.02em">' + bottega.name + '</h1>' +
+    '<div style="display:flex;gap:6px;flex-shrink:0"><div style="background:rgba(255,255,255,0.06);border-radius:50px;padding:3px 8px;font-size:10px;color:#F5F1E8;font-weight:700;font-family:JetBrains Mono,monospace" id="bottega-members-count">👥 ...</div></div></div>' +
+    '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(184,114,224,0.10);border:1px solid rgba(184,114,224,0.25);border-radius:50px;font-size:11px;color:' + bottega.color + ';font-weight:700;width:fit-content"><span style="font-size:14px">' + bottega.mentor.avatar + '</span><span>Mentor: ' + bottega.mentor.name + '</span></div>';
   container.appendChild(info);
   
-  var soon = document.createElement("div");
-  soon.style.cssText = "padding:20px 16px;margin-top:20px;background:rgba(255,255,255,0.02);border-top:1px solid rgba(255,255,255,0.06)";
-  soon.innerHTML = '<div style="font-family:JetBrains Mono,monospace;font-size:10px;letter-spacing:2px;color:#8a82a8;text-transform:uppercase;font-weight:700;margin-bottom:14px">PROSSIMAMENTE IN BOTTEGA</div>' +
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
-      '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:14px;padding:14px;opacity:0.7"><div style="font-size:22px;margin-bottom:6px">📸</div><div style="font-weight:700;font-size:13px;color:#F5F1E8;margin-bottom:2px">Feed privato</div><div style="font-size:11px;color:#8a82a8">Solo membri</div></div>' +
-      '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:14px;padding:14px;opacity:0.7"><div style="font-size:22px;margin-bottom:6px">💬</div><div style="font-weight:700;font-size:13px;color:#F5F1E8;margin-bottom:2px">Chat di gruppo</div><div style="font-size:11px;color:#8a82a8">Mentor + membri</div></div>' +
-      '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:14px;padding:14px;opacity:0.7"><div style="font-size:22px;margin-bottom:6px">🏆</div><div style="font-weight:700;font-size:13px;color:#F5F1E8;margin-bottom:2px">Sfide esclusive</div><div style="font-size:11px;color:#8a82a8">Premi 2x token</div></div>' +
-      '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:14px;padding:14px;opacity:0.7"><div style="font-size:22px;margin-bottom:6px">📚</div><div style="font-weight:700;font-size:13px;color:#F5F1E8;margin-bottom:2px">Lezioni private</div><div style="font-size:11px;color:#8a82a8">Solo per membri</div></div>' +
-    '</div>' +
-    '<div style="text-align:center;margin-top:18px;font-size:11px;color:#6e6791;font-style:italic">Stai vivendo l anteprima delle Botteghe. Le funzionalita arriveranno presto.</div>';
-  container.appendChild(soon);
+  // New post button
+  var newPostBtn = document.createElement("button");
+  newPostBtn.style.cssText = "width:calc(100% - 32px);margin:0 16px 16px;height:48px;background:linear-gradient(135deg,#B872E0,#FBBA00);border:none;border-radius:14px;color:#1c1b29;font-weight:800;font-size:14px;cursor:pointer;font-family:Geist,sans-serif;box-shadow:0 8px 24px rgba(184,114,224,0.30);display:flex;align-items:center;justify-content:center;gap:8px";
+  newPostBtn.innerHTML = '<span style="font-size:18px;line-height:1">+</span><span>Nuovo post in bottega</span>';
+  newPostBtn.onclick = function(){ openBottegaPostUpload(bottegaId); };
+  container.appendChild(newPostBtn);
+  
+  // Feed kicker
+  var kicker = document.createElement("div");
+  kicker.style.cssText = "padding:0 16px 10px;display:flex;align-items:center;justify-content:space-between";
+  kicker.innerHTML = '<div style="font-family:JetBrains Mono,monospace;font-size:10px;letter-spacing:2px;color:#8a82a8;text-transform:uppercase;font-weight:700">FEED DELLA BOTTEGA</div>';
+  container.appendChild(kicker);
+  
+  // Feed container (will be populated by renderBottegaFeed)
+  var feedDiv = document.createElement("div");
+  feedDiv.id = "bottega-feed-container";
+  feedDiv.style.cssText = "padding:0 16px 80px";
+  feedDiv.innerHTML = '<div style="text-align:center;padding:30px;color:#9896B8"><div style="width:28px;height:28px;border:3px solid rgba(255,255,255,.1);border-top:3px solid #B872E0;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px"></div>Caricamento feed...</div>';
+  container.appendChild(feedDiv);
+  
+  // Load members count
+  var members = await loadBottegaMembers(bottegaId);
+  var countEl = document.getElementById("bottega-members-count");
+  if(countEl) countEl.innerHTML = '👥 ' + members.length + ' / ' + bottega.maxMembers;
+  
+  // Load posts
+  var posts = await loadBottegaPosts(bottegaId);
+  renderBottegaFeed(bottega, posts);
 }
 
 /* DAILY LESSON SYSTEM */
@@ -7110,6 +7125,289 @@ function closeHamburger(){
     }
     overlay.style.animation = "fadeOut 0.2s ease-in";
     setTimeout(function(){ if(overlay && overlay.parentNode) overlay.remove(); }, 200);
+  }
+}
+
+/* BOTTEGA FEED FUNCTIONS */
+async function loadBottegaPosts(bottegaId){
+  if(!sbReady()) return [];
+  try{
+    var posts = await sbFetch("GET","dl_bottega_posts",{
+      filters:"bottega_id=eq."+bottegaId,
+      order:"created_at.desc",
+      limit:50
+    });
+    return posts || [];
+  }catch(e){
+    console.warn("loadBottegaPosts error:", e);
+    return [];
+  }
+}
+
+function renderBottegaFeed(bottega, posts){
+  var feedContainer = document.getElementById("bottega-feed-container");
+  if(!feedContainer) return;
+  feedContainer.innerHTML = "";
+  
+  if(!posts || !posts.length){
+    var empty = document.createElement("div");
+    empty.style.cssText = "text-align:center;padding:50px 20px;color:#8a82a8";
+    empty.innerHTML = '<div style="font-size:48px;margin-bottom:14px;opacity:0.6">🖼️</div>' +
+      '<div style="font-family:Bricolage Grotesque,sans-serif;font-size:18px;font-weight:700;color:#F5F1E8;margin-bottom:6px">Nessun post ancora</div>' +
+      '<div style="font-size:13px;line-height:1.5;max-width:260px;margin:0 auto">Sii il primo a condividere un lavoro con i membri della tua bottega.</div>';
+    feedContainer.appendChild(empty);
+    return;
+  }
+  
+  posts.forEach(function(p){
+    var card = document.createElement("div");
+    card.style.cssText = "background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:18px;overflow:hidden;margin-bottom:14px";
+    
+    // Header (user row)
+    var userRow = document.createElement("div");
+    userRow.style.cssText = "padding:12px 14px;display:flex;align-items:center;gap:10px";
+    var userAvatar = (p.user_avatar && p.user_avatar.indexOf("http")===0)
+      ? '<img src="'+p.user_avatar+'" style="width:32px;height:32px;border-radius:50%;object-fit:cover">'
+      : '<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#814393,#FBBA00);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff">' + (p.user_name?p.user_name.charAt(0).toUpperCase():"?") + '</div>';
+    var timeAgo = formatTimeAgo(p.created_at);
+    userRow.innerHTML = userAvatar +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-weight:700;font-size:13px;color:#F5F1E8">' + (p.user_name||"Membro") + '</div>' +
+        '<div style="font-size:10px;color:#8a82a8;font-family:JetBrains Mono,monospace">' + timeAgo + '</div>' +
+      '</div>';
+    card.appendChild(userRow);
+    
+    // Image
+    if(p.image_url){
+      var img = document.createElement("img");
+      img.src = p.image_url;
+      img.style.cssText = "width:100%;display:block;max-height:500px;object-fit:cover;cursor:pointer;background:#15102a";
+      img.loading = "lazy";
+      img.onclick = function(){ openImageLightbox(p.image_url); };
+      card.appendChild(img);
+    }
+    
+    // Actions row
+    var actions = document.createElement("div");
+    actions.style.cssText = "padding:10px 14px;display:flex;align-items:center;gap:14px";
+    
+    var likedKey = "dl:bp_liked_" + p.id;
+    var isLiked = localStorage.getItem(likedKey) === "1";
+    var likesCount = p.likes_count || 0;
+    
+    var likeBtn = document.createElement("button");
+    likeBtn.style.cssText = "background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;color:" + (isLiked?"#E07172":"#F5F1E8") + ";font-weight:700;font-size:13px;font-family:Geist,sans-serif;padding:0";
+    likeBtn.innerHTML = '<span style="font-size:18px">' + (isLiked?"♥️":"♡") + '</span><span>' + likesCount + '</span>';
+    (function(postId, btn, count, liked){
+      btn.onclick = async function(){
+        var newLiked = !liked;
+        var newCount = newLiked ? count+1 : Math.max(0,count-1);
+        // Optimistic update
+        try{ localStorage.setItem(likedKey, newLiked?"1":"0"); }catch(e){}
+        btn.innerHTML = '<span style="font-size:18px">' + (newLiked?"♥️":"♡") + '</span><span>' + newCount + '</span>';
+        btn.style.color = newLiked ? "#E07172" : "#F5F1E8";
+        // Re-bind with new state
+        liked = newLiked; count = newCount;
+        // Persist
+        if(sbReady()){
+          try{
+            await sbFetch("PATCH","dl_bottega_posts?id=eq."+postId,{body:{likes_count:newCount}});
+          }catch(e){console.warn("like persist failed:",e);}
+        }
+      };
+    })(p.id, likeBtn, likesCount, isLiked);
+    actions.appendChild(likeBtn);
+    
+    card.appendChild(actions);
+    
+    // Caption
+    if(p.caption){
+      var cap = document.createElement("div");
+      cap.style.cssText = "padding:0 14px 14px;font-size:13px;color:#F5F1E8;line-height:1.5";
+      cap.innerHTML = '<span style="font-weight:700">' + (p.user_name||"Membro") + '</span> <span style="color:#d8d2e8">' + p.caption + '</span>';
+      card.appendChild(cap);
+    }
+    
+    feedContainer.appendChild(card);
+  });
+  
+  // Replace emoji placeholders within the rendered content
+  // (already done inline; emoji_map is applied below)
+}
+
+function formatTimeAgo(timestamp){
+  try{
+    var ms = new Date() - new Date(timestamp);
+    var s = Math.floor(ms/1000);
+    if(s < 60) return "ora";
+    var m = Math.floor(s/60);
+    if(m < 60) return m + "m fa";
+    var h = Math.floor(m/60);
+    if(h < 24) return h + "h fa";
+    var d = Math.floor(h/24);
+    if(d < 7) return d + "g fa";
+    var w = Math.floor(d/7);
+    if(w < 4) return w + "set fa";
+    return Math.floor(d/30) + "m fa";
+  }catch(e){ return ""; }
+}
+
+function openImageLightbox(url){
+  var lb = document.createElement("div");
+  lb.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;cursor:pointer;animation:fadeIn 0.2s ease-out";
+  lb.onclick = function(){ lb.remove(); };
+  var fi = document.createElement("img");
+  fi.src = url;
+  fi.style.cssText = "max-width:100%;max-height:90vh;object-fit:contain;border-radius:12px";
+  lb.appendChild(fi);
+  document.body.appendChild(lb);
+}
+
+function openBottegaPostUpload(bottegaId){
+  if(!A.user){ showToast("Accedi prima",""); return; }
+  if(!isMemberOf(bottegaId)){ showToast("Devi essere membro",""); return; }
+  
+  // Trigger file picker
+  var inp = document.createElement("input");
+  inp.type = "file";
+  inp.accept = "image/*";
+  inp.style.display = "none";
+  document.body.appendChild(inp);
+  
+  inp.onchange = function(e){
+    var file = e.target.files && e.target.files[0];
+    document.body.removeChild(inp);
+    if(!file) return;
+    showBottegaPostPreview(bottegaId, file);
+  };
+  
+  inp.click();
+}
+
+async function showBottegaPostPreview(bottegaId, file){
+  // Read file as data URL for preview
+  var dataUrl = await new Promise(function(resolve, reject){
+    var r = new FileReader();
+    r.onload = function(ev){ resolve(ev.target.result); };
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+  
+  var bottega = getBottega(bottegaId);
+  
+  // Build preview modal
+  var overlay = document.createElement("div");
+  overlay.id = "bottega-upload-overlay";
+  overlay.style.cssText = "position:fixed;inset:0;z-index:10001;background:rgba(21,16,42,0.92);backdrop-filter:blur(12px);display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;animation:fadeIn 0.2s ease-out";
+  
+  var card = document.createElement("div");
+  card.style.cssText = "background:#1c1738;border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:20px;max-width:480px;width:100%;margin-top:40px;margin-bottom:40px";
+  
+  // Header
+  var header = document.createElement("div");
+  header.style.cssText = "display:flex;align-items:center;justify-content:space-between;margin-bottom:16px";
+  header.innerHTML = '<div><div style="font-family:JetBrains Mono,monospace;font-size:10px;letter-spacing:2px;color:#FBBA00;font-weight:700;text-transform:uppercase">NUOVO POST</div>' +
+    '<div style="font-family:Bricolage Grotesque,sans-serif;font-weight:800;font-size:18px;color:#F5F1E8;margin-top:2px">in ' + bottega.name + '</div></div>' +
+    '<button onclick="document.getElementById(\u0027bottega-upload-overlay\u0027).remove()" style="width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#F5F1E8;font-size:16px;cursor:pointer">×</button>';
+  card.appendChild(header);
+  
+  // Image preview
+  var img = document.createElement("img");
+  img.src = dataUrl;
+  img.style.cssText = "width:100%;max-height:300px;object-fit:cover;border-radius:16px;margin-bottom:14px;background:#15102a";
+  card.appendChild(img);
+  
+  // Caption input
+  var capLabel = document.createElement("div");
+  capLabel.style.cssText = "font-family:JetBrains Mono,monospace;font-size:10px;letter-spacing:2px;color:#8a82a8;font-weight:700;text-transform:uppercase;margin-bottom:6px";
+  capLabel.textContent = "Descrizione (opzionale)";
+  card.appendChild(capLabel);
+  
+  var capInput = document.createElement("textarea");
+  capInput.id = "bottega-post-caption";
+  capInput.placeholder = "Racconta il tuo lavoro ai membri...";
+  capInput.style.cssText = "width:100%;min-height:80px;max-height:160px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.10);border-radius:14px;color:#F5F1E8;padding:12px 14px;font-family:Geist,sans-serif;font-size:14px;outline:none;resize:vertical;box-sizing:border-box;line-height:1.5";
+  capInput.maxLength = 500;
+  card.appendChild(capInput);
+  
+  // Action buttons
+  var btnRow = document.createElement("div");
+  btnRow.style.cssText = "display:flex;gap:10px;margin-top:18px";
+  
+  var cancelBtn = document.createElement("button");
+  cancelBtn.style.cssText = "flex:1;height:48px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.10);border-radius:14px;color:#a8a2c8;font-weight:700;font-size:14px;cursor:pointer;font-family:Geist,sans-serif";
+  cancelBtn.textContent = "Annulla";
+  cancelBtn.onclick = function(){ overlay.remove(); };
+  
+  var submitBtn = document.createElement("button");
+  submitBtn.id = "bottega-post-submit";
+  submitBtn.style.cssText = "flex:2;height:48px;background:linear-gradient(135deg,#B872E0,#FBBA00);border:none;border-radius:14px;color:#1c1b29;font-weight:800;font-size:14px;cursor:pointer;font-family:Geist,sans-serif;box-shadow:0 8px 24px rgba(184,114,224,0.30)";
+  submitBtn.textContent = "Pubblica";
+  submitBtn.onclick = async function(){
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Caricamento...";
+    submitBtn.style.opacity = "0.7";
+    var caption = capInput.value.trim();
+    var success = await submitBottegaPost(bottegaId, file, caption);
+    if(success){
+      overlay.remove();
+      // Re-open bottega to refresh feed
+      openBottega(bottegaId);
+    } else {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Riprova";
+      submitBtn.style.opacity = "1";
+    }
+  };
+  
+  btnRow.appendChild(cancelBtn);
+  btnRow.appendChild(submitBtn);
+  card.appendChild(btnRow);
+  
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+  setTimeout(function(){ capInput.focus(); }, 100);
+}
+
+async function submitBottegaPost(bottegaId, file, caption){
+  if(!A.user) return false;
+  if(!isMemberOf(bottegaId)){ showToast("Non sei membro",""); return false; }
+  
+  try{
+    // Compress
+    var blob = await compressImage(file, 1600, 0.85);
+    
+    // Upload to Storage  
+    var fname = A.user.id + "_bottega_" + bottegaId + "_" + Date.now() + ".jpg";
+    var imageUrl = await sbUpload("Posts", fname, blob);
+    if(!imageUrl) throw new Error("upload failed");
+    
+    // Insert into dl_bottega_posts
+    await sbFetch("POST","dl_bottega_posts",{
+      body:{
+        bottega_id: bottegaId,
+        user_id: A.user.id,
+        user_name: A.user.name || "Membro",
+        user_avatar: A.user.picture || A.user.avatar || "",
+        image_url: imageUrl,
+        caption: caption || "",
+        likes_count: 0,
+        comments_count: 0,
+        created_at: new Date().toISOString()
+      }
+    });
+    
+    try{ localStorage.setItem("dl:posted_any","1"); }catch(e){}
+    try{ if(typeof track==="function") track("bottega_post_created", {bottega_id: bottegaId}); }catch(e){}
+    showToast("Post pubblicato nella bottega!", "");
+    return true;
+  }catch(e){
+    console.error("submitBottegaPost error:", e);
+    var msg = e.message || "errore sconosciuto";
+    if(msg.indexOf("bucket")>=0||msg.indexOf("Bucket")>=0) msg = "Bucket 'Posts' non configurato";
+    if(msg.indexOf("relation")>=0) msg = "Tabella dl_bottega_posts non creata";
+    showToast("Errore: " + msg, "");
+    return false;
   }
 }
 
