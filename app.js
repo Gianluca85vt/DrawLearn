@@ -397,7 +397,14 @@ async function sbUpload(bucket, path, file){
 function sbReady(){ return SB_URL.startsWith("https://") && SB_KEY.startsWith("eyJ"); }
 
 /* LOCAL session storage - uses localStorage (standard browser API) */
-function localGet(k){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch{ return null; }}
+function localGet(k){
+  try{
+    var v = localStorage.getItem(k);
+    if(v === null || v === undefined) return null;
+    // Try JSON parse; if it fails, return the raw string (handles plain values like "google_abc123")
+    try{ return JSON.parse(v); }catch(e){ return v; }
+  }catch(e){ return null; }
+}
 function localSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch{} }
 function localDel(k){ try{ localStorage.removeItem(k); }catch{} }
 
@@ -573,8 +580,21 @@ function showToast(msg,e){const t=document.getElementById("toast");t.textContent
 function togglePwd(id,btn){const el=document.getElementById(id);el.type=el.type==="password"?"text":"password";btn.textContent=el.type==="password"?"○":"👁";}
 var DISP={"splash":"flex","auth":"flex","home":"block","category":"block","lesson":"block","paywall":"flex","checkout":"flex","profile":"block","drawpass":"block","feed":"block"};
 function showScreen(name){
-  // GUARD: do not show auth screen if user is logged in (prevents accidental logout)
-  if(name==="auth" && A && A.user){ console.warn("Refused to show auth: user is logged in"); return; }
+  // GUARD: refuse auth if A.user OR cached session in localStorage (prevents accidental logout)
+  if(name === "auth"){
+    if(A && A.user){ console.warn("[showScreen] Refused auth: A.user is set"); return; }
+    try{
+      var _uid = localStorage.getItem("dl:uid");
+      if(_uid){
+        console.warn("[showScreen] Refused auth: dl:uid in localStorage, restoring A.user");
+        try{
+          var _cu = localStorage.getItem("dl:user");
+          A.user = _cu ? JSON.parse(_cu) : { id: _uid };
+        }catch(e){ A.user = { id: _uid }; }
+        return;
+      }
+    }catch(e){}
+  }
   try{ if(name==="auth"||name==="splash"){ var _bn=document.getElementById("bottom-nav"); if(_bn) _bn.style.display="none"; } }catch(e){}
   document.querySelectorAll(".screen").forEach(function(s){
     s.style.display="none";
@@ -8662,27 +8682,119 @@ function init(){
   proceedInit();
 }
 function proceedInit(){
-
-  // STEP 1: after 2s max, show auth regardless (safety net)
-  var authTimer = setTimeout(function(){
-    // Only show auth if we're STILL on splash AND don't have a user yet (extra guard)
-    if(A.screen==="splash" && !A.user){ setStatus(""); showScreen("auth"); }
-  }, 7000);
-
-  // STEP 2: try to restore session from localStorage
-  var uid = localGet("dl:uid");
-  if(!uid){
-    // No session - just show auth after short splash
-    clearTimeout(authTimer);
-    setTimeout(function(){ setStatus(""); showScreen("auth"); }, 1500);
-    // Load tutorials in background for when user logs in
-    loadTutorialsFromDB().catch(function(){});
+  console.log("[proceedInit] starting...");
+  
+  // Read everything from localStorage FIRST (synchronous, fast)
+  var uid = null;
+  var cachedUser = null;
+  try{ uid = localStorage.getItem("dl:uid"); }catch(e){}
+  try{ var cu = localStorage.getItem("dl:user"); if(cu) cachedUser = JSON.parse(cu); }catch(e){}
+  
+  console.log("[proceedInit] uid:", uid, "cachedUser:", !!cachedUser);
+  
+  // NO SESSION? Go to auth
+  if(!uid && !cachedUser){
+    console.log("[proceedInit] no session, showing auth");
+    setTimeout(function(){
+      setStatus("");
+      showScreen("auth");
+    }, 800);
+    if(typeof loadTutorialsFromDB === "function") loadTutorialsFromDB().catch(function(){});
     return;
   }
-
-  // STEP 3: user has session - load their data
-  setStatus("Accesso in corso...");
-  loadUserSession(uid, authTimer);
+  
+  // HAVE SESSION - restore IMMEDIATELY from cache (don't wait for Supabase!)
+  if(cachedUser){
+    A.user = cachedUser;
+  } else if(uid){
+    A.user = { id: uid }; // minimal until Supabase syncs
+  }
+  
+  // Restore other state from localStorage
+  try{ A.pro = localStorage.getItem("dl:pro") === "1"; }catch(e){}
+  try{ A.tokens = parseInt(localStorage.getItem("dl:tokens")) || 0; }catch(e){}
+  try{
+    var p = localStorage.getItem("dl:progress_all");
+    if(p){ var pp = JSON.parse(p); if(pp && typeof pp === "object" && !Array.isArray(pp)) A.progress = pp; }
+  }catch(e){ A.progress = {}; }
+  if(!A.profile) A.profile = { avatar: "def", border: "none" };
+  
+  // Restore membership cache
+  try{
+    var mb = localStorage.getItem("dl:my_botteghe");
+    if(mb && typeof _myBotteghe !== "undefined"){ _myBotteghe = JSON.parse(mb) || []; }
+  }catch(e){}
+  
+  // Determine last screen
+  var lastScreen = "dashboard";
+  var lastBottega = null;
+  try{
+    var ls = localStorage.getItem("dl:last_screen");
+    var safe = ["dashboard","feed","home","profile","botteghe","badges","drawpass","search","chat","bottega"];
+    if(ls && safe.indexOf(ls) >= 0) lastScreen = ls;
+    if(ls === "bottega") lastBottega = localStorage.getItem("dl:last_bottega");
+  }catch(e){}
+  
+  console.log("[proceedInit] restoring to screen:", lastScreen, "bottega:", lastBottega);
+  
+  // Navigate IMMEDIATELY using cached data (no waiting for Supabase)
+  setStatus("");
+  showBottomNav();
+  var ni = document.getElementById("nav-avatar-icon");
+  if(ni && typeof getAvatarIcon === "function") ni.textContent = getAvatarIcon();
+  
+  if(lastScreen === "bottega" && lastBottega){
+    setTimeout(function(){
+      try{ openBottega(lastBottega); }catch(e){ navTo("botteghe"); }
+    }, 100);
+  } else {
+    setTimeout(function(){ navTo(lastScreen); }, 50);
+  }
+  
+  // Sync with Supabase in BACKGROUND (non-blocking, never logs out)
+  if(uid && typeof sbReady === "function" && sbReady()){
+    console.log("[proceedInit] background sync with Supabase...");
+    sbFetch("GET","dl_users",{filters:"id=eq."+uid}).then(function(rows){
+      if(rows && rows[0]){
+        // Merge: keep cached extras + take fresh DB data
+        A.user = Object.assign({}, A.user || {}, rows[0]);
+        try{ localStorage.setItem("dl:user", JSON.stringify(A.user)); }catch(e){}
+        console.log("[proceedInit] user synced from Supabase");
+      } else {
+        console.log("[proceedInit] user not in DB but keeping cached session");
+      }
+    }).catch(function(e){ console.warn("[proceedInit] Supabase user sync failed (offline mode):", e); });
+    
+    // Load subscription
+    sbFetch("GET","dl_subscriptions",{filters:"user_id=eq."+uid}).then(function(rows){
+      if(rows && rows[0]){
+        A.pro = !!(rows[0].active);
+        try{ localStorage.setItem("dl:pro", A.pro?"1":"0"); }catch(e){}
+      }
+    }).catch(function(){});
+    
+    // Load progress
+    sbFetch("GET","dl_progress",{filters:"user_id=eq."+uid}).then(function(rows){
+      if(rows && rows.length){
+        var pg = A.progress || {};
+        rows.forEach(function(r){
+          var ex = pg[r.lesson_key];
+          if(!ex || r.completed || (r.step > (ex.step||0))) pg[r.lesson_key] = { step: r.step, completed: r.completed };
+        });
+        A.progress = pg;
+        try{ localStorage.setItem("dl:progress_all", JSON.stringify(pg)); }catch(e){}
+      }
+    }).catch(function(){});
+    
+    // Load profile
+    sbFetch("GET","dl_profiles",{filters:"user_id=eq."+uid}).then(function(rows){
+      if(rows && rows[0]){
+        A.profile = { avatar: rows[0].avatar_id || "def", border: rows[0].border_id || "none" };
+      }
+    }).catch(function(){});
+    
+    if(typeof loadTutorialsFromDB === "function") loadTutorialsFromDB().catch(function(){});
+  }
 }
 
 async function loadUserSession(uid, authTimer){
