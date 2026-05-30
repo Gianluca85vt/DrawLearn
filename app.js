@@ -573,6 +573,7 @@ function showToast(msg,e){const t=document.getElementById("toast");t.textContent
 function togglePwd(id,btn){const el=document.getElementById(id);el.type=el.type==="password"?"text":"password";btn.textContent=el.type==="password"?"○":"👁";}
 var DISP={"splash":"flex","auth":"flex","home":"block","category":"block","lesson":"block","paywall":"flex","checkout":"flex","profile":"block","drawpass":"block","feed":"block"};
 function showScreen(name){
+  try{ if(scr==="auth"||scr==="splash"){ var _bn=document.getElementById("bottom-nav"); if(_bn) _bn.style.display="none"; } }catch(e){}
   document.querySelectorAll(".screen").forEach(function(s){
     s.style.display="none";
     s.classList.remove("on");
@@ -1694,7 +1695,9 @@ function renderProfile(){
   var done = Object.values(A.progress||{}).filter(function(v){return v.completed;}).length;
 
   /* Cover photo */
-  var coverUrl = localGet("dl:cover_"+A.user.id)||"";
+  var coverUrl = localGet("dl:cover_"+A.user.id)||(A.user&&A.user.cover_url)||"";
+  if(!localGet("dl:cover_"+A.user.id) && A.user && A.user.cover_url){ try{ localStorage.setItem("dl:cover_"+A.user.id, A.user.cover_url); }catch(e){} }
+  try{ if(sbReady() && A.user){ sbFetch("PATCH","dl_users?id=eq."+A.user.id,{body:{cover_url: url}}).catch(function(){}); A.user.cover_url = url; }}catch(e){}
   var coverEl = document.getElementById("prof-cover-img");
   var coverGrad = document.getElementById("prof-cover-grad");
   if(coverEl && coverUrl){ coverEl.src=coverUrl; coverEl.style.display="block"; if(coverGrad) coverGrad.style.display="none"; }
@@ -8459,6 +8462,170 @@ async function submitBottegaChat(bottegaId, text){
   if(sendBtn){ sendBtn.disabled = false; sendBtn.style.opacity = "1"; }
 }
 
+/* FOUNDER PROFILE */
+function openFounderProfile(masterId){
+  var master = (typeof MASTERS !== "undefined") ? MASTERS.find(function(m){return m.id===masterId;}) : null;
+  if(!master){ showToast("Founder non trovato",""); return; }
+  
+  var isThisMaster = (A.user && A.user.id === masterId);
+  var isPres = (typeof isPresidente === "function") && isPresidente();
+  var canEdit = isThisMaster || isPres;
+  
+  try{ history.pushState({dlApp:true, overlay:"founder"}, "", ""); }catch(e){}
+  
+  var overlay = document.createElement("div");
+  overlay.id = "founder-profile-overlay";
+  overlay.style.cssText = "position:fixed;inset:0;z-index:9997;background:#15102a;overflow-y:auto;padding-bottom:60px;animation:fadeIn 0.2s ease-out";
+  
+  var cover = document.createElement("div");
+  cover.style.cssText = "height:200px;background:" + master.headerBg + ";position:relative;display:flex;align-items:center;justify-content:center";
+  
+  var backBtn = document.createElement("button");
+  backBtn.style.cssText = "position:absolute;top:14px;left:14px;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.2);color:#fff;font-size:16px;cursor:pointer;z-index:2";
+  backBtn.textContent = "←";
+  backBtn.onclick = function(){
+    var ov = document.getElementById("founder-profile-overlay");
+    if(ov) ov.remove();
+    try{ history.back(); }catch(e){}
+  };
+  cover.appendChild(backBtn);
+  
+  var founderBadge = document.createElement("div");
+  founderBadge.style.cssText = "position:absolute;top:14px;right:14px;background:rgba(0,0,0,0.4);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.2);border-radius:50px;padding:5px 12px;font-size:11px;font-weight:800;color:#FBBA00;letter-spacing:0.5px;font-family:JetBrains Mono,monospace";
+  founderBadge.textContent = "FOUNDER";
+  cover.appendChild(founderBadge);
+  
+  var bigAvatar = document.createElement("div");
+  bigAvatar.style.cssText = "width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.15);backdrop-filter:blur(8px);border:3px solid rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;font-size:42px;line-height:1";
+  bigAvatar.textContent = master.avatar;
+  cover.appendChild(bigAvatar);
+  
+  overlay.appendChild(cover);
+  
+  var info = document.createElement("div");
+  info.style.cssText = "padding:20px 16px 14px;text-align:center";
+  info.innerHTML = '<h1 style="font-family:Bricolage Grotesque,sans-serif;font-size:24px;font-weight:800;color:#F5F1E8;margin:0 0 4px;letter-spacing:-0.02em">' + master.name + '</h1>' +
+    '<div style="font-family:JetBrains Mono,monospace;font-size:10px;letter-spacing:2px;color:' + master.accent + ';font-weight:700;text-transform:uppercase;margin-bottom:6px">' + master.title + '</div>' +
+    '<div style="font-size:11px;color:#8a82a8;margin-bottom:14px">' + master.subtitle + '</div>' +
+    '<div style="font-size:13px;color:#a8a2c8;line-height:1.5;max-width:340px;margin:0 auto">' + master.bio + '</div>';
+  overlay.appendChild(info);
+  
+  var myBotteghe = (typeof BOTTEGHE_CATALOG !== "undefined") ? BOTTEGHE_CATALOG.filter(function(b){return b.mentor && b.mentor.id===masterId;}) : [];
+  
+  var stats = document.createElement("div");
+  stats.style.cssText = "padding:0 16px 14px;display:grid;grid-template-columns:1fr 1fr;gap:10px";
+  stats.innerHTML = '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:12px;text-align:center"><div style="font-family:Bricolage Grotesque,sans-serif;font-size:22px;font-weight:800;color:' + master.accent + '">' + master.lessons.length + '</div><div style="font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:1.5px;color:#8a82a8;text-transform:uppercase;margin-top:3px">lezioni</div></div>' +
+    '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:12px;text-align:center"><div style="font-family:Bricolage Grotesque,sans-serif;font-size:22px;font-weight:800;color:' + master.accent + '">' + myBotteghe.length + '</div><div style="font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:1.5px;color:#8a82a8;text-transform:uppercase;margin-top:3px">botteghe</div></div>';
+  overlay.appendChild(stats);
+  
+  var tabBar = document.createElement("div");
+  tabBar.style.cssText = "display:flex;border-bottom:1px solid rgba(255,255,255,0.08);background:#0F0E1A;position:sticky;top:0;z-index:1";
+  var tabs = [{ id:"lessons", label:"Lezioni" }, { id:"botteghe", label:"Botteghe" }];
+  if(canEdit) tabs.push({ id:"manage", label:"Gestione" });
+  
+  var activeTab = "lessons";
+  
+  function rebuildTabs(){
+    tabBar.innerHTML = "";
+    tabs.forEach(function(t){
+      var tab = document.createElement("button");
+      var isActive = (activeTab === t.id);
+      tab.style.cssText = "flex:1;padding:14px 8px;background:none;border:none;cursor:pointer;font-family:Geist,sans-serif;font-weight:700;font-size:13px;color:" + (isActive?master.accent:'#8a82a8') + ";border-bottom:2px solid " + (isActive?master.accent:'transparent') + ";transition:color .15s,border-color .15s";
+      tab.textContent = t.label;
+      (function(tid){ tab.onclick = function(){ activeTab = tid; rebuildTabs(); renderTabContent(); }; })(t.id);
+      tabBar.appendChild(tab);
+    });
+  }
+  rebuildTabs();
+  overlay.appendChild(tabBar);
+  
+  var contentArea = document.createElement("div");
+  contentArea.id = "founder-tab-content";
+  contentArea.style.cssText = "padding:16px";
+  overlay.appendChild(contentArea);
+  
+  function renderTabContent(){
+    contentArea.innerHTML = "";
+    if(activeTab === "lessons"){
+      master.lessons.forEach(function(les){
+        var card = document.createElement("div");
+        card.style.cssText = "background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer";
+        card.innerHTML = '<div style="width:48px;height:48px;border-radius:12px;background:' + master.headerBg + ';display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">' + (les.icon||"") + '</div>' +
+          '<div style="flex:1;min-width:0"><div style="font-weight:800;font-size:14px;color:#F5F1E8;margin-bottom:2px">' + les.title + '</div>' +
+          '<div style="font-size:11px;color:#8a82a8;margin-bottom:4px">' + (les.difficulty||"") + ' · ' + (les.duration||"") + ' min</div>' +
+          '<div style="font-size:12px;color:#a8a2c8;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + (les.description||"") + '</div></div>' +
+          '<div style="color:' + master.accent + ';font-size:14px;flex-shrink:0">›</div>';
+        contentArea.appendChild(card);
+      });
+    }
+    if(activeTab === "botteghe"){
+      if(!myBotteghe.length){
+        contentArea.innerHTML = '<div style="text-align:center;padding:40px 20px;color:#8a82a8;font-size:13px">Nessuna bottega assegnata.</div>';
+        return;
+      }
+      myBotteghe.forEach(function(b){
+        var card = document.createElement("div");
+        card.style.cssText = "background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:0;margin-bottom:10px;cursor:pointer;overflow:hidden";
+        card.innerHTML = '<div style="height:70px;background:' + b.coverGradient + ';display:flex;align-items:center;justify-content:center;font-size:36px">' + b.icon + '</div>' +
+          '<div style="padding:12px"><div style="font-weight:800;font-size:14px;color:#F5F1E8;margin-bottom:4px">' + b.name + '</div>' +
+          '<div style="font-size:11px;color:#8a82a8;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + b.description + '</div></div>';
+        (function(bid){
+          card.onclick = function(){
+            if(typeof isMemberOf === "function" && (isMemberOf(bid) || isPres)){
+              var ov = document.getElementById("founder-profile-overlay");
+              if(ov) ov.remove();
+              openBottega(bid);
+            } else {
+              navTo("botteghe");
+              var ov = document.getElementById("founder-profile-overlay");
+              if(ov) ov.remove();
+            }
+          };
+        })(b.id);
+        contentArea.appendChild(card);
+      });
+    }
+    if(activeTab === "manage" && canEdit){
+      var notice = document.createElement("div");
+      notice.style.cssText = "background:linear-gradient(135deg,rgba(184,114,224,0.10),rgba(251,186,0,0.08));border:1px solid rgba(184,114,224,0.30);border-radius:14px;padding:14px;margin-bottom:14px";
+      notice.innerHTML = '<div style="font-family:JetBrains Mono,monospace;font-size:10px;letter-spacing:2px;color:#FBBA00;font-weight:800;text-transform:uppercase;margin-bottom:6px">PANNELLO MENTOR</div>' +
+        '<div style="font-size:12px;color:#a8a2c8;line-height:1.5">Da qui gestisci lezioni, chat delle tue botteghe e pubblichi contenuti.</div>';
+      contentArea.appendChild(notice);
+      
+      var lessonsRow = document.createElement("div");
+      lessonsRow.style.cssText = "background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;cursor:pointer";
+      lessonsRow.innerHTML = '<div style="font-size:20px">📚</div><div style="flex:1"><div style="font-weight:700;font-size:13px;color:#F5F1E8">Gestisci lezioni</div><div style="font-size:11px;color:#8a82a8;margin-top:2px">' + master.lessons.length + ' lezioni attive</div></div><div style="color:#8a82a8">›</div>';
+      lessonsRow.onclick = function(){ showToast("Editor lezioni in arrivo","✏️"); };
+      contentArea.appendChild(lessonsRow);
+      
+      myBotteghe.forEach(function(b){
+        var chatRow = document.createElement("div");
+        chatRow.style.cssText = "background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;cursor:pointer";
+        chatRow.innerHTML = '<div style="font-size:20px">💬</div><div style="flex:1"><div style="font-weight:700;font-size:13px;color:#F5F1E8">Chat di ' + b.name + '</div><div style="font-size:11px;color:#8a82a8;margin-top:2px">Tap per aprire la chat di gruppo</div></div><div style="color:#8a82a8">›</div>';
+        (function(bid){
+          chatRow.onclick = function(){
+            var ov = document.getElementById("founder-profile-overlay");
+            if(ov) ov.remove();
+            if(typeof openBottegaChat === "function") openBottegaChat(bid);
+          };
+        })(b.id);
+        contentArea.appendChild(chatRow);
+      });
+      
+      var commRow = document.createElement("div");
+      commRow.style.cssText = "background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;cursor:pointer";
+      commRow.innerHTML = '<div style="font-size:20px">👥</div><div style="flex:1"><div style="font-weight:700;font-size:13px;color:#F5F1E8">Membri delle botteghe</div><div style="font-size:11px;color:#8a82a8;margin-top:2px">Visualizza chi e iscritto</div></div><div style="color:#8a82a8">›</div>';
+      commRow.onclick = function(){ showToast("Lista membri in arrivo",""); };
+      contentArea.appendChild(commRow);
+    }
+  }
+  renderTabContent();
+  
+  document.body.appendChild(overlay);
+}
+
+function openMentorProfile(masterId){ openFounderProfile(masterId); }
+
 function init(){
   _initBackHandler();
   applyTheme(); // Apply saved theme
@@ -8505,8 +8672,17 @@ async function loadUserSession(uid, authTimer){
     ]);
     
     if(!rows || !rows[0]){
-      clearTimeout(authTimer);
-      setStatus(""); showScreen("auth"); return;
+      // Fallback: try cached user before kicking to auth
+      try{
+        var cached = localStorage.getItem("dl:user");
+        if(cached){
+          var cu = JSON.parse(cached);
+          if(cu && cu.id === uid){
+            console.warn("Supabase user not found, using cached session");
+            rows = [cu];
+          } else { clearTimeout(authTimer); setStatus(""); showScreen("auth"); return; }
+        } else { clearTimeout(authTimer); setStatus(""); showScreen("auth"); return; }
+      }catch(e){ clearTimeout(authTimer); setStatus(""); showScreen("auth"); return; }
     }
     
     A.user = rows[0];
