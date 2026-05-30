@@ -2059,6 +2059,46 @@ function renderProfileSettings(cont){
   quickRow.appendChild(btnRow);
   devSec.appendChild(quickRow);
   
+  // ─── PRESIDENTE MODE ───
+  var presRow = document.createElement("div");
+  presRow.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(251,186,0,0.08);border:1px solid rgba(251,186,0,0.30);border-radius:10px;margin-bottom:8px";
+  var presLabel = document.createElement("div");
+  presLabel.innerHTML = '<div style="font-weight:800;font-size:13px;color:#FBBA00">Modalita Presidente</div><div style="font-size:11px;color:#8a82a8;margin-top:2px">PRO + tutti i poteri di mentor</div>';
+  presRow.appendChild(presLabel);
+  var presToggle = document.createElement("button");
+  var presOn = isPresidente();
+  presToggle.style.cssText = "padding:8px 16px;border-radius:50px;border:none;font-weight:800;font-size:12px;cursor:pointer;font-family:Geist,sans-serif;" + (presOn ? "background:linear-gradient(135deg,#FBBA00,#FF9500);color:#15102a" : "background:rgba(255,255,255,0.08);color:#8a82a8;border:1px solid rgba(255,255,255,0.10)");
+  presToggle.textContent = presOn ? "ATTIVA" : "OFF";
+  presToggle.onclick = function(){
+    setPresidenteMode(!isPresidente());
+    renderProfileSettings(cont);
+  };
+  presRow.appendChild(presToggle);
+  devSec.appendChild(presRow);
+  
+  // ─── PERSONA SWITCHER ───
+  var personaRow = document.createElement("div");
+  personaRow.style.cssText = "padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:10px;margin-bottom:8px";
+  personaRow.innerHTML = '<div style="font-weight:700;font-size:13px;color:#F5F1E8;margin-bottom:6px">Visualizza come</div><div style="font-size:11px;color:#8a82a8;margin-bottom:8px">Cambia identita per testare i mentori</div>';
+  var personaBtns = document.createElement("div");
+  personaBtns.style.cssText = "display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px";
+  var currentP = getCurrentPersona();
+  var personas = [
+    {id:"me", label:"Io", icon:""},
+    {id:"master_sofia", label:"Sofia", icon:""},
+    {id:"master_luca", label:"Luca", icon:""}
+  ];
+  personas.forEach(function(p){
+    var b = document.createElement("button");
+    var active = (currentP === p.id);
+    b.style.cssText = "padding:8px 6px;border-radius:8px;cursor:pointer;font-family:Geist,sans-serif;font-weight:700;font-size:12px;" + (active ? "background:linear-gradient(135deg,rgba(184,114,224,0.20),rgba(251,186,0,0.12));border:1px solid #B872E0;color:#F5F1E8" : "background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#a8a2c8");
+    b.textContent = p.label;
+    (function(pid){ b.onclick = function(){ switchPersona(pid); renderProfileSettings(cont); }; })(p.id);
+    personaBtns.appendChild(b);
+  });
+  personaRow.appendChild(personaBtns);
+  devSec.appendChild(personaRow);
+  
   // Reset progress
   var resetRow = document.createElement("div");
   resetRow.style.cssText = "padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:10px";
@@ -2163,6 +2203,13 @@ var _currentPostId = null;
 
     /* Navigation */
 function navTo(screen){
+  // Clear last_bottega if navigating away from bottega
+  try{
+    if(screen !== "bottega" && screen !== "botteghe"){
+      localStorage.removeItem("dl:last_bottega");
+    }
+  }catch(e){}
+
   // Save for refresh restoration
   try{
     var safeScreens = ["dashboard","feed","home","profile","botteghe","badges","drawpass","search","chat"];
@@ -6283,7 +6330,9 @@ function getBottega(id){
 }
 
 function isBottegaUnlocked(bottega){
-  if(!bottega || !bottega.gate) return true;
+  if(!bottega) return false;
+  if(isPresidente()) return true;
+  if(!bottega.gate) return true;
   try{
     if(bottega.gate.type === "category"){
       var cat = CATS.find(function(c){return c.id===bottega.gate.category;});
@@ -6329,6 +6378,13 @@ function getBottegaProgress(bottega){
 }
 
 function isMemberOf(bottegaId){
+  // Presidente has access to everything
+  if(isPresidente()) return true;
+  // Mentor of the bottega has access
+  try{
+    var b = getBottega(bottegaId);
+    if(b && A.user && b.mentor && b.mentor.id === A.user.id) return true;
+  }catch(e){}
   return _myBotteghe.indexOf(bottegaId) >= 0;
 }
 
@@ -6518,6 +6574,12 @@ function renderBotteghePage(){
 }
 
 async function openBottega(bottegaId){
+  // Save for refresh
+  try{
+    localStorage.setItem("dl:last_screen", "bottega");
+    localStorage.setItem("dl:last_bottega", bottegaId);
+  }catch(e){}
+
   var bottega = getBottega(bottegaId);
   if(!bottega) return;
   if(!isBottegaUnlocked(bottega)){
@@ -7369,7 +7431,12 @@ async function showBottegaPostPreview(bottegaId, file){
     var result = await submitBottegaPost(bottegaId, file, caption);
     if(result === true){
       overlay.remove();
-      openBottega(bottegaId);
+      // Refresh feed in place (don't re-render whole bottega)
+      try{
+        var posts = await loadBottegaPosts(bottegaId);
+        var bot = getBottega(bottegaId);
+        renderBottegaFeed(bot, posts);
+      }catch(e){console.warn("feed refresh failed:",e);}
     } else {
       submitBtn.disabled = false;
       submitBtn.textContent = "Riprova";
@@ -7602,6 +7669,64 @@ async function submitBottegaComment(postId, text, bottegaId){
   if(sendBtn){ sendBtn.disabled = false; sendBtn.style.opacity = "1"; }
 }
 
+/* PRESIDENTE / PERSONA SWITCHER (dev/admin) */
+var _originalUser = null; // backup of real user when impersonating
+
+function isPresidente(){
+  try{ return localStorage.getItem("dl:presidente") === "1"; }catch(e){ return false; }
+}
+
+function setPresidenteMode(on){
+  try{ localStorage.setItem("dl:presidente", on ? "1" : "0"); }catch(e){}
+  if(on){
+    // Grant PRO + auto-join all unlocked botteghe
+    A.pro = true;
+    try{ localStorage.setItem("dl:pro","1"); }catch(e){}
+  }
+  showToast("Modalita Presidente " + (on?"ATTIVA":"disattivata"), on?"":"");
+}
+
+function switchPersona(personaId){
+  // Backup original user on first switch
+  if(!_originalUser && A.user){
+    _originalUser = JSON.parse(JSON.stringify(A.user));
+  }
+  
+  if(personaId === "me"){
+    // Restore original
+    if(_originalUser){
+      A.user = JSON.parse(JSON.stringify(_originalUser));
+      try{ localStorage.setItem("dl:user", JSON.stringify(_originalUser)); }catch(e){}
+    }
+    showToast("Tornato al tuo profilo","");
+  } else {
+    // Switch to a master persona (Sofia or Luca)
+    var master = (typeof MASTERS !== "undefined") ? MASTERS.find(function(m){return m.id===personaId;}) : null;
+    if(!master){ showToast("Persona non trovata",""); return; }
+    A.user = {
+      id: master.id,
+      name: master.name,
+      avatar: master.avatar,
+      picture: "",
+      bio: master.bio,
+      is_mentor: true,
+      is_persona: true
+    };
+    try{ localStorage.setItem("dl:user", JSON.stringify(A.user)); }catch(e){}
+    showToast("Stai navigando come " + master.name, master.avatar);
+  }
+  
+  // Refresh visible UI
+  if(typeof renderDashboard === "function") renderDashboard();
+  if(typeof loadMyBotteghe === "function") loadMyBotteghe();
+}
+
+function getCurrentPersona(){
+  if(!A.user) return "me";
+  if(A.user.is_persona && A.user.id) return A.user.id;
+  return "me";
+}
+
 function init(){
   applyTheme(); // Apply saved theme
   showScreen("splash");
@@ -7680,12 +7805,23 @@ async function loadUserSession(uid, authTimer){
     var ni=document.getElementById("nav-avatar-icon");
     if(ni) ni.textContent=getAvatarIcon();
     renderFeed(); showScreen("feed"); var lastScreen = "dashboard";
+  var lastBottega = null;
   try{
     var ls = localStorage.getItem("dl:last_screen");
-    var safe = ["dashboard","feed","home","profile","botteghe","badges","drawpass","search","chat"];
+    var safe = ["dashboard","feed","home","profile","botteghe","badges","drawpass","search","chat","bottega"];
     if(ls && safe.indexOf(ls) >= 0) lastScreen = ls;
+    if(ls === "bottega"){
+      lastBottega = localStorage.getItem("dl:last_bottega");
+    }
   }catch(e){}
-  navTo(lastScreen);
+  if(lastScreen === "bottega" && lastBottega){
+    // Try to open specific bottega
+    setTimeout(function(){
+      try{ openBottega(lastBottega); }catch(e){ navTo("botteghe"); }
+    }, 200);
+  } else {
+    navTo(lastScreen);
+  }
     
   } catch(e) {
     console.error("loadUserSession error:", e);
