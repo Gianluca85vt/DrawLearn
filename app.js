@@ -2203,6 +2203,7 @@ var _currentPostId = null;
 
     /* Navigation */
 function navTo(screen){
+  _trackNav(screen);
   // Clear last_bottega if navigating away from bottega
   try{
     if(screen !== "bottega" && screen !== "botteghe"){
@@ -6767,6 +6768,7 @@ function getDailyMonthlyCount(){
 }
 
 function openDailyLesson(){
+  try{ history.pushState({dlApp:true, overlay:"daily"}, "", ""); }catch(e){}
   var lesson = getDailyLesson();
   if(!lesson) return;
   var done = isDailyDone();
@@ -7076,6 +7078,7 @@ function formatGreeting(firstName){
 
 /* HAMBURGER MENU (slide-in drawer) */
 function openHamburger(){
+  try{ history.pushState({dlApp:true, overlay:"hamburger"}, "", ""); }catch(e){}
   if(document.getElementById("hamburger-overlay")) return;
   
   // Backdrop
@@ -7370,6 +7373,7 @@ function openBottegaPostUpload(bottegaId){
 }
 
 async function showBottegaPostPreview(bottegaId, file){
+  try{ history.pushState({dlApp:true, overlay:"upload"}, "", ""); }catch(e){}
   // Read file as data URL for preview
   var dataUrl = await new Promise(function(resolve, reject){
     var r = new FileReader();
@@ -7544,31 +7548,87 @@ async function loadBottegaComments(postId){
 async function openBottegaComments(post, bottegaId){
   if(!post || !post.id){ showToast("Post non valido",""); return; }
   
+  try{ history.pushState({dlApp:true, overlay:"comments"}, "", ""); }catch(e){}
+  
+  // Overlay container
   var overlay = document.createElement("div");
   overlay.id = "comments-overlay";
   overlay.style.cssText = "position:fixed;inset:0;z-index:10002;background:#15102a;display:flex;flex-direction:column;animation:fadeIn 0.2s ease-out";
   
+  // Header — built with DOM API for safety
   var header = document.createElement("div");
   header.style.cssText = "padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:12px;background:#1c1738;flex-shrink:0";
-  header.innerHTML = '<button onclick="document.getElementById('+comments-overlay+').remove()" style="width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#F5F1E8;font-size:18px;cursor:pointer">←</button>' +
-    '<div style="flex:1"><div style="font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:2px;color:#8a82a8;font-weight:700;text-transform:uppercase">COMMENTI</div><div style="font-weight:700;font-size:14px;color:#F5F1E8" id="comments-header-title">Caricamento...</div></div>';
+  
+  var backBtn = document.createElement("button");
+  backBtn.style.cssText = "width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#F5F1E8;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center";
+  backBtn.textContent = "←";
+  backBtn.onclick = function(){
+    var ov = document.getElementById("comments-overlay");
+    if(ov) ov.remove();
+    try{ history.back(); }catch(e){}
+  };
+  header.appendChild(backBtn);
+  
+  var titleWrap = document.createElement("div");
+  titleWrap.style.cssText = "flex:1;min-width:0";
+  var kicker = document.createElement("div");
+  kicker.style.cssText = "font-family:JetBrains Mono,monospace;font-size:9px;letter-spacing:2px;color:#8a82a8;font-weight:700;text-transform:uppercase";
+  kicker.textContent = "COMMENTI";
+  titleWrap.appendChild(kicker);
+  var titleEl = document.createElement("div");
+  titleEl.id = "comments-header-title";
+  titleEl.style.cssText = "font-weight:700;font-size:14px;color:#F5F1E8";
+  titleEl.textContent = "Caricamento...";
+  titleWrap.appendChild(titleEl);
+  header.appendChild(titleWrap);
+  
   overlay.appendChild(header);
   
+  // Scrollable area
   var scroll = document.createElement("div");
   scroll.style.cssText = "flex:1;overflow-y:auto;padding-bottom:80px";
   
+  // Post preview
   var postPreview = document.createElement("div");
-  postPreview.style.cssText = "padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:12px;background:rgba(255,255,255,0.02)";
-  var avHTML = (post.user_avatar && post.user_avatar.indexOf("http")===0)
-    ? '<img src="'+post.user_avatar+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0">'
-    : '<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#814393,#FBBA00);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0">' + (post.user_name?post.user_name.charAt(0).toUpperCase():"?") + '</div>';
-  var thumbHTML = post.image_url ? '<img src="'+post.image_url+'" style="width:60px;height:60px;border-radius:10px;object-fit:cover;flex-shrink:0">' : '';
-  postPreview.innerHTML = avHTML +
-    '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px;color:#F5F1E8;margin-bottom:2px">' + (post.user_name||"Membro") + '</div>' +
-    '<div style="font-size:12px;color:#a8a2c8;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + (post.caption || "(senza descrizione)") + '</div></div>' +
-    thumbHTML;
+  postPreview.style.cssText = "padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:12px;background:rgba(255,255,255,0.02);align-items:flex-start";
+  
+  // Avatar
+  var avEl;
+  if(post.user_avatar && post.user_avatar.indexOf("http") === 0){
+    avEl = document.createElement("img");
+    avEl.src = post.user_avatar;
+    avEl.style.cssText = "width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0";
+  } else {
+    avEl = document.createElement("div");
+    avEl.style.cssText = "width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#814393,#FBBA00);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0";
+    avEl.textContent = post.user_name ? post.user_name.charAt(0).toUpperCase() : "?";
+  }
+  postPreview.appendChild(avEl);
+  
+  // User info + caption
+  var infoWrap = document.createElement("div");
+  infoWrap.style.cssText = "flex:1;min-width:0";
+  var nameEl = document.createElement("div");
+  nameEl.style.cssText = "font-weight:700;font-size:13px;color:#F5F1E8;margin-bottom:2px";
+  nameEl.textContent = post.user_name || "Membro";
+  infoWrap.appendChild(nameEl);
+  var captionEl = document.createElement("div");
+  captionEl.style.cssText = "font-size:12px;color:#a8a2c8;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden";
+  captionEl.textContent = post.caption || "(senza descrizione)";
+  infoWrap.appendChild(captionEl);
+  postPreview.appendChild(infoWrap);
+  
+  // Thumbnail
+  if(post.image_url){
+    var thumb = document.createElement("img");
+    thumb.src = post.image_url;
+    thumb.style.cssText = "width:60px;height:60px;border-radius:10px;object-fit:cover;flex-shrink:0";
+    postPreview.appendChild(thumb);
+  }
+  
   scroll.appendChild(postPreview);
   
+  // Comments list container
   var listDiv = document.createElement("div");
   listDiv.id = "bottega-comments-list";
   listDiv.style.cssText = "padding:16px";
@@ -7577,6 +7637,7 @@ async function openBottegaComments(post, bottegaId){
   
   overlay.appendChild(scroll);
   
+  // Input bar at bottom
   var inputBar = document.createElement("div");
   inputBar.style.cssText = "position:absolute;left:0;right:0;bottom:0;padding:10px 12px;background:#1c1738;border-top:1px solid rgba(255,255,255,0.08);display:flex;gap:8px;align-items:center";
   
@@ -7591,7 +7652,7 @@ async function openBottegaComments(post, bottegaId){
   var sendBtn = document.createElement("button");
   sendBtn.id = "comment-send-btn";
   sendBtn.style.cssText = "width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#B872E0,#FBBA00);border:none;color:#1c1b29;font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center";
-  sendBtn.innerHTML = "↑";
+  sendBtn.textContent = "↑";
   sendBtn.onclick = function(){
     var text = input.value.trim();
     if(!text) return;
@@ -7607,6 +7668,7 @@ async function openBottegaComments(post, bottegaId){
     if(e.key === "Enter"){ sendBtn.click(); }
   });
   
+  // Load comments async
   var comments = await loadBottegaComments(post.id);
   renderBottegaComments(comments);
   var ht = document.getElementById("comments-header-title");
@@ -7780,7 +7842,66 @@ async function sbFetchStrict(method, table, opts){
   return res.text();
 }
 
+/* ─── HARDWARE BACK BUTTON HANDLING ─── */
+var _navHistory = [];
+var _isBackNav = false;
+
+function _initBackHandler(){
+  try{
+    history.replaceState({dlApp:true, root:true}, "", "");
+    history.pushState({dlApp:true}, "", "");
+  }catch(e){console.warn("history setup failed:",e);}
+  
+  window.addEventListener("popstate", function(e){
+    var overlayIds = [
+      "comments-overlay",
+      "bottega-upload-overlay",
+      "hamburger-overlay",
+      "daily-overlay",
+      "master-detail-overlay"
+    ];
+    for(var i=0; i<overlayIds.length; i++){
+      var ov = document.getElementById(overlayIds[i]);
+      if(ov){
+        ov.remove();
+        try{ history.pushState({dlApp:true}, "", ""); }catch(e){}
+        return;
+      }
+    }
+    
+    var modals = document.querySelectorAll('[id^="modal-"]');
+    for(var m=0; m<modals.length; m++){
+      if(modals[m].style.display === "flex" || modals[m].style.display === "block"){
+        modals[m].style.display = "none";
+        try{ history.pushState({dlApp:true}, "", ""); }catch(e){}
+        return;
+      }
+    }
+    
+    if(_navHistory.length > 1){
+      _navHistory.pop();
+      var prev = _navHistory[_navHistory.length - 1];
+      _isBackNav = true;
+      try{ navTo(prev); }catch(err){console.warn("back nav failed:",err);}
+      _isBackNav = false;
+      try{ history.pushState({dlApp:true}, "", ""); }catch(e){}
+      return;
+    }
+    
+    try{ history.pushState({dlApp:true, root:true}, "", ""); }catch(e){}
+  });
+}
+
+function _trackNav(screen){
+  if(_isBackNav) return;
+  if(_navHistory.length && _navHistory[_navHistory.length-1] === screen) return;
+  _navHistory.push(screen);
+  if(_navHistory.length > 30) _navHistory.shift();
+  try{ history.pushState({dlApp:true, screen:screen}, "", ""); }catch(e){}
+}
+
 function init(){
+  _initBackHandler();
   applyTheme(); // Apply saved theme
   showScreen("splash");
   setStatus("Avvio...");
