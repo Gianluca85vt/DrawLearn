@@ -582,7 +582,7 @@ input, textarea, button, select {
   backdrop-filter: blur(24px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
   border-top: 1px solid rgba(255,255,255,0.06) !important;
-  padding: 10px 4px 24px !important;
+  padding: 8px 4px max(env(safe-area-inset-bottom), 10px) !important;
 }
 
 .nav-tab {
